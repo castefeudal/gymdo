@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "lastReviewed": "2026-09-28",
+  "models": [
+    {
+      "id": "mifflin-st-jeor-1990",
+      "name": "Mifflin–St Jeor resting energy equation",
+      "formulaVersion": "1990-original",
+      "source": "Mifflin MD et al. A new predictive equation for resting energy expenditure in healthy individuals. Am J Clin Nutr. 1990;51(2):241-247.",
+      "doi": "10.1093/ajcn/51.2.241",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/2305711/",
+      "evidenceLevel": "primary-predictive-study",
+      "limitations": "Population-derived estimate of resting energy expenditure; individual error remains and measured indirect calorimetry is different."
+    },
+    {
+      "id": "karvonen-hrr-1957",
+      "name": "Heart-rate reserve / Karvonen method",
+      "formulaVersion": "HRR-basic",
+      "source": "Karvonen MJ, Kentala E, Mustala O. The effects of training on heart rate; a longitudinal study. 1957.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/13470504/",
+      "evidenceLevel": "historical-primary-study",
+      "limitations": "Calculated zones are planning estimates; measured thresholds can differ materially."
+    },
+    {
+      "id": "fiber-ai-energy-density",
+      "name": "Dietary fiber planning reference",
+      "formulaVersion": "14-g-per-1000-kcal",
+      "source": "Institute of Medicine Dietary Reference Intake basis: 14 g fiber per 1000 kcal.",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11555338/",
+      "evidenceLevel": "dietary-reference-intake",
+      "limitations": "Population planning reference; individual gastrointestinal tolerance and clinical needs are not inferred."
+    },
+    {
+      "id": "riegel-1981",
+      "name": "Riegel endurance prediction",
+      "formulaVersion": "1.06-exponent",
+      "source": "Riegel PS. Athletic Records and Human Endurance. American Scientist. 1981;69(3):285-290.",
+      "evidenceLevel": "empirical-performance-model",
+      "limitations": "Extrapolation is sensitive to distance gap, event specificity, terrain, weather and training status."
+    },
+    {
+      "id": "epley-e1rm",
+      "name": "Epley e1RM estimate",
+      "formulaVersion": "w*(1+r/30)",
+      "source": "Common submaximal-load e1RM model retained from the existing MARKOV MADE GYM calculator.",
+      "evidenceLevel": "estimation-model",
+      "limitations": "Accuracy varies by exercise, repetition count, proximity to failure and individual profile."
+    },
+    {
+      "id": "brzycki-e1rm",
+      "name": "Brzycki e1RM estimate",
+      "formulaVersion": "w*36/(37-r)",
+      "source": "Common submaximal-load e1RM model retained from the existing MARKOV MADE GYM calculator.",
+      "evidenceLevel": "estimation-model",
+      "limitations": "Accuracy varies by exercise, repetition count, proximity to failure and individual profile."
+    },
+    {
+      "id": "issn-protein-exercise-2017",
+      "name": "Protein intake for healthy exercising individuals",
+      "formulaVersion": "ISSN-2017-position",
+      "source": "Jäger R et al. International Society of Sports Nutrition Position Stand: protein and exercise. JISSN. 2017;14:20.",
+      "doi": "10.1186/s12970-017-0177-8",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28642676/",
+      "evidenceLevel": "position-stand-review",
+      "limitations": "General athlete guidance; needs vary with total energy intake, training status, age and individual context."
+    },
+    {
+      "id": "protein-energy-restriction-helms-2014",
+      "name": "Protein during caloric restriction in resistance-trained lean athletes",
+      "formulaVersion": "2.3-3.1-g-per-kg-FFM",
+      "source": "Helms ER et al. A systematic review of dietary protein during caloric restriction in resistance trained lean athletes. Int J Sport Nutr Exerc Metab. 2014;24(2):127-138.",
+      "doi": "10.1123/ijsnem.2013-0054",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/24092765/",
+      "evidenceLevel": "systematic-review",
+      "limitations": "The FFM-based range is specifically framed for energy-restricted, resistance-trained, relatively lean athletes and should not be generalized to every user."
+    },
+    {
+      "id": "protein-weight-loss-athletes-2014",
+      "name": "Protein intake while managing athlete weight loss",
+      "formulaVersion": "1.8-2.7-g-per-kg-BW",
+      "source": "Hector AJ, Phillips SM. Considerations for protein intake in managing weight loss in athletes. Eur J Sport Sci. 2015;15(1):21-28.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25014731/",
+      "evidenceLevel": "narrative-review",
+      "limitations": "Body-weight range depends on deficit severity, body composition and training; it is a planning range rather than an individual requirement.",
+      "doi": "10.1080/17461391.2014.936325"
+    }
+  ]
+}

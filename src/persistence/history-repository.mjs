@@ -1,0 +1,539 @@
+export const HISTORY_DATABASE = 'markov-made-gym';
+export const HISTORY_SCHEMA_VERSION = 8;
+
+const HISTORY_STORE = 'history';
+const CUSTOM_EXERCISE_STORE = 'customExercises';
+const EQUIPMENT_PROFILE_STORE = 'equipmentProfiles';
+const EXERCISE_PREFERENCE_STORE = 'exercisePreferences';
+const USER_STATE_STORE = 'userState';
+const PROGRAM_STORE = 'programs';
+const ACTIVE_PROGRAM_ID = 'active';
+const NUTRITION_DAY_STORE = 'nutritionDays';
+const MEASUREMENT_STORE = 'measurements';
+const EXERCISE_PREFERENCE_VALUES = new Set(['prefer', 'neutral', 'lessOften', 'avoid', 'unavailable', 'discomfort']);
+const TRACKING_TYPES = new Set([
+  'weight-reps', 'reps-only', 'duration', 'distance-duration',
+  'weight-duration', 'assisted-weight', 'bodyweight-added-weight',
+]);
+
+function requestResult(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('IndexedDB request failed'));
+  });
+}
+
+function cleanHistory(entries) {
+  if (!Array.isArray(entries)) return [];
+  const ids = new Set();
+  return entries.flatMap((entry, index) => {
+    if (!entry || typeof entry !== 'object' || !Array.isArray(entry.items)) return [];
+    const copy = structuredClone(entry);
+    if (!copy.id) copy.id = `legacy-${String(copy.date || 'unknown')}-${index}`;
+    copy.id = String(copy.id);
+    const baseId = copy.id;
+    let suffix = 1;
+    while (ids.has(copy.id)) copy.id = `${baseId}-${++suffix}`;
+    ids.add(copy.id);
+    return [copy];
+  });
+}
+
+function newestFirst(entries) {
+  return entries.sort((a, b) => {
+    const date = String(b.date || '').localeCompare(String(a.date || ''));
+    return date || String(b.id).localeCompare(String(a.id));
+  });
+}
+
+export function mergeMissingRecords(existing, legacy, key) {
+  const seen = new Set((Array.isArray(existing) ? existing : []).map((entry) => entry?.[key]).filter(Boolean));
+  const merged = Array.isArray(existing) ? existing.slice() : [];
+  for (const entry of Array.isArray(legacy) ? legacy : []) {
+    const identity = entry?.[key];
+    if (!identity || seen.has(identity)) continue;
+    seen.add(identity);
+    merged.push(entry);
+  }
+  return merged;
+}
+
+function openDatabase() {
+  if (!globalThis.indexedDB) return Promise.reject(new Error('IndexedDB is unavailable'));
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(HISTORY_DATABASE, HISTORY_SCHEMA_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(HISTORY_STORE)) db.createObjectStore(HISTORY_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(CUSTOM_EXERCISE_STORE)) db.createObjectStore(CUSTOM_EXERCISE_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(EQUIPMENT_PROFILE_STORE)) db.createObjectStore(EQUIPMENT_PROFILE_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(EXERCISE_PREFERENCE_STORE)) db.createObjectStore(EXERCISE_PREFERENCE_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(USER_STATE_STORE)) db.createObjectStore(USER_STATE_STORE, { keyPath: 'key' });
+      if (!db.objectStoreNames.contains(PROGRAM_STORE)) db.createObjectStore(PROGRAM_STORE, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(NUTRITION_DAY_STORE)) db.createObjectStore(NUTRITION_DAY_STORE, { keyPath: 'date' });
+      if (!db.objectStoreNames.contains(MEASUREMENT_STORE)) db.createObjectStore(MEASUREMENT_STORE, { keyPath: 'date' });
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => db.close();
+      resolve(db);
+    };
+    request.onerror = () => reject(request.error || new Error('Could not open IndexedDB'));
+    request.onblocked = () => reject(new Error('IndexedDB upgrade is blocked by another tab'));
+  });
+}
+
+export function cleanCustomExercises(entries) {
+  if (!Array.isArray(entries)) return [];
+  const ids = new Set();
+  return entries.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+    const id = String(entry.id || '').slice(0, 80);
+    const nameRu = String(entry.nameRu || '').trim().slice(0, 120);
+    const nameEn = String(entry.nameEn || '').trim().slice(0, 120);
+    const zone = String(entry.zone || '').trim().slice(0, 48);
+    const target = String(entry.target || '').trim().slice(0, 48);
+    const equip = String(entry.equip || '').trim().slice(0, 64);
+    const trackingType = String(entry.trackingType || 'weight-reps');
+    if (!id.startsWith('custom-') || ids.has(id) || !nameRu || !nameEn || !zone || !target || !equip || !TRACKING_TYPES.has(trackingType)) return [];
+    ids.add(id);
+    const number = (value, fallback, min, max) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback;
+    };
+    const laterality = ['bilateral', 'unilateral', 'alternating', 'none'].includes(entry.laterality)
+      ? entry.laterality
+      : 'bilateral';
+    const secondary = Array.isArray(entry.secondary)
+      ? [...new Set(entry.secondary.map((value) => String(value).trim().slice(0, 48)).filter(Boolean))].slice(0, 8)
+      : [];
+    const createdAt = typeof entry.createdAt === 'string' ? entry.createdAt.slice(0, 40) : '';
+    const updatedAt = typeof entry.updatedAt === 'string' ? entry.updatedAt.slice(0, 40) : createdAt;
+    return [{
+      id,
+      nameRu,
+      nameEn,
+      zone,
+      target,
+      secondary,
+      equip,
+      movementPattern: String(entry.movementPattern || '').trim().slice(0, 48) || null,
+      trackingType,
+      laterality,
+      compound: Boolean(entry.compound),
+      defaultSets: number(entry.defaultSets, 3, 1, 20),
+      defaultRepRange: String(entry.defaultRepRange || '8–12').trim().slice(0, 24),
+      defaultRest: number(entry.defaultRest, 90, 15, 900),
+      loadIncrement: number(entry.loadIncrement, 2.5, 0.1, 100),
+      notes: String(entry.notes || '').trim().slice(0, 1000),
+      image: typeof entry.image === 'string' && /^data:image\/(png|jpeg|webp);base64,/i.test(entry.image) && entry.image.length <= 2_000_000 ? entry.image : null,
+      createdAt,
+      updatedAt,
+    }];
+  });
+}
+
+export function cleanEquipmentProfiles(entries) {
+  if (!Array.isArray(entries)) return [];
+  const ids = new Set();
+  return entries.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+    const id = String(entry.id || '').slice(0, 80);
+    const nameRu = String(entry.nameRu || '').trim().slice(0, 80);
+    const nameEn = String(entry.nameEn || '').trim().slice(0, 80);
+    if (!id || ids.has(id) || !nameRu || !nameEn) return [];
+    ids.add(id);
+    const equipment = Array.isArray(entry.equipment)
+      ? [...new Set(entry.equipment.map((value) => String(value).trim().slice(0, 64)).filter(Boolean))].slice(0, 64)
+      : [];
+    const createdAt = typeof entry.createdAt === 'string' ? entry.createdAt.slice(0, 40) : '';
+    return [{ id, nameRu, nameEn, equipment, createdAt, updatedAt: typeof entry.updatedAt === 'string' ? entry.updatedAt.slice(0, 40) : createdAt, builtIn: Boolean(entry.builtIn) }];
+  });
+}
+
+export function cleanExercisePreferences(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value)
+    .filter(([id, preference]) => id.length > 0 && id.length <= 80 && EXERCISE_PREFERENCE_VALUES.has(preference) && preference !== 'neutral')
+    .slice(0, 1324));
+}
+
+export function cleanNutritionDays(entries) {
+  if (!Array.isArray(entries)) return [];
+  const records = new Map();
+  const optional = (value, max) => {
+    if (value == null || value === '') return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number >= 0 && number <= max ? Math.round(number * 10) / 10 : undefined;
+  };
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+    const date = String(entry.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+    if (!Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) continue;
+    const calories = Number(entry.calories), protein = Number(entry.protein);
+    if (!Number.isFinite(calories) || calories < 1 || calories > 15_000 || !Number.isFinite(protein) || protein < 0 || protein > 500) continue;
+    const fat = optional(entry.fat, 1_000), carbs = optional(entry.carbs, 1_500), weightKg = optional(entry.weightKg, 500);
+    if (fat === undefined || carbs === undefined || weightKg === undefined) continue;
+    const accuracy = ['accurate', 'estimated', 'rough'].includes(entry.accuracy) ? entry.accuracy : 'unknown';
+    records.set(date, { date, calories: Math.round(calories), protein: Math.round(protein * 10) / 10, fat, carbs, weightKg, accuracy, note: String(entry.note || '').trim().slice(0, 240), updatedAt: String(entry.updatedAt || '').slice(0, 40) });
+  }
+  return [...records.values()].sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function cleanMeasurements(entries) {
+  if (!Array.isArray(entries)) return [];
+  const records = new Map();
+  const optionalNumber = (value, min, max, digits = 1) => {
+    if (value == null || value === '') return null;
+    const number = Number(value);
+    if (!Number.isFinite(number) || number < min || number > max) return null;
+    const factor = 10 ** digits;
+    return Math.round(number * factor) / factor;
+  };
+  const rating = (value, max) => {
+    const number = Number(value);
+    return Number.isInteger(number) && number >= 1 && number <= max ? number : null;
+  };
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+    const date = String(entry.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+    if (!Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) continue;
+    records.set(date, {
+      date,
+      weight: optionalNumber(entry.weight, 30, 300),
+      waist: optionalNumber(entry.waist, 40, 200),
+      recovery: rating(entry.recovery, 3),
+      sleep: optionalNumber(entry.sleep, 0, 16),
+      mood: rating(entry.mood, 5),
+      hunger: rating(entry.hunger, 3),
+      fatigue: rating(entry.fatigue, 3),
+      lift: String(entry.lift || '').trim().slice(0, 80),
+      note: String(entry.note || '').trim().slice(0, 400),
+    });
+  }
+  return [...records.values()].sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export async function createHistoryRepository() {
+  const db = await openDatabase();
+
+  async function readAll() {
+    const tx = db.transaction(HISTORY_STORE, 'readonly');
+    return newestFirst(await requestResult(tx.objectStore(HISTORY_STORE).getAll()));
+  }
+
+  async function replaceAll(entries) {
+    const records = cleanHistory(entries);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(HISTORY_STORE, 'readwrite');
+      const store = tx.objectStore(HISTORY_STORE);
+      store.clear();
+      records.forEach((entry) => store.put(entry));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save workout history'));
+      tx.onabort = () => reject(tx.error || new Error('Workout history save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function migrateLegacy(entries) {
+    const existing = await readAll();
+    const merged = mergeMissingRecords(existing, cleanHistory(entries), 'id');
+    if (merged.length !== existing.length) await replaceAll(merged);
+    return readAll();
+  }
+
+  async function readCustomExercises() {
+    const tx = db.transaction(CUSTOM_EXERCISE_STORE, 'readonly');
+    return cleanCustomExercises(await requestResult(tx.objectStore(CUSTOM_EXERCISE_STORE).getAll()));
+  }
+
+  async function replaceCustomExercises(entries) {
+    const records = cleanCustomExercises(entries);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(CUSTOM_EXERCISE_STORE, 'readwrite');
+      const store = tx.objectStore(CUSTOM_EXERCISE_STORE);
+      store.clear();
+      records.forEach((entry) => store.put(entry));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save custom exercises'));
+      tx.onabort = () => reject(tx.error || new Error('Custom exercise save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function migrateLegacyCustomExercises(entries) {
+    const existing = await readCustomExercises();
+    const merged = mergeMissingRecords(existing, cleanCustomExercises(entries), 'id');
+    if (merged.length !== existing.length) await replaceCustomExercises(merged);
+    return readCustomExercises();
+  }
+
+  async function readEquipmentProfiles() {
+    const tx = db.transaction(EQUIPMENT_PROFILE_STORE, 'readonly');
+    return cleanEquipmentProfiles(await requestResult(tx.objectStore(EQUIPMENT_PROFILE_STORE).getAll()));
+  }
+
+  async function replaceEquipmentProfiles(entries) {
+    const records = cleanEquipmentProfiles(entries);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(EQUIPMENT_PROFILE_STORE, 'readwrite');
+      const store = tx.objectStore(EQUIPMENT_PROFILE_STORE);
+      store.clear();
+      records.forEach((entry) => store.put(entry));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save equipment profiles'));
+      tx.onabort = () => reject(tx.error || new Error('Equipment profile save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function migrateLegacyEquipmentProfiles(entries) {
+    const existing = await readEquipmentProfiles();
+    const merged = mergeMissingRecords(existing, cleanEquipmentProfiles(entries), 'id');
+    if (merged.length !== existing.length) await replaceEquipmentProfiles(merged);
+    return readEquipmentProfiles();
+  }
+
+  async function readExercisePreferences() {
+    const tx = db.transaction(EXERCISE_PREFERENCE_STORE, 'readonly');
+    const records = await requestResult(tx.objectStore(EXERCISE_PREFERENCE_STORE).getAll());
+    return cleanExercisePreferences(Object.fromEntries(records.map(({ id, preference }) => [id, preference])));
+  }
+
+  async function replaceExercisePreferences(value) {
+    const records = Object.entries(cleanExercisePreferences(value)).map(([id, preference]) => ({ id, preference }));
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(EXERCISE_PREFERENCE_STORE, 'readwrite');
+      const store = tx.objectStore(EXERCISE_PREFERENCE_STORE);
+      store.clear();
+      records.forEach((record) => store.put(record));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save exercise preferences'));
+      tx.onabort = () => reject(tx.error || new Error('Exercise preference save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function migrateLegacyExercisePreferences(value) {
+    const existing = await readExercisePreferences();
+    const legacy = cleanExercisePreferences(value);
+    const merged = Object.assign({}, legacy, existing);
+    if (Object.keys(merged).length !== Object.keys(existing).length) await replaceExercisePreferences(merged);
+    return readExercisePreferences();
+  }
+
+  async function readNutritionDays() {
+    const tx = db.transaction(NUTRITION_DAY_STORE, 'readonly');
+    return cleanNutritionDays(await requestResult(tx.objectStore(NUTRITION_DAY_STORE).getAll()));
+  }
+
+  async function replaceNutritionDays(entries) {
+    const records = cleanNutritionDays(entries);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(NUTRITION_DAY_STORE, 'readwrite');
+      const store = tx.objectStore(NUTRITION_DAY_STORE);
+      store.clear();
+      records.forEach((entry) => store.put(entry));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save nutrition days'));
+      tx.onabort = () => reject(tx.error || new Error('Nutrition log save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function putNutritionDay(entry) {
+    const [record] = cleanNutritionDays([entry]);
+    if (!record) throw new TypeError('Invalid nutrition day');
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(NUTRITION_DAY_STORE, 'readwrite');
+      tx.objectStore(NUTRITION_DAY_STORE).put(record);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save nutrition day'));
+      tx.onabort = () => reject(tx.error || new Error('Nutrition day save was aborted'));
+    });
+    return record;
+  }
+
+  async function migrateLegacyNutritionDays(entries) {
+    const existing = await readNutritionDays();
+    const merged = mergeMissingRecords(existing, cleanNutritionDays(entries), 'date');
+    if (merged.length !== existing.length) await replaceNutritionDays(merged);
+    return readNutritionDays();
+  }
+
+  async function readMeasurements() {
+    const tx = db.transaction(MEASUREMENT_STORE, 'readonly');
+    return cleanMeasurements(await requestResult(tx.objectStore(MEASUREMENT_STORE).getAll()));
+  }
+
+  async function replaceMeasurements(entries) {
+    const records = cleanMeasurements(entries);
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(MEASUREMENT_STORE, 'readwrite');
+      const store = tx.objectStore(MEASUREMENT_STORE);
+      store.clear();
+      records.forEach((entry) => store.put(entry));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save measurements'));
+      tx.onabort = () => reject(tx.error || new Error('Measurement save was aborted'));
+    });
+    return records.length;
+  }
+
+  async function migrateLegacyMeasurements(localEntries, legacyUserStateKey) {
+    const existing = await readMeasurements();
+    const userState = legacyUserStateKey ? await readUserState() : {};
+    const databaseLegacyValue = legacyUserStateKey ? userState[legacyUserStateKey] : null;
+    let databaseLegacy = [];
+    let canRemoveLegacyUserState = databaseLegacyValue == null;
+    if (databaseLegacyValue != null) {
+      try {
+        const parsed = JSON.parse(databaseLegacyValue);
+        if (Array.isArray(parsed)) {
+          databaseLegacy = parsed;
+          canRemoveLegacyUserState = cleanMeasurements(parsed).length === parsed.length;
+        }
+      } catch {}
+    }
+    const legacyByDate = mergeMissingRecords(cleanMeasurements(databaseLegacy), cleanMeasurements(localEntries), 'date');
+    const missingByDate = mergeMissingRecords(existing, legacyByDate, 'date');
+    if (missingByDate.length !== existing.length) await replaceMeasurements(missingByDate);
+    if (legacyUserStateKey && databaseLegacyValue != null && canRemoveLegacyUserState) await deleteUserState(legacyUserStateKey);
+    return readMeasurements();
+  }
+
+  async function readUserState() {
+    const tx = db.transaction(USER_STATE_STORE, 'readonly');
+    const records = await requestResult(tx.objectStore(USER_STATE_STORE).getAll());
+    return Object.fromEntries(records.filter((record) => record && typeof record.key === 'string' && typeof record.value === 'string' && record.value.length <= 50_000_000).map(({ key, value }) => [key, value]));
+  }
+
+  async function migrateLegacyUserState(legacyState) {
+    const existing = await readUserState();
+    const missing = Object.entries(legacyState || {}).filter(([key, value]) => typeof value === 'string' && value.length <= 50_000_000 && !Object.hasOwn(existing, key));
+    if (missing.length) {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(USER_STATE_STORE, 'readwrite');
+        const store = tx.objectStore(USER_STATE_STORE);
+        missing.forEach(([key, value]) => store.put({ key, value }));
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error || new Error('Could not migrate local user state'));
+        tx.onabort = () => reject(tx.error || new Error('User state migration was aborted'));
+      });
+    }
+    return readUserState();
+  }
+
+  async function writeUserState(key, value) {
+    if (typeof key !== 'string' || !key || key.length > 160 || typeof value !== 'string' || value.length > 50_000_000) throw new TypeError('Invalid user state record');
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(USER_STATE_STORE, 'readwrite');
+      tx.objectStore(USER_STATE_STORE).put({ key, value });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save user state'));
+      tx.onabort = () => reject(tx.error || new Error('User state save was aborted'));
+    });
+  }
+
+  async function deleteUserState(key) {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(USER_STATE_STORE, 'readwrite');
+      tx.objectStore(USER_STATE_STORE).delete(key);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not delete user state'));
+      tx.onabort = () => reject(tx.error || new Error('User state deletion was aborted'));
+    });
+  }
+
+  async function clearUserState() {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(USER_STATE_STORE, 'readwrite');
+      tx.objectStore(USER_STATE_STORE).clear();
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not clear user state'));
+      tx.onabort = () => reject(tx.error || new Error('User state clear was aborted'));
+    });
+  }
+
+  async function readProgram() {
+    const tx = db.transaction(PROGRAM_STORE, 'readonly');
+    const record = await requestResult(tx.objectStore(PROGRAM_STORE).get(ACTIVE_PROGRAM_ID));
+    return record?.schemaVersion === 1 && record.plan && typeof record.plan === 'object' && !Array.isArray(record.plan)
+      ? JSON.stringify(record.plan)
+      : null;
+  }
+
+  async function writeProgram(value) {
+    if (typeof value !== 'string' || value.length > 50_000_000) throw new TypeError('Invalid programme record');
+    let plan;
+    try { plan = JSON.parse(value); } catch { throw new TypeError('Programme must be valid JSON'); }
+    if (!plan || typeof plan !== 'object' || Array.isArray(plan)) throw new TypeError('Programme must be an object');
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PROGRAM_STORE, 'readwrite');
+      tx.objectStore(PROGRAM_STORE).put({ id: ACTIVE_PROGRAM_ID, schemaVersion: 1, plan });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not save programme'));
+      tx.onabort = () => reject(tx.error || new Error('Programme save was aborted'));
+    });
+  }
+
+  async function clearProgram() {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PROGRAM_STORE, 'readwrite');
+      tx.objectStore(PROGRAM_STORE).delete(ACTIVE_PROGRAM_ID);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error || new Error('Could not clear programme'));
+      tx.onabort = () => reject(tx.error || new Error('Programme clear was aborted'));
+    });
+  }
+
+  async function migrateLegacyProgram(localValue, legacyUserStateKey) {
+    const existing = await readProgram();
+    const userState = legacyUserStateKey ? await readUserState() : {};
+    const databaseLegacyValue = legacyUserStateKey ? userState[legacyUserStateKey] : null;
+    const candidate = existing || databaseLegacyValue || localValue;
+    if (!existing && candidate) await writeProgram(candidate);
+    if (legacyUserStateKey && databaseLegacyValue != null) await deleteUserState(legacyUserStateKey);
+    return readProgram();
+  }
+
+  return Object.freeze({
+    schemaVersion: HISTORY_SCHEMA_VERSION,
+    readAll,
+    replaceAll,
+    migrateLegacy,
+    readCustomExercises,
+    replaceCustomExercises,
+    migrateLegacyCustomExercises,
+    readEquipmentProfiles,
+    replaceEquipmentProfiles,
+    migrateLegacyEquipmentProfiles,
+    readExercisePreferences,
+    replaceExercisePreferences,
+    migrateLegacyExercisePreferences,
+    readNutritionDays,
+    replaceNutritionDays,
+    putNutritionDay,
+    migrateLegacyNutritionDays,
+    readMeasurements,
+    replaceMeasurements,
+    migrateLegacyMeasurements,
+    readUserState,
+    migrateLegacyUserState,
+    writeUserState,
+    deleteUserState,
+    clearUserState,
+    readProgram,
+    writeProgram,
+    clearProgram,
+    migrateLegacyProgram,
+    close: () => db.close(),
+  });
+}
+
+export { cleanHistory, newestFirst };

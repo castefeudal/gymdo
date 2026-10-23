@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MARKOV MADE GYM — premium mark concept</title>
+  <desc id="desc">Geometric M monogram with a precision training baseline, on graphite.</desc>
+  <rect width="512" height="512" rx="112" fill="#080C11"/>
+  <rect x="22" y="22" width="468" height="468" rx="94" fill="none" stroke="#F2F6F5" stroke-opacity=".13" stroke-width="3"/>
+  <path d="M131 352V157L256 274L381 157V352" fill="none" stroke="#F4F7F5" stroke-width="43" stroke-linejoin="miter" stroke-linecap="square"/>
+  <path d="M132 401H380" fill="none" stroke="#BEF47D" stroke-width="15" stroke-linecap="square"/>
+  <path d="M132 377V418M380 377V418" fill="none" stroke="#BEF47D" stroke-width="7"/>
+</svg>

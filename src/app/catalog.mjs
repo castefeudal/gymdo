@@ -392,8 +392,8 @@ export const CORE_TRANSLATIONS = Object.freeze(Object.assign(
   },
   {
     "v7.home": { ru: "Сегодня", en: "Today" },
-    "v7.library": { ru: "Библиотека", en: "Library" },
-    "v7.workout": { ru: "Тренировка", en: "Workout" },
+    "v7.library": { ru: "Упражнения", en: "Exercises" },
+    "v7.workout": { ru: "Тренировки", en: "Training" },
     "v7.progress": { ru: "Прогресс", en: "Progress" },
     "v7.more": { ru: "Ещё", en: "More" },
     "v7.program": { ru: "Программа", en: "Programme" },
@@ -403,7 +403,7 @@ export const CORE_TRANSLATIONS = Object.freeze(Object.assign(
     "v7.settings": { ru: "Настройки", en: "Settings" },
     "v7.about": { ru: "Павел Марков", en: "Pavel Markov" },
     "v7.moreTitle": { ru: "Разделы системы", en: "System sections" },
-    "v7.homeSub": { ru: "Следующее действие, текущий план и обратная связь — без лишней навигации.", en: "Next action, active plan and feedback — without unnecessary navigation." },
+    "v7.homeSub": { ru: "Следующее действие, план и обратная связь.", en: "Next action, plan and feedback." },
     "v7.moreSub": { ru: "Программа, питание, знания и настройки — вторичный уровень, когда он действительно нужен.", en: "Programme, nutrition, knowledge and settings — the secondary layer when you need it." },
     "v7.settingsSub": { ru: "Интерфейс, расширенное логирование и контроль данных.", en: "Interface, advanced logging and local data controls." },
     "v7.next": { ru: "Следующее действие", en: "Next action" },
@@ -471,7 +471,7 @@ export const CORE_TRANSLATIONS = Object.freeze(Object.assign(
     "v7.nutritionKeep": { ru: "Не меняй калории автоматически: сначала проверь соблюдение и накопи устойчивый тренд.", en: "Do not change calories automatically: verify adherence and collect a stable trend first." },
     "v7.weekComplete": { ru: "Неделя выполнена — сверить прогресс", en: "Week complete — review progress" },
     "v7.weekCompleteWhy": { ru: "Все дни программы на этой неделе завершены. Следующий полезный шаг — короткая обратная связь, а не ещё одна тренировка.", en: "Every programme day for this week is complete. The next useful action is feedback, not another session." },
-    "v7.tools": { ru: "Lab", en: "Lab" }
+    "v7.tools": { ru: "Инструменты", en: "Tools" }
   },
   {
     'nutritionWeek.noTarget': { ru: 'Сначала рассчитай ориентир калорий выше, затем записывай рацион по дням.', en: 'Calculate a calorie target above, then log daily intake to see the weekly picture.' },

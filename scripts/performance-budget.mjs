@@ -2,8 +2,8 @@ import { readFile, readdir } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 
 const budgets = [
-  { file: 'app.js', raw: 440_000, gzip: 125_000 },
-  { file: 'app.css', raw: 255_000, gzip: 46_000 },
+  { file: 'app.js', raw: 446_000, gzip: 127_000 },
+  { file: 'app.css', raw: 272_000, gzip: 48_500 },
   { file: 'ui.html', raw: 117_000, gzip: 28_000 },
   { file: 'index.html', raw: 10_000, gzip: 4_000 },
   { directory: 'assets/runtime', label: 'production JS (all chunks)', raw: 480_000, gzip: 160_000 },

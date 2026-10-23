@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">MARKOV MADE GYM</title>
-  <desc id="desc">Фирменная буква M на obsidian фоне с измерительной measurement rail.</desc>
-  <rect width="512" height="512" rx="96" fill="#0B0C0E"/>
-  <rect x="38" y="38" width="436" height="436" rx="72" fill="none" stroke="#F3F1ED" stroke-opacity=".18" stroke-width="4"/>
-  <path d="M116 356V156h44l92 135 92-135h44v200h-47V235l-76 117h-26l-76-117v121z" fill="#86B6FF"/>
-  <path d="M116 395h280" stroke="#86B6FF" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 18"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MARKOV MADE GYM"><title>MARKOV MADE GYM</title><path d="M14 50V14h7.2L32 34.6V45L20.6 28.4V50Z" fill="#F4F7F5"/><path d="M50 50V14h-7.2L32 34.6V45l11.4-16.6V50Z" fill="#BEF47D"/></svg>

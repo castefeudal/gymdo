@@ -1,6 +1,14 @@
 # MARKOV MADE GYM design system
 
-The interface follows Today → start → complete → save → progress → next action. Desktop uses one header navigation; phones use five-item bottom navigation and contextual training controls. Accent indicates actions and active states. Panels share geometry across Obsidian, Soft and Ivory.
+## Identity
+
+The mark is a geometric M built from two mirrored halves split on the centre axis: the left half is the text colour, the right half is the performance accent. It reads at 24 px, needs no plate for small sizes, and is used directly as the app icon plate, the favicon and the OG composition. Brand sources live in `assets/brand/` (`mark*.svg`, `lockup*.svg`, `favicon.svg`, PWA icons, `og-image.png`); `scripts/brand-assets.mjs` regenerates the vector sources and the raster pages that `scripts/brand-render.mjs` captures.
+
+## Palette
+
+One semantic palette owns three themes. Obsidian is graphite (`#080C11` canvas, `#101720` surface, `#17212B` elevated) with a lime performance accent (`#BEF47D`, ink `#0A1503`) and a cool analytics accent (`#8BBFD1`). Soft is the neutral light theme (`#EEF1F3`), Ivory the warm paper theme (`#F4F2EC`); both darken the accent to `#3F7A18` / `#4C6A1E` so lime never carries white text. Components read semantic tokens only — `tokens.css` owns colour, geometry, spacing and motion.
+
+The interface follows Today → start → complete → save → progress → next action. Desktop shows seven product sections (Сегодня · Тренировки · Упражнения · Питание · Прогресс · Инструменты · Ещё) in one header row; phones use a five-tab bottom bar with the remaining sections behind «Ещё», plus contextual training controls. Home keeps one primary action on the next-action card; the context bar never repeats it. Accent indicates actions and active states. Panels share geometry across Obsidian, Soft and Ivory.
 
 ## Ownership
 

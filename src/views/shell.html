@@ -14,24 +14,24 @@
 <header class="topbar">
   <div class="container topbar-inner">
     <a class="brand" href="#home" aria-label="MARKOV MADE GYM — на главную">
-      <svg class="brand-mark" viewBox="0 0 40 40" role="img" aria-hidden="true" focusable="false">
-        <rect x="1" y="1" width="38" height="38" rx="9" fill="none" stroke="currentColor" stroke-opacity=".28"/>
-        <path d="M9 29V11h4.4l6.6 10.2L26.6 11H31v18h-4.3V18.9l-5.9 9.1h-1.6l-5.9-9.1V29z" fill="var(--accent)"/>
-        <path d="M9 33h22" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1.6 3.4" opacity=".7"/>
+      <svg class="brand-mark" viewBox="0 0 64 64" role="img" aria-hidden="true" focusable="false">
+        <path d="M14 50V14h7.2L32 34.6V45L20.6 28.4V50Z" fill="currentColor"/>
+        <path d="M50 50V14h-7.2L32 34.6V45l11.4-16.6V50Z" fill="var(--accent)"/>
       </svg>
       <span class="brand-name"><b>MARKOV MADE</b><span>GYM</span></span>
     </a>
 
     <nav class="nav-links v7-primary-nav" id="nav-links" aria-label="Основные разделы">
       <a class="v7-nav-link" href="#home" data-v7-nav="home">Сегодня</a>
-      <a class="v7-nav-link" href="#library" data-v7-nav="library">Библиотека</a>
-      <a class="v7-nav-link" href="#workout" data-v7-nav="workout">Тренировка</a>
+      <a class="v7-nav-link" href="#workout" data-v7-nav="workout">Тренировки</a>
+      <a class="v7-nav-link" href="#library" data-v7-nav="library">Упражнения</a>
+      <a class="v7-nav-link" href="#nutrition" data-v7-nav="nutrition">Питание</a>
       <a class="v7-nav-link" href="#progress" data-v7-nav="progress">Прогресс</a>
+      <a class="v7-nav-link" href="#tools" data-v7-nav="tools">Инструменты</a>
       <div class="nav-group" data-navgroup="more" data-open="false">
-        <button type="button" aria-expanded="false" aria-controls="navmenu-more"><span data-v7-nav="more">Ещё</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button type="button" aria-expanded="false" aria-controls="navmenu-more"><span data-v7-nav="more">Ещё</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-menu" id="navmenu-more">
           <a href="#program"><b data-v7-more="program">Программа</b><span data-v7-more-sub="program">Структура недели и старт следующей тренировки</span></a>
-          <a href="#nutrition"><b data-v7-more="nutrition">Питание</b><span data-v7-more-sub="nutrition">Калории, макросы и сверка с прогрессом</span></a>
           <a href="#knowledge"><b data-v7-more="knowledge">База знаний</b><span data-v7-more-sub="knowledge">Практические разборы по контексту</span></a>
           <a href="#method"><b data-v7-more="method">Метод</b><span data-v7-more-sub="method">Как система принимает решения</span></a>
           <a href="#settings"><b data-v7-more="settings">Настройки</b><span data-v7-more-sub="settings">Интерфейс, логирование и данные</span></a>
@@ -60,6 +60,30 @@
     </div>
   </div>
 </header>
+
+<nav class="mobile-app-nav" id="mobile-app-nav" aria-label="Основная навигация">
+  <a href="#home" data-mobile-dest="home" class="mnav-tab">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V20a1 1 0 0 1-1 1h-4.6v-5.4H9.6V21H5a1 1 0 0 1-1-1Z"/></svg>
+    <span>Сегодня</span>
+  </a>
+  <a href="#workout" data-mobile-dest="workout" class="mnav-tab">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h3v6H3zM18 9h3v6h-3zM6 12h12M7 7h10M7 17h10"/></svg>
+    <span>Тренировка</span>
+  </a>
+  <a href="#library" data-mobile-dest="library" class="mnav-tab">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.6"/><path d="m15.8 15.8 4.2 4.2"/></svg>
+    <span>Упражнения</span>
+  </a>
+  <a href="#progress" data-mobile-dest="progress" class="mnav-tab">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M9.4 18V5M14.8 18v-6M20.2 18v-9"/></svg>
+    <span>Прогресс</span>
+  </a>
+  <button type="button" class="mnav-tab" id="mnav-more-open" aria-expanded="false" aria-controls="mobile-nav">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg>
+    <span>Ещё</span>
+  </button>
+</nav>
+
 
 <div class="mobile-nav" id="mobile-nav" data-open="false" role="dialog" aria-modal="true" aria-label="Меню" data-i18n-aria="aria.menu">
   <button class="icon-btn mnav-close" id="nav-close" type="button" aria-label="Закрыть меню" data-i18n-aria="aria.menuClose">
@@ -261,13 +285,21 @@
     <div class="modal-scroll modal-scroll-exercise" id="modal-scroll">
       <aside class="modal-visual" aria-label="Демонстрация упражнения">
         <div class="modal-media" id="modal-media">
-          <img id="modal-img" alt="" width="640" height="480" decoding="async">
+          <div class="modal-media-stage">
+            <img id="modal-img" alt="" width="640" height="480" decoding="async">
+          </div>
           <div class="modal-media-chrome">
-            <span class="modal-media-status" id="modal-media-status">GIF · полный кадр</span>
-            <button class="modal-media-expand" id="modal-media-expand" type="button" aria-label="Развернуть демонстрацию упражнения">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
-              <span id="modal-media-expand-label">Развернуть</span>
-            </button>
+            <span class="modal-media-status" id="modal-media-status">Демонстрация · полный кадр</span>
+            <div class="modal-media-controls">
+              <button class="media-btn" id="modal-media-play" type="button" aria-pressed="true" aria-label="Пауза демонстрации">
+                <svg class="media-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+                <svg class="media-ico-play" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M8 5.5v13l11-6.5Z"/></svg>
+              </button>
+              <button class="media-btn" id="modal-media-expand" type="button" aria-label="Развернуть демонстрацию упражнения" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+                <span id="modal-media-expand-label">Развернуть</span>
+              </button>
+            </div>
           </div>
         </div>
         <div class="modal-quick" id="modal-quick" aria-label="Краткий профиль упражнения"></div>

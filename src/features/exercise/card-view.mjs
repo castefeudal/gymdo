@@ -7,7 +7,7 @@
     var kind = detailKindLabel(ex);
     var level = detailLevelLabel(ex);
     var meta = ex.secondary.slice(0, 2).map(function (m) {
-      return '<span class="meta-tag">+ ' + esc(labelMu(m)) + '</span>';
+      return '<span class="meta-tag">' + esc(labelMu(m)) + '</span>';
     }).join('');
     return '<article class="card' + (added ? ' in-workout' : '') + '" data-id="' + esc(ex.id) + '">' +
       '<div class="card-media">' +
@@ -21,7 +21,7 @@
         '<p class="card-target">' + esc(labelMu(ex.target)) + '</p>' +
         '<h3 class="card-title">' + esc(name) + '</h3>' +
         '<div class="card-specs"><span>' + esc(kind) + '</span><span>' + esc(level) + '</span></div>' +
-        '<div class="card-meta"><span class="meta-tag">' + premiumIcon('equipment') + esc(labelEq(ex.equip)) + '</span>' + meta + '</div>' +
+        '<div class="card-meta"><span class="meta-tag meta-eq">' + esc(labelEq(ex.equip)) + '</span>' + meta + '</div>' +
         '<button class="btn btn-quiet btn-sm exercise-preference-trigger" type="button" data-pref-toggle="' + esc(ex.id) + '" aria-label="' + esc((S.lang === 'en' ? 'Set preference for ' : 'Настроить предпочтение: ') + name) + '" title="' + esc(S.lang === 'en' ? 'Personal exercise preference' : 'Личное предпочтение упражнения') + '">' + esc(exercisePreferenceLabel(exercisePreference(ex.id))) + '</button>' +
         '<div class="card-actions">' +
           '<button class="btn btn-solid btn-sm" type="button" data-open="' + esc(ex.id) + '">' + esc(t('openTechnique')) + '</button>' +

@@ -1,0 +1,10 @@
+import { chromium } from '@playwright/test';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.addInitScript(() => localStorage.setItem('mmg.theme.v2','soft'));
+await page.goto('http://127.0.0.1:4173/index.html#library', { waitUntil:'load' });
+await page.waitForSelector('#grid .card');
+await page.waitForTimeout(600);
+const out = await page.evaluate(() => [...document.querySelectorAll('h1,h2,h3')].slice(0, 8).map(h => ({ tag: h.tagName, id: h.id, cls: h.className, vis: !!h.offsetParent, text: h.textContent.trim().slice(0,30) })));
+console.log(JSON.stringify(out, null, 1));
+await browser.close();

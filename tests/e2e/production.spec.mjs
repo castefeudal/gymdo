@@ -1122,7 +1122,7 @@ test('desktop library filters do not overlap and the warm gold accent is gone', 
     };
   });
 
-  expect(audit.accent.toLowerCase()).toBe('#86b6ff');
+  expect(audit.accent.toLowerCase()).toBe('#bef47d');
   expect(audit.listOverflow).toBe('visible');
   expect(audit.minHeight).toBeGreaterThanOrEqual(37);
   expect(audit.overlaps).toBe(0);
@@ -1138,9 +1138,9 @@ test('all three themes resolve coherent tokens, persist and keep library informa
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
 
   const expected = [
-    { theme: 'obsidian', canvas: '#070a0e', signal: '#86b6ff', scheme: 'dark' },
-    { theme: 'soft', canvas: '#eaf0f6', signal: '#386aa9', scheme: 'light' },
-    { theme: 'ivory', canvas: '#f6f5f1', signal: '#4f7197', scheme: 'light' },
+    { theme: 'obsidian', canvas: '#080c11', signal: '#bef47d', scheme: 'dark' },
+    { theme: 'soft', canvas: '#eef1f3', signal: '#35700f', scheme: 'light' },
+    { theme: 'ivory', canvas: '#f4f2ec', signal: '#4c6a1e', scheme: 'light' },
   ];
 
   for (const spec of expected) {

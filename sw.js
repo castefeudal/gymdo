@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r72-fitness-os';
+const VERSION = '2026.10-r73-precision-identity';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;

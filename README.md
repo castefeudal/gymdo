@@ -69,6 +69,12 @@ Calculation logic is kept outside DOM code in pure modules and covered by unit t
 6. One coherent system over disconnected calculators.
 7. Transparent rules over “AI magic”.
 
+## Identity and interface
+
+The product identity is a geometric M: two mirrored halves split on the centre axis, the left in the interface text colour and the right in the performance accent. Brand sources (mark, horizontal lockup, light/dark variants, favicon, PWA 192/512, maskable icon, Apple touch icon and the 1200×630 social image) live in `assets/brand/` and are regenerated with `node scripts/brand-assets.mjs` plus a Playwright capture pass.
+
+The interface runs on one semantic token palette (graphite canvas, lime performance accent, cool analytics accent) with three themes — Obsidian, Soft and Ivory. Desktop navigation exposes the seven product sections (Today, Training, Exercises, Nutrition, Progress, Tools, More); phones use a five-tab bottom bar plus the overflow menu. Library cards frame every movement in a consistent media plate with the full body visible, and the exercise surface treats the demonstration as the hero with playback and fullscreen controls. Text never drops below 14 px; interface strings are pluralised per language.
+
 ## Architecture
 
 The application is currently delivered as a static GitHub Pages PWA while being migrated progressively away from the older monolithic structure.

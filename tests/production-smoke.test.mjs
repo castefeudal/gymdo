@@ -111,7 +111,7 @@ test('detail media box itself stays inside the visual frame and step counter inc
 test('one semantic palette owns the three themes', async () => {
   const tokens = await read('styles/source/tokens.css');
   for (const theme of ['obsidian', 'soft', 'ivory']) assert.ok(tokens.includes(`html[data-theme="${theme}"]`));
-  for (const color of ['#86b6ff', '#386aa9', '#4f7197']) assert.ok(tokens.includes(color));
+  for (const color of ['#bef47d', '#35700f', '#4c6a1e']) assert.ok(tokens.includes(color));
   for (const token of ['--bg-canvas:', '--bg-surface:', '--bg-elevated:', '--text-primary:', '--text-secondary:', '--text-muted:', '--border-subtle:', '--border-strong:', '--accent:', '--accent-hover:', '--accent-soft:', '--positive:', '--warning:', '--critical:']) assert.ok(tokens.includes(token));
 });
 
@@ -122,7 +122,7 @@ test('saved theme is hydrated before stylesheet and runtime keeps theme metadata
   const stylesheet = index.indexOf('app.css?v=');
   assert.ok(hydrate >= 0 && stylesheet > hydrate, 'saved theme must resolve before stylesheet paint');
   assert.match(app, /document\.documentElement\.style\.colorScheme = S\.theme === 'obsidian' \? 'dark' : 'light'/);
-  assert.match(app, /obsidian: '#070A0E', soft: '#EAF0F6', ivory: '#F6F5F1'/);
+  assert.match(app, /obsidian: '#080C11', soft: '#EEF1F3', ivory: '#F4F2EC'/);
 });
 
 test('library cards expose useful type and level context plus live selection insights', async () => {

@@ -26,6 +26,7 @@ import { mergeEnglishCompatibility } from './src/app/i18n.mjs';
 import { createLocalFirstStore } from './src/persistence/local-first-store.mjs';
 import { createInitialState } from './src/app/state.mjs';
 import { subscribeToHashChanges } from './src/app/router.mjs';
+import { countPhrase as countPhraseI18n } from './src/features/i18n/plural.mjs';
 import { searchCommandPalette } from './src/features/command-palette/search.mjs';
 import { createCustomExerciseRuntimeRecord, decodeCompactExercises } from './src/data/exercise-repository.mjs';
 import { cleanSetRecord, ensureSetLog, normalizeWorkoutRecord } from './src/features/workout/workout-records.mjs';
@@ -918,7 +919,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     inZone.forEach(function (ex) { byTarget[ex.target] = (byTarget[ex.target] || 0) + 1; });
     var targets = Object.keys(byTarget).sort(function (a, b) { return byTarget[b] - byTarget[a] || labelMu(a).localeCompare(labelMu(b), S.lang === 'en' ? 'en' : 'ru'); });
     if (title) title.textContent = labelZone(zone);
-    if (subtitle) subtitle.textContent = (S.lang === 'en' ? inZone.length + ' exercises · choose a target muscle or keep the whole area.' : inZone.length + ' упражнений · уточни мышцу или оставь активной всю зону.');
+    if (subtitle) subtitle.textContent = (S.lang === 'en' ? countPhraseI18n(inZone.length, 'exercise', 'en') + ' · choose a target muscle or keep the whole area.' : countPhraseI18n(inZone.length, 'exercise', 'ru') + ' · уточни мышцу или оставь активной всю зону.');
     board.innerHTML = '<div class="muscle-detail"><div class="muscle-detail-grid">' + targets.map(function (tg) {
         var selected = S.muscles.indexOf(tg) !== -1;
         return '<button class="muscle-target-btn" type="button" data-musnav-muscle="' + esc(tg) + '" aria-pressed="' + selected + '">' +
@@ -1160,6 +1161,30 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     return renderExerciseTechniqueView({ $, C, L, detailAlertCard, detailCueCard, detailKindLabel, detailLevelLabel, detailStepLabel, detailText, esc, exCardZone, exerciseTechniqueModel, factRow, labelEq, labelMu, labelZone, qsa, setModalTabActive, t }, ex);
   }
 
+  function syncModalMediaPlayback() {
+    var button = $('modal-media-play'), img = $('modal-img');
+    if (!button || !img) return;
+    var playing = img.getAttribute('src') !== img.dataset.still && !!img.getAttribute('src');
+    button.setAttribute('aria-pressed', String(playing));
+    button.setAttribute('aria-label', playing ? detailText('Пауза демонстрации', 'Pause demonstration') : detailText('Воспроизвести демонстрацию', 'Play demonstration'));
+    var pause = button.querySelector('.media-ico-pause');
+    var play = button.querySelector('.media-ico-play');
+    if (pause) pause.hidden = !playing;
+    if (play) play.hidden = playing;
+  }
+
+  function toggleModalMediaPlayback() {
+    var img = $('modal-img');
+    if (!img || !S.activeId) return;
+    var ex = BY_ID[S.activeId];
+    if (!ex) return;
+    var still = img.dataset.still || exStill(ex);
+    var playing = img.getAttribute('src') !== still && !!img.getAttribute('src');
+    img.dataset.paused = playing ? '1' : '';
+    img.src = playing ? still : exMotion(ex);
+    syncModalMediaPlayback();
+  }
+
   function syncModalMediaExpandLabel() {
     var frame = $('modal-media'), button = $('modal-media-expand'), label = $('modal-media-expand-label');
     if (!frame || !button || !label) return;
@@ -1236,6 +1261,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
       if (frame) frame.classList.add('is-ready');
     }, { once: true });
     img.src = exMotion(ex);
+    img.dataset.paused = '';
+    syncModalMediaPlayback();
 
     renderExerciseTechnique(ex);
     renderExerciseCoach(ex);
@@ -4595,7 +4622,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
       var mark = qs('.theme-choice-check', b);
       if (mark) mark.textContent = active ? '✓' : '';
     });
-    var colors = { obsidian: '#070A0E', soft: '#EAF0F6', ivory: '#F6F5F1' };
+    var colors = { obsidian: '#080C11', soft: '#EEF1F3', ivory: '#F4F2EC' };
     var labels = {
       obsidian: { ru: 'Тёмная', en: 'Dark' },
       soft: { ru: 'Мягкая', en: 'Soft' },
@@ -5023,6 +5050,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     });
 
     $('modal-media-expand').addEventListener('click', toggleModalMedia);
+    var mediaPlay = $('modal-media-play');
+    if (mediaPlay) mediaPlay.addEventListener('click', toggleModalMediaPlayback);
     $('modal-tabs').addEventListener('click', function (e) {
       var button = e.target.closest('[data-modal-jump]');
       if (!button) return;
@@ -5727,7 +5756,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.10-r72-fitness-os';
+  var APP_VERSION = '2026.10-r73-precision-identity';
   var BACKUP_SCHEMA = 10;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
@@ -6237,7 +6266,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
       '</div>'+timeline;
   }
   function renderV7Home() {
-    return renderV7HomeView({ $, S, esc, t, v7c, v7DateLabel, v7NextAction, v7PlanSummary, v7TrendSummary, totalCompletedHistorySets, premiumIcon, renderV10HomePulse });
+    return renderV7HomeView({ $, S, esc, t, v7c, v7DateLabel, v7NextAction, v7PlanSummary, v7TrendSummary, totalCompletedHistorySets, premiumIcon, renderV10HomePulse, BY_ID, exStill, exName, countPhrase: countPhraseI18n });
   }
 
   function renderV7More(){
@@ -6296,9 +6325,9 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   };
   function v8RouteMeta(route){
     var pack=V8_ROUTE_META[S.lang==='en'?'en':'ru'],base=pack[route]||['MARKOV MADE',v7c(route)||route],meta=base[1];
-    if(route==='home'){var n=v7NextAction();meta=n.why||meta;}
+    if(route==='home'){var n=v7NextAction(),w=S.workout||[],ss=w.reduce(function(a,x){return a+(Number(x.sets)||0);},0);meta=S.plan?(S.lang==='en'?'Programme active':'Программа активна'):(w.length?(S.lang==='en'?'Session prepared':'Тренировка собрана'):(S.lang==='en'?'No session yet':'Тренировка не собрана'));}
     else if(route==='library'){var nres=S.lastFiltered&&S.lastFiltered.length!=null?S.lastFiltered.length:EX.length;meta=nres+' / '+EX.length+' '+(S.lang==='en'?'movements':'движений');}
-    else if(route==='workout'){var sets=S.workout.reduce(function(a,w){return a+(Number(w.sets)||0);},0);meta=S.workout.length+' '+(S.lang==='en'?'exercises':'упражнений')+' · '+sets+' '+v7c('sets');}
+    else if(route==='workout'){var sets=S.workout.reduce(function(a,w){return a+(Number(w.sets)||0);},0);meta=countPhraseI18n(S.workout.length,'exercise',S.lang)+' · '+countPhraseI18n(sets,'set',S.lang);}
     else if(route==='progress'){var c=v7DiaryConfidence();meta=c.label+' · '+c.detail;}
     else if(route==='program'&&S.plan&&S.plan.days){meta=(S.plan.completedDays||[]).length+' / '+S.plan.days.length+' '+(S.lang==='en'?'sessions this week':'тренировок на этой неделе');}
     return{k:base[0],t:v7c(route)||route,m:meta};

@@ -10,7 +10,8 @@
     "build:index": "node scripts/build-styles.mjs && node scripts/build-views.mjs && node scripts/build-runtime.mjs && node scripts/build-index.mjs",
     "e2e": "playwright test",
     "visual": "playwright test tests/e2e/visual.spec.mjs --project=desktop",
-    "quality": "npm run syntax && npm run build:index && npm run budget && npm test"
+    "quality": "npm run syntax && npm run build:index && npm run budget && npm test",
+    "brand": "node scripts/brand-assets.mjs && node scripts/brand-render.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",

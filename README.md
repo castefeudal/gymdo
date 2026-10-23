@@ -225,6 +225,23 @@ MARKOV MADE GYM is no longer positioned as a standalone “exercise dataset brow
 
 **what to do today → perform the workout → log it → understand progress → choose the next load → manage nutrition and body-composition decisions.**
 
+## Права и авторство / Rights
+
+Автор и правообладатель проекта — **Павел Марков (Pavel Markov)**.
+Проект — личный авторский продукт: © 2026 Павел Марков, все права защищены
+(All rights reserved). Условия: [`LICENSE`](LICENSE) (проприетарная лицензия).
+
+- Стороннее использование — кода, дизайна, датасета, медиа и собранных
+  версий — только по письменному согласованию с автором.
+- Медиа упражнений — © Gym visual, атрибутия обязательна: [`NOTICE.md`](NOTICE.md).
+- Фрагменты, полученные из открытого MIT-датасета, остаются под MIT (строка
+  копирайта сохранена в `LICENSE`).
+
+Third-party use of the code, design, dataset, media or built versions
+requires the author's written permission. Exercise media is © Gym visual
+(attribution required, see `NOTICE.md`); fragments received from the open
+MIT-licensed upstream dataset remain under MIT.
+
 ## Author and credits
 
 Author and maintainer: **Pavel Markov** ([github.com/castefeudal](https://github.com/castefeudal)).

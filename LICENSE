@@ -1,49 +1,105 @@
-MIT License
+АВТОРСКАЯ (ПРОПРИЕТАРНАЯ) ЛИЦЕНЗИЯ / PROPRIETARY LICENSE
 
-Copyright (c) 2026 Pavel Markov
+© 2026 Павел Марков (Pavel Markov). Все права защищены. / All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation and data files (the "Software"),
-to deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Автор, владелец и единственный правообладатель проекта — Павел Марков
+(Pavel Markov, https://github.com/castefeudal, MARKOV MADE).
+The author, owner and sole rights holder of this project is Pavel Markov.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+==============================================================================
+1. ОБЪЁМ ПРАВ / SCOPE OF RIGHTS
+==============================================================================
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Проект MARKOV MADE GYM — личный авторский продукт. Всё, что находится в этом
+репозитории, создано, собрано и упорядочено автором: продуктовая логика,
+архитектура и структура приложения, дизайн-система и вёрстка, весь код
+приложения, расчётные модули MARKOV MADE LAB, тексты и переводы интерфейса,
+структура датасета и его метаданные, тесты, визуальные эталоны, сборка и CI.
+Права на перечисленное принадлежат автору в полном объёме.
 
-------------------------------------------------------------------------------
-UPSTREAM NOTICE
-------------------------------------------------------------------------------
+The project is a personal authored product. Every part of it was written,
+assembled and arranged by the author: product logic, application architecture
+and structure, design system and markup, all application code, MARKOV MADE LAB
+calculation modules, interface copy and translations, dataset structure and
+metadata, tests, visual baselines, build and CI. All rights belong to the
+author.
 
-MARKOV MADE GYM started as a derivative of "exercises-dataset" by Hasan Emir
-Yıldırım (https://github.com/hasaneyldrm/exercises-dataset), published under
-the MIT License. The upstream copyright line is preserved here because the MIT
-License requires it to be retained:
+==============================================================================
+2. РАЗРЕШЕНО БЕЗ ОТДЕЛЬНОГО СОГЛАСОВАНИЯ / ALLOWED WITHOUT PRIOR APPROVAL
+==============================================================================
+
+- Открывать сайт и пользоваться приложением для себя, включая локальные данные.
+- Форк средствами GitHub — для ознакомления, чтения кода и экспериментов.
+- Цитировать короткие фрагменты (до ~300 знаков) со ссылкой на проект и
+  указанием автора.
+- Делиться ссылкой на сайт и репозиторий.
+
+- Open the site and use the app for yourself, including local data.
+- Fork through GitHub to read, study and experiment.
+- Quote short fragments (up to ~300 characters) with a link to the project and
+  the author's name.
+- Share the site and repository links.
+
+==============================================================================
+3. ТРЕБУЕТ ПИСЬМЕННОГО СОГЛАСОВАНИЯ АВТОРА / REQUIRES WRITTEN PERMISSION
+==============================================================================
+
+- Копирование кода, дизайна или датасета в другой проект.
+- Собственный форк с самостоятельной разработкой и публикацией изменений.
+- Публичное развёртывание копии или форка (кроме официального сайта автора).
+- Коммерческое использование: платный доступ, продажа, White-label, встраивание
+  в платный продукт или сервис.
+- Распространение собранных версий приложения, APK/PWA-пакетов, оффлайн-копий.
+- Обучение моделей машинного обучения на датасете, инструкциях и медиа.
+- Переработки, переводы, производные продукты и повторная публикация медиа.
+
+- Copying code, design or dataset into another project.
+- Independent forks with own development and publication of changes.
+- Public deployment of a copy or fork (other than the author's official site).
+- Commercial use: paid access, resale, white-label, embedding into a paid
+  product or service.
+- Redistribution of built versions, APK/PWA bundles or offline copies.
+- Training machine-learning models on the dataset, instructions and media.
+- Derivative works, translations, derived products and media republication.
+
+==============================================================================
+4. МАТЕРИАЛЫ ТРЕТЬИХ ЛИЦ / THIRD-PARTY MATERIALS
+==============================================================================
+
+- Медиа упражнений (изображения и GIF в `images/` и `videos/`) — © Gym visual,
+  https://gymvisual.com/. Распространяются по условиям правообладателя, см.
+  `NOTICE.md`. Атрибуцию удалять нельзя.
+- Часть структуры датасета и многоязычных инструкций происходит из открытого
+  MIT-датасета «exercises-dataset» (автор Hasan Emir Yıldırım). Эта часть
+  остаётся под MIT, и его копирайт сохраняется ниже — MIT нельзя отозвать для
+  того, что получено по MIT. Всё, что добавил автор, — под этой лицензией.
+
+- Exercise media (`images/`, `videos/`) — © Gym visual, https://gymvisual.com/,
+  distributed under the rights holder's terms, see `NOTICE.md`. Attribution
+  must be retained.
+- Part of the dataset structure and multilingual instructions derives from the
+  MIT-licensed "exercises-dataset" by Hasan Emir Yıldırım. Those portions stay
+  under MIT, and his notice is preserved below — MIT cannot be revoked for what
+  was received under MIT. Everything the author added is under this license.
 
     Copyright (c) 2026 Hasan Emir Yıldırım
 
-------------------------------------------------------------------------------
-MEDIA EXCEPTION
-------------------------------------------------------------------------------
+==============================================================================
+5. ГАРАНТИИ / WARRANTY
+==============================================================================
 
-The MIT license above covers ONLY the code, tooling, dataset structure, and
-instruction text/translations in this repository.
+Проект предоставляется «как есть». Расчёты и рекомендации носят информационный
+характер и не являются медицинским заключением.
 
-It DOES NOT cover the exercise media in the `images/` and `videos/`
-directories. That media is © Gym visual (https://gymvisual.com/) and is
-included here with the rights holder's written permission, at 180×180
-resolution, and must retain the attribution "© Gym visual —
-https://gymvisual.com/". Its use and reuse are governed by Gym visual's Terms
-& Conditions (https://gymvisual.com/content/3-terms-and-conditions-of-use) and
-by `NOTICE.md` in this repository — NOT by the MIT license above. Cloning this
-repository does not grant you any license to the media; obtain your own from
-Gym visual.
+Provided "as is". Calculations and recommendations are informational and are not
+a medical opinion.
+
+==============================================================================
+6. КОНТАКТ / CONTACT
+==============================================================================
+
+Согласование и вопросы: Telegram @markovmade · GitHub @castefeudal ·
+https://markovmade.com
+
+Requests and questions: Telegram @markovmade · GitHub @castefeudal ·
+https://markovmade.com

@@ -69,7 +69,9 @@ const index = `<!doctype html>
   <title>MARKOV MADE GYM — тренировки, прогресс и техника</title>
   <meta name="description" content="MARKOV MADE GYM — local-first система тренировок, прогрессии, питания, состава тела и прозрачных fitness-расчётов.">
   <meta name="author" content="Павел Марков / MarkovMade">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="copyright" content="Pavel Markov">
+  <meta name="rights" content="All rights reserved. Third-party use of the code, design and dataset requires the author written permission; see LICENSE and NOTICE.md.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
   <meta name="theme-color" content="#070a0e">
   <meta name="application-name" content="MARKOV MADE GYM">
   <meta name="color-scheme" content="dark light">

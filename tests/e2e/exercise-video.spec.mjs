@@ -2,6 +2,21 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 test.use({ serviceWorkers: 'block' });
 
+test('reduced motion starts with a still and permits explicit playback', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/index.html#library');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await page.locator('#search').fill('0025');
+  await page.locator('#grid [data-open="0025"]').click();
+  const image = page.locator('#modal-img');
+  const still = await image.getAttribute('data-still');
+  await expect(image).toHaveAttribute('src', still);
+  await page.locator('#modal-media-play').click();
+  await expect(image).toHaveAttribute('src', /videos\/.*\.gif/);
+  await page.locator('#modal-media-play').click();
+  await expect(image).toHaveAttribute('src', still);
+});
+
 test('licensed video is lazy, exposes speed, falls back and closes safely', async ({ page, browserName }) => {
   await page.route('**/data/exercise-media.json', route => route.fulfill({ json: {
     schemaVersion: 1, exercises: { '0025': {

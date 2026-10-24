@@ -19,7 +19,7 @@ export const LAB_MARKERS = [
   ['triglycerides', 'Триглицериды', 'Triglycerides', ['mmol/L', 'mg/dL'], 0.0113],
   ['alt', 'АЛТ', 'ALT', ['U/L']], ['ast', 'АСТ', 'AST', ['U/L']],
   ['creatinine', 'Креатинин', 'Creatinine', ['µmol/L', 'mg/dL'], 88.4],
-  ['egfr', 'СКФ (из бланка)', 'eGFR (reported)', ['mL/min/1.73m²']],
+  ['egfr', 'СКФ', 'eGFR', ['mL/min/1.73m²']],
 ];
 
 export function cleanLabResults(rows) {

@@ -19,6 +19,8 @@ is claimed.
 - Build-time resolution of obsolete translation overrides and removal of unused
   older timer/import implementations, with unchanged resource budgets.
 - First library image loads eagerly with high priority. Other images remain lazy.
+- Reduced-motion exercise previews start with a still image and retain explicit
+  GIF playback/pause. Media chrome no longer intercepts its own control buttons.
 - PWA precache retains generated modules and the raw modules actually used by
   bootstrap/Tools. It removes 44 duplicate authored URLs (693,471 authored bytes),
   and known-offline navigation attempts the cached shell before a network fetch.
@@ -33,6 +35,8 @@ is claimed.
   preparation race. Its corrected boot/persistence synchronization passes on retry.
 - Twelve local new-feature checks passed across Chromium desktop/mobile, Firefox
   and WebKit, including real VP8 decoding and clean-profile backup restoration.
+- Twelve additional media checks pass across those four configurations after
+  adding real pointer-based GIF playback/pause under reduced motion.
 - Responsive proof: 297 route/theme/width checks, no horizontal overflow;
   108 screenshots at selected widths. This is not a human usability study.
 - [Linux Quality generation run](https://github.com/castefeudal/gymdo/actions/runs/40137775929)
@@ -49,6 +53,10 @@ is claimed.
   A brief failed-origin backoff prevents dependent imports from repeating the
   timeout. The browser fixture holds connections for five seconds before
   dropping them, exercising pending requests rather than immediate rejection.
+- [Normal Quality run](https://github.com/castefeudal/gymdo/actions/runs/40143486790)
+  passed all six jobs for `71d591e`, including the stressed offline scenario in
+  all four browser configurations and all 218 Linux visual comparisons.
+  This is evidence for that revision, not a production deployment.
 
 ## Published-site Lighthouse baseline
 

@@ -602,6 +602,7 @@
 /* @sequence 2251 */
 #modal .modal-media::before {
   content: "";
+  pointer-events: none;
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -1786,6 +1787,7 @@ html[data-theme="ivory"] .modal-media-expand {
 /* @sequence 8007 */
 #modal .modal-media-chrome{
   position: static;
+  pointer-events: auto;
   z-index: auto;
   left: auto;
   right: auto;

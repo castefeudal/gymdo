@@ -24,8 +24,12 @@ const contentTypes = new Map([
 
 createServer((request, response) => {
   // Per-context connection-loss simulation; this helper is not deployed.
-  if (/(?:^|;\s*)mmg-offline-test=1(?:;|$)/.test(request.headers.cookie || '')) {
-    request.socket.destroy();
+  const lostConnection = /(?:^|;\s*)mmg-offline-test=([12])(?:;|$)/.exec(request.headers.cookie || '');
+  if (lostConnection) {
+    if (lostConnection[1] === '2') {
+      const timer = setTimeout(() => request.socket.destroy(), 5000);
+      response.on('close', () => clearTimeout(timer));
+    } else request.socket.destroy();
     return;
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') {

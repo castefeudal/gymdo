@@ -22,7 +22,7 @@ test('licensed video is lazy, exposes speed, falls back and closes safely', asyn
   if (browserName === 'webkit') {
     // Windows WebKit may reject the codec before playback, even with preload
     // disabled. That browser must still retain the usable GIF fallback.
-    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · загрузка|Видео недоступно · GIF/);
+    await expect(page.locator('#modal-media-status')).toHaveText(/^Видео(?: недоступно · GIF)?$/);
     await page.locator('#modal-media').click();
     await page.evaluate(() => { document.querySelector('#modal video')?.play().catch(() => {}); });
     await expect(page.locator('#modal-media-status')).toContainText('Видео недоступно');
@@ -46,6 +46,8 @@ test('licensed video is lazy, exposes speed, falls back and closes safely', asyn
 });
 
 test('decoded dimensions remain honest and closing releases a playable source', async ({ page, browserName }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
   await page.route('**/data/exercise-media.json', route => route.fulfill({ json: { exercises: { '0025': {
     author: 'Synthetic test fixture', license: 'CC0 test-only color frame', attributionUrl: 'https://example.org/test-fixture',
     sources: [{ src: 'videos/player-test.webm', type: 'video/webm', width: 1920, height: 1080 }]
@@ -58,7 +60,7 @@ test('decoded dimensions remain honest and closing releases a playable source', 
   await page.locator('#grid [data-open="0025"]').click();
   const video = page.locator('#modal video');
   if (browserName === 'webkit') {
-    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · загрузка|Видео недоступно · GIF/);
+    await expect(page.locator('#modal-media-status')).toHaveText(/^Видео(?: недоступно · GIF)?$|160 × 90/);
     await page.locator('#modal-media').click();
     await page.evaluate(() => { document.querySelector('#modal video')?.play().catch(() => {}); });
     await expect(page.locator('#modal-media-status')).toHaveText(/160 × 90|Видео недоступно · GIF/);
@@ -70,6 +72,10 @@ test('decoded dimensions remain honest and closing releases a playable source', 
     await expect(page.locator('#modal-media-status')).toHaveText('160 × 90');
     expect(await video.evaluate(element => element.videoWidth)).toBe(160);
   }
+  const stale = await video.count() ? await video.elementHandle() : null;
   await page.locator('#modal-close').click();
   await expect(video).toHaveCount(0);
+  if (stale) await stale.evaluate(element => element.dispatchEvent(new Event('loadedmetadata')));
+  await page.evaluate(() => new Promise(requestAnimationFrame));
+  expect(errors).toEqual([]);
 });

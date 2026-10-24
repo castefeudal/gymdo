@@ -46,6 +46,9 @@ is claimed.
   Network requests that remain pending fall back to the installed shell after
   three seconds; direct worker tests cover pending/rejected fetches and cache
   write failure without discarding a valid online response.
+  A brief failed-origin backoff prevents dependent imports from repeating the
+  timeout. The browser fixture holds connections for five seconds before
+  dropping them, exercising pending requests rather than immediate rejection.
 
 ## Published-site Lighthouse baseline
 

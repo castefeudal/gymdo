@@ -78,10 +78,11 @@ export function createExerciseMediaPlayer({ frame, image, text, onFallback }) {
     extras.append(replay, speed, attribution);
     frame.append(extras);
     video.addEventListener('loadedmetadata', () => {
+      if (current !== generation) return;
       const hd = video.videoWidth >= 1920 && video.videoHeight >= 1080;
       frame.querySelector('#modal-media-status').textContent = `${hd ? 'Full HD · ' : ''}${video.videoWidth} × ${video.videoHeight}`;
     });
-    frame.querySelector('#modal-media-status').textContent = text('Видео · загрузка', 'Video · loading');
+    frame.querySelector('#modal-media-status').textContent = text('Видео', 'Video');
   }
   return { open, stop };
 }

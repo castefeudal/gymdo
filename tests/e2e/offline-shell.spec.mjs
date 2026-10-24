@@ -17,9 +17,9 @@ test('compiled shell and unvisited routes reopen offline without authored bundle
   expect(files.some(file => file.endsWith('/app.js'))).toBe(false);
   // A genuinely unreachable origin exercises the service-worker fallback in
   // every engine. WebKit's protocol offline flag can abort before fetch events.
-  await context.addCookies([{ name: 'mmg-offline-test', value: '1', url: page.url() }]);
+  await context.addCookies([{ name: 'mmg-offline-test', value: '2', url: page.url() }]);
   expect(await page.evaluate(async () => {
-    try { await fetch('/uncached-offline-probe', { cache: 'no-store' }); return false; }
+    try { await fetch('/uncached-offline-probe', { cache: 'no-store', signal: AbortSignal.timeout(8000) }); return false; }
     catch { return true; }
   })).toBe(true);
   await page.reload({ waitUntil: 'domcontentloaded' });

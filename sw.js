@@ -61,10 +61,11 @@ async function trimMedia(cache) {
   while (keys.length > MEDIA_LIMIT) await cache.delete(keys.shift());
 }
 
+let shellRetryAt = 0;
 async function shellResponse(request, key = request) {
   let cached;
   try { cached = await caches.match(key, { ignoreSearch: true }); } catch {}
-  if (cached && self.navigator.onLine === false) return { response: cached, fromCache: true };
+  if (cached && (self.navigator.onLine === false || Date.now() < shellRetryAt)) return { response: cached, fromCache: true };
   let timer;
   try {
     const network = fetch(request, { cache: 'no-store' });
@@ -72,10 +73,11 @@ async function shellResponse(request, key = request) {
     // A previously installed shell must remain usable in that condition.
     const response = cached ? await Promise.race([
       network,
-      new Promise(resolve => { timer = setTimeout(() => resolve(cached), 3000); }),
+      new Promise(resolve => { timer = setTimeout(() => { shellRetryAt = Date.now() + 15000; resolve(cached); }, 3000); }),
     ]) : await network;
     return { response, fromCache: response === cached };
   } catch {
+    shellRetryAt = Date.now() + 15000;
     return { response: cached || Response.error(), fromCache: true };
   } finally {
     clearTimeout(timer);
@@ -112,6 +114,7 @@ self.addEventListener('fetch', (event) => {
       const cache = await caches.open(MEDIA);
       const hit = await cache.match(request);
       if (hit) return hit;
+      if (self.navigator.onLine === false || Date.now() < shellRetryAt) return caches.match('./images/exercise-placeholder.svg');
       try {
         const response = await fetch(request);
         if (response.ok) {

@@ -19,7 +19,8 @@ async function harness(fetch) {
 }
 
 test('installed shell responds within its deadline when network fetch never settles', async () => {
-  const { context, cached, timers, cleared } = await harness(() => new Promise(() => {}));
+  let requests = 0;
+  const { context, cached, timers, cleared } = await harness(() => { requests++; return new Promise(() => {}); });
   const pending = context.shellResponse({ url: 'https://example.test/index.html' });
   await setImmediate();
   assert.equal(timers[0].delay, 3000);
@@ -27,6 +28,8 @@ test('installed shell responds within its deadline when network fetch never sett
   const result = await pending;
   assert.equal(result.response, cached);
   assert.equal(result.fromCache, true);
+  assert.equal((await context.shellResponse({ url: 'https://example.test/entry.mjs' })).response, cached);
+  assert.equal(requests, 1, 'dependent shell imports must not each repeat the network timeout');
   assert.deepEqual(cleared, [1]);
 });
 

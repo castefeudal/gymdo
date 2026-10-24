@@ -22,6 +22,8 @@ is claimed.
 - PWA precache retains generated modules and the raw modules actually used by
   bootstrap/Tools. It removes 44 duplicate authored URLs (693,471 authored bytes),
   and known-offline navigation attempts the cached shell before a network fetch.
+  Cross-engine connection-loss tests close real origin connections per browser
+  context and prove an uncached fetch fails before testing cached routes.
 - Pages assembly writes the exact quality-checked SHA to public `release.json`.
 
 ## Evidence
@@ -38,7 +40,9 @@ is claimed.
   before acceptance. Timer masks in regression captures are test-only.
 - Later persistence/offline and normal CI results must be read from PR checks;
   they are not implied by the earlier generation run. Windows WebKit offline
-  reload encountered an internal browser error during local verification.
+  protocol emulation encountered an internal browser error during local verification.
+  The real-origin connection-loss scenario subsequently passed locally in all
+  four browser configurations, including WebKit, with an uncached failure probe.
 
 ## Published-site Lighthouse baseline
 
@@ -58,8 +62,9 @@ default mobile/desktop presets, three runs per route/device; all runs retained.
 | Desktop / Library | 0.536 | 0.9501 | 36 |
 
 The library's largest shift was its main content during initialization. The
-candidate keeps initializing main content invisible while preserving layout
-geometry, then reveals it through the existing app-ready state. This prevents
+candidate keeps initializing main content transparent and marks it `aria-busy`
+while preserving layout geometry, then reveals it through the existing app-ready
+state. This prevents
 showing intermediate routes before hydration; the boot/error UI remains visible.
 It has not been verified as a published-site CWV improvement.
 

@@ -27,6 +27,6 @@ Precache follows the compiled module graph, with only bootstrap/entry and Tools
 dependencies retained as raw modules. Do not also precache `app.js` and authored
 copies of bundled modules. The offline-shell browser test checks a fresh install,
 offline reload and previously unvisited routes. Initial route hydration keeps the
-main content invisible until app readiness while retaining measurable geometry;
+main content transparent and inert until app readiness, with `aria-busy`, while retaining measurable geometry;
 the boot and error surfaces remain available. The first library poster is eager
 and high priority; subsequent posters remain lazy.

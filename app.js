@@ -6549,6 +6549,9 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     document.documentElement.dataset.coreReady = 'true';
     document.documentElement.dataset.routeReady = v7RouteFromHash();
     document.documentElement.dataset.appReady = 'true';
+    var appMain = $('top');
+    appMain.inert = false;
+    appMain.setAttribute('aria-busy', 'false');
       window.mmgLocalData = Object.freeze({
       readSnapshot: function () {
         return {

@@ -23,6 +23,11 @@ const contentTypes = new Map([
 ]);
 
 createServer((request, response) => {
+  // Per-context connection-loss simulation; this helper is not deployed.
+  if (/(?:^|;\s*)mmg-offline-test=1(?:;|$)/.test(request.headers.cookie || '')) {
+    request.socket.destroy();
+    return;
+  }
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     response.writeHead(405, { Allow: 'GET, HEAD' }).end();
     return;

@@ -1358,3 +1358,13 @@ body[data-v8-returning="true"] .v8-context-bar {
     display: none;
   }
 }
+
+/* @sequence 5100 */
+@media (max-width:1200px){
+  .v7-primary-nav>.v7-nav-link{
+    padding: 10px 8px;
+  }
+  .brand-name span{
+    letter-spacing: .14em;
+  }
+}

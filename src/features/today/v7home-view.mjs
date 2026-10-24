@@ -53,7 +53,7 @@ export function renderV7HomeView(context) {
     finishProfile: en ? 'Finish setup' : 'Завершить настройку',
     checkin: en ? 'Weekly check-in' : 'Недельный check-in',
     weighIn: en ? 'Log weight' : 'Записать вес',
-    run: en ? 'Start Run Mode' : 'Начать Run Mode',
+    run: en ? 'Start workout' : 'Начать тренировку',
   };
   const ctaLabel = shortActions[next.type] || title.replace(/^Начать |^Start /, '');
   const primary = `<button class="btn btn-primary btn-lg" type="button" data-v7-action="${esc(next.type || '')}"${next.day != null ? ` data-v7-day="${esc(next.day)}"` : ''}>${esc(en ? ctaLabel : ctaLabel)}<span aria-hidden="true">→</span></button>`;
@@ -118,7 +118,8 @@ export function renderV7HomeView(context) {
   signal($id('v7-home-last'), v7c('last'), last ? String((last.items || []).length) : '—',
     last ? `${last.date} · ${phrase(totalCompletedHistorySets(last), 'set')}` : (en ? 'No completed sessions' : 'Нет завершённых тренировок'),
     'workout', last ? '' : (en ? 'Open training' : 'К тренировке'));
-  signal($id('v7-home-progress'), v7c('trend'), trend.v || '—',
+  const trendFigure = String(trend.v || '—').replace('-', '−').replace(/(\d)\.(\d)/, '$1,$2');
+  signal($id('v7-home-progress'), v7c('trend'), trendFigure,
     trend.s || (en ? 'Not enough data yet' : 'Пока недостаточно данных'),
     'progress', (S.diary || []).length ? '' : (en ? 'Log a check-in' : 'Сделать check-in'));
   signal($id('v7-home-nutrition'), v7c('kcal'), S.kbjuLast ? String(S.kbjuLast.target) : '—',

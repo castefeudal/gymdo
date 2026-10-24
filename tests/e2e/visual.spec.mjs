@@ -48,6 +48,11 @@ async function snapshot(page, name) {
       if (img.dataset.still) img.src = img.dataset.still;
       try { await img.decode(); } catch {}
     }));
+    // Decoding is not painting: under parallel workers the compositor can still
+    // show the previous frame. Two frames plus a short settle make capture
+    // deterministic without hiding real layout regressions.
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise(r => setTimeout(r, 120));
   });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow, `${name}: horizontal page overflow`).toBeLessThanOrEqual(1);

@@ -5715,7 +5715,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   }
   function ensureMobileAppNav(){
     var nav=$('mobile-app-nav');if(!nav){nav=document.createElement('nav');nav.id='mobile-app-nav';nav.className='mobile-app-nav';document.body.appendChild(nav);}
-    nav.setAttribute('aria-label',S.lang==='en'?'Primary navigation':'Основная навигация');var count=S.workout.length?'<span class="mobile-nav-badge">'+S.workout.length+'</span>':'';
+    nav.setAttribute('aria-label',S.lang==='en'?'Primary navigation':'Основная навигация');var navSig=(S.lang||'ru')+'|'+(S.workout?S.workout.length:0);if(nav.dataset.signature===navSig){if(typeof Tt==='function')Tt(!1);return nav;}nav.dataset.signature=navSig;var count=S.workout.length?'<span class="mobile-nav-badge">'+S.workout.length+'</span>':'';
     nav.innerHTML='<a href="#home" data-mobile-dest="home">'+premiumIcon('home')+'<span>'+esc(S.lang==='en'?'Today':'Сегодня')+'</span></a><a href="#library" data-mobile-dest="library">'+premiumIcon('search')+'<span>'+esc(S.lang==='en'?'Search':'Поиск')+'</span></a><a href="#workout" data-mobile-dest="workout">'+premiumIcon('workout')+count+'<span>'+esc(S.lang==='en'?'Train':'Тренинг')+'</span></a><a href="#progress" data-mobile-dest="progress">'+premiumIcon('progress')+'<span>'+esc(S.lang==='en'?'Progress':'Прогресс')+'</span></a><a href="#more" data-mobile-dest="more">'+premiumIcon('menu')+'<span>'+esc(S.lang==='en'?'More':'Ещё')+'</span></a>';
     if(typeof applyV7Route==='function')applyV7Route(false);return nav;
   }

@@ -13,13 +13,16 @@ test('licensed video is lazy, exposes speed, falls back and closes safely', asyn
   await page.route('**/videos/test-missing.mp4', route => { videoRequests++; return route.abort(); });
   await page.goto('/index.html#library');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await expect(page.locator('#grid .card img').first()).toHaveAttribute('loading', 'eager');
+  await expect(page.locator('#grid .card img').first()).toHaveAttribute('fetchpriority', 'high');
+  await expect(page.locator('#grid .card img').nth(1)).toHaveAttribute('loading', 'lazy');
   await page.locator('#search').fill('0025');
   await page.locator('#grid [data-open="0025"]').click();
   const video = page.locator('#modal video');
   if (browserName === 'webkit') {
     // Windows WebKit may reject the codec before playback, even with preload
     // disabled. That browser must still retain the usable GIF fallback.
-    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · качество после загрузки|Видео недоступно · показан GIF/);
+    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · загрузка|Видео недоступно · GIF/);
     await page.locator('#modal-media').click();
     await page.evaluate(() => { document.querySelector('#modal video')?.play().catch(() => {}); });
     await expect(page.locator('#modal-media-status')).toContainText('Видео недоступно');
@@ -55,10 +58,10 @@ test('decoded dimensions remain honest and closing releases a playable source', 
   await page.locator('#grid [data-open="0025"]').click();
   const video = page.locator('#modal video');
   if (browserName === 'webkit') {
-    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · качество после загрузки|Видео недоступно · показан GIF/);
+    await expect(page.locator('#modal-media-status')).toHaveText(/Видео · загрузка|Видео недоступно · GIF/);
     await page.locator('#modal-media').click();
     await page.evaluate(() => { document.querySelector('#modal video')?.play().catch(() => {}); });
-    await expect(page.locator('#modal-media-status')).toHaveText(/160 × 90|Видео недоступно · показан GIF/);
+    await expect(page.locator('#modal-media-status')).toHaveText(/160 × 90|Видео недоступно · GIF/);
     if (await video.count()) expect(await video.evaluate(element => element.videoWidth)).toBe(160);
     else await expect(page.locator('#modal-img')).toBeVisible();
   } else {

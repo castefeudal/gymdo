@@ -672,8 +672,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     return '<svg viewBox="0 0 24 38" aria-hidden="true"><circle class="mini-body-base" cx="12" cy="4" r="3"/><path class="mini-body-base" d="M8 8h8l3 9-2 5-1 14h-3l-1-12-1 12H8L7 22l-2-5Z"/>'+hit+'</svg>';
   }
 
-  function cardHtml(ex) {
-    return cardHtmlView({ S, esc, exName, labelZone, labelMu, labelEq, isFav, inWorkout, exStill, STAR_SVG, premiumIcon, t, exercisePreference, exercisePreferenceLabel, C, detailKindLabel, detailLevelLabel }, ex);
+  function cardHtml(ex, index) {
+    return cardHtmlView({ S, esc, exName, labelZone, labelMu, labelEq, isFav, inWorkout, exStill, STAR_SVG, premiumIcon, t, exercisePreference, exercisePreferenceLabel, C, detailKindLabel, detailLevelLabel }, ex, index === 0);
   }
 
   function activeChipsHtml() {
@@ -6319,7 +6319,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var host=$('labs'); if(!host||host.dataset.labLang===S.lang)return;host.dataset.labLang=S.lang;
     qsa('[data-labs-nav]').forEach(function(el){el.textContent=S.lang==='en'?'Lab results':'Анализы';});
     var module=await import('./src/features/lab/results-view.mjs');
-    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:function(rows){return store.set(K.labResults,JSON.stringify(rows));},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays});
+    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays});
   }
   function renderV8Shell(route,animate){
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';

@@ -44,21 +44,28 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
   }
   list();
   host.querySelector('[data-lab-result-filter]').addEventListener('change', list);
-  form.addEventListener('submit', event => {
+  let busy = false;
+  async function persist(next) {
+    if(busy)return false;busy=true;form.querySelector('[type=submit]').disabled=true;
+    try{return await write(next);}finally{busy=false;form.querySelector('[type=submit]').disabled=false;}
+  }
+  form.addEventListener('submit', async event => {
     event.preventDefault();
+    if(busy)return;
     const row = Object.fromEntries(new FormData(form));
     row.value = Number(row.value);
     row.id ||= crypto.randomUUID();
     const clean = cleanLabResults([row]);
     if (!clean) { status.textContent = text('Проверь дату, значение и границы интервала.', 'Check the date, value and interval limits.'); return; }
     const next = cleanLabResults([...rows.filter(item => item.id !== row.id), clean[0]]);
-    if (!write(next)) { status.textContent = text('Не удалось сохранить. Скопируй введённые данные.', 'Could not save. Copy your input before leaving.'); return; }
+    if (!await persist(next)) { status.textContent = text('Не удалось сохранить. Скопируй введённые данные.', 'Could not save. Copy your input before leaving.'); return; }
     rows.splice(0, rows.length, ...next);
     controls.id.value = row.id;
     status.textContent = text('Сохранено на устройстве.', 'Saved on this device.');
     list();
   });
-  host.querySelector('[data-lab-result-list]').addEventListener('click', event => {
+  host.querySelector('[data-lab-result-list]').addEventListener('click', async event => {
+    if(busy)return;
     const edit = event.target.closest('[data-lab-edit]');
     const remove = event.target.closest('[data-lab-delete]');
     if (edit) {
@@ -69,7 +76,7 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     }
     if (remove && confirm(text('Удалить это измерение?', 'Delete this measurement?'))) {
       const next = rows.filter(row => row.id !== remove.dataset.labDelete);
-      if (write(next)) { rows.splice(0, rows.length, ...next); list(); }
+      if (await persist(next)) { rows.splice(0, rows.length, ...next); list(); }
     }
   });
 }

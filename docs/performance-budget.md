@@ -22,3 +22,11 @@ retaining source compatibility. Reintroducing one of those keys into ui.html or
 app.js automatically retains it in the production catalog. Superseded timer and
 unsafe legacy import implementations were removed; deadline timing and verified
 import remain canonical. These changes preserve the existing runtime budget.
+
+Precache follows the compiled module graph, with only bootstrap/entry and Tools
+dependencies retained as raw modules. Do not also precache `app.js` and authored
+copies of bundled modules. The offline-shell browser test checks a fresh install,
+offline reload and previously unvisited routes. Initial route hydration keeps the
+main content invisible until app readiness while retaining measurable geometry;
+the boot and error surfaces remain available. The first library poster is eager
+and high priority; subsequent posters remain lazy.

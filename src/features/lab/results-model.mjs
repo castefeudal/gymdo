@@ -30,6 +30,7 @@ export function cleanLabResults(rows) {
     const marker = LAB_MARKERS.find(item => item[0] === row?.marker);
     if (!marker || !marker[3].includes(row.unit) || typeof row.id !== 'string' || !row.id || row.id.length > 80 || ids.has(row.id)) return null;
     const timestamp = Date.parse(`${row.date}T12:00:00Z`);
+    if (row.time && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(row.time)) return null;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date) || !Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== row.date) return null;
     if (typeof row.value !== 'number' || !Number.isFinite(row.value) || row.value < 0) return null;
     const low = row.low === '' || row.low == null ? null : Number(row.low);
@@ -38,7 +39,7 @@ export function cleanLabResults(rows) {
     ids.add(row.id);
     cleaned.push({ id: row.id.slice(0, 80), marker: row.marker, unit: row.unit, date: row.date,
       value: row.value, low, high,
-      time: /^\d{2}:\d{2}$/.test(row.time || '') ? row.time : '',
+      time: row.time || '',
       laboratory: String(row.laboratory || '').slice(0, 160), method: String(row.method || '').slice(0, 160), context: String(row.context || '').slice(0, 1000) });
   }
   return cleaned.sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));

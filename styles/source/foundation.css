@@ -4944,3 +4944,7 @@ body[data-v8-returning="true"] .section {
   background: var(--surface-panel);
   box-shadow: var(--shadow-card);
 }
+/* @sequence 12003 */
+html:not([data-app-ready="true"]) main{
+  visibility: hidden;
+}

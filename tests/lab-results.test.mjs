@@ -13,7 +13,7 @@ test('laboratory results preserve original units and classify only supplied inte
   assert.equal(labCanonicalValue({ ...row, marker: 'prolactin', unit: 'ng/mL' }), null);
 });
 test('malformed laboratory backups fail atomically', () => {
-  for (const invalid of [{ ...row, date: '2026-99-10' }, { ...row, date: '2026-02-30' }, { ...row, value: -1 }, { ...row, low: 900 }, { ...row, unit: 'IU/L' }]) {
+  for (const invalid of [{ ...row, time: '24:30' }, { ...row, date: '2026-99-10' }, { ...row, date: '2026-02-30' }, { ...row, value: -1 }, { ...row, low: 900 }, { ...row, unit: 'IU/L' }]) {
     assert.equal(cleanLabResults([row, { ...invalid, id: 'two' }]), null);
     assert.equal(validateBackupField('labResults', JSON.stringify([row, { ...invalid, id: 'two' }])), null);
   }

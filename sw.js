@@ -2,12 +2,13 @@ const VERSION = '2026.10-r74-local-lab-media';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
+// Bundle outputs include their own lazy modules. Do not also cache authored copies.
 const PRECACHE = [
   './assets/runtime/application.js',
   './assets/runtime/calculator-history-EXXTNB5I.js',
   './assets/runtime/chunk-2QAHXVO4.js',
   './assets/runtime/chunk-5MTFQ47D.js',
-  './assets/runtime/chunk-CJGL2TUZ.js',
+  './assets/runtime/chunk-TQPV3246.js',
   './assets/runtime/decision-engine-PXY5OBCC.js',
   './assets/runtime/history-repository-XZLWYEQW.js',
   './assets/runtime/i18n-VB76NCGC.js',
@@ -16,7 +17,7 @@ const PRECACHE = [
   './assets/runtime/nutrition-analytics-OBDU5YCR.js',
   './assets/runtime/pr-engine-EHEKVMRG.js',
   './assets/runtime/progression-VLKS4LDK.js',
-  './assets/runtime/results-view-NREVMFMQ.js',
+  './assets/runtime/results-view-JXYEGB4L.js',
   './assets/runtime/router-GQ7X5DUD.js',
   './assets/runtime/substitution-engine-CEQUMOF4.js',
   './assets/runtime/weekly-review-4RBJ5OET.js',
@@ -27,60 +28,16 @@ const PRECACHE = [
   './app.css',
   './ui.html',
   './src/app/entry.mjs',
-  './src/features/workout/workout-view.mjs',
-  './src/features/exercise/exercisetechnique-view.mjs',
-  './src/features/settings/v7settings-view.mjs',
-  './src/features/program/programwizard-view.mjs',
-  './src/features/workout/history-view.mjs',
-  './src/features/progress/progressintelligence-view.mjs',
-  './src/features/workout/save-state.mjs',
-  './src/features/workout/run-view.mjs',
-  './src/features/workout/session-lifecycle.mjs',
-  './src/features/today/v7home-view.mjs',
-  './src/features/nutrition/nutritiontrend-view.mjs',
-  './src/features/exercise/card-view.mjs',
-  './src/features/exercise/media-player.mjs',
-  './src/features/exercise/media-model.mjs',
-  './data/exercise-media.json',
-  './src/features/lab/results-model.mjs',
-  './src/features/lab/results-view.mjs',
-  './src/features/exercise/preference-write-queue.mjs',
-  './app.js',
   './src/app/router.mjs',
-  './src/features/command-palette/search.mjs',
-  './src/features/backup/backup-fields.mjs',
-  './src/data/exercise-repository.mjs',
-  './src/features/workout/workout-records.mjs',
-  './src/features/workout/equipment-increments.mjs',
-  './src/features/workout/progression-adapter.mjs',
-  './src/features/exercise/preferences.mjs',
-  './src/app/state.mjs',
-  './src/app/i18n.mjs',
-  './src/app/catalog.mjs',
-  './src/app/load-modules.mjs',
   './bootstrap.js',
   './gym-tools.js',
   './tools/gym-calculators.mjs',
   './tools/lab-calculators.mjs',
-  './tools/progression.mjs',
-  './tools/workout-groups.mjs',
-  './src/persistence/history-repository.mjs',
-  './src/persistence/local-first-store.mjs',
-  './src/features/today/decision-engine.mjs',
-  './src/features/program/mesocycle.mjs',
-  './src/features/program/weekly-review.mjs',
-  './src/features/program/plan-builder.mjs',
   './src/features/lab/evidence-registry.mjs',
-  './src/features/exercise/substitution-engine.mjs',
-  './src/features/workout/pr-engine.mjs',
   './src/features/nutrition/nutrition-analytics.mjs',
-  './src/features/progress/weight-trend.mjs',
-  './src/features/progress/diary-analytics.mjs',
-  './src/features/progress/summary.mjs',
-  './src/features/progress/chart-model.mjs',
-  './src/features/progress/chart-view.mjs',
   './data/content.json',
   './data/exercises-compact.json',
+  './data/exercise-media.json',
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
@@ -105,6 +62,10 @@ async function trimMedia(cache) {
 }
 
 async function networkFirstNavigation(request) {
+  if (self.navigator.onLine === false) {
+    const cached = await caches.match('./index.html');
+    if (cached) return cached;
+  }
   try {
     const response = await fetch(request, { cache: 'no-store' });
     if (response.ok) {

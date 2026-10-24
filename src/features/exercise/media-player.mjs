@@ -42,7 +42,7 @@ export function createExerciseMediaPlayer({ frame, image, text, onFallback }) {
       if (current !== generation) return;
       stop();
       onFallback();
-      frame.querySelector('#modal-media-status').textContent = text('Видео недоступно · показан GIF', 'Video unavailable · showing GIF');
+      frame.querySelector('#modal-media-status').textContent = text('Видео недоступно · GIF', 'Video unavailable · GIF');
     };
     for (const source of record.sources) {
       const element = document.createElement('source');
@@ -81,7 +81,7 @@ export function createExerciseMediaPlayer({ frame, image, text, onFallback }) {
       const hd = video.videoWidth >= 1920 && video.videoHeight >= 1080;
       frame.querySelector('#modal-media-status').textContent = `${hd ? 'Full HD · ' : ''}${video.videoWidth} × ${video.videoHeight}`;
     });
-    frame.querySelector('#modal-media-status').textContent = text('Видео · качество после загрузки', 'Video · quality available after loading');
+    frame.querySelector('#modal-media-status').textContent = text('Видео · загрузка', 'Video · loading');
   }
   return { open, stop };
 }

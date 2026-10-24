@@ -1,5 +1,5 @@
 // DOM adapter: domain rules and persistence remain in their existing modules.
-  export function cardHtmlView(context, ex) {
+  export function cardHtmlView(context, ex, critical = false) {
     const { S, esc, exName, labelZone, labelMu, labelEq, isFav, inWorkout, exStill, STAR_SVG, premiumIcon, t, exercisePreference, exercisePreferenceLabel, C, detailKindLabel, detailLevelLabel } = context;
     var fav = isFav(ex.id);
     var added = inWorkout(ex.id);
@@ -11,7 +11,7 @@
     }).join('');
     return '<article class="card' + (added ? ' in-workout' : '') + '" data-id="' + esc(ex.id) + '">' +
       '<div class="card-media">' +
-        '<img src="' + esc(exStill(ex)) + '" data-still="' + esc(exStill(ex)) + '" data-ex-media alt="' + esc(name) + '" width="320" height="240" loading="lazy" decoding="async">' +
+        '<img src="' + esc(exStill(ex)) + '" data-still="' + esc(exStill(ex)) + '" data-ex-media alt="' + esc(name) + '" width="320" height="240" loading="' + (critical ? 'eager" fetchpriority="high' : 'lazy') + '" decoding="async">' +
         '<span class="card-badge">' + esc(labelZone(ex.zone)) + '</span>' +
         (added ? '<span class="card-status">' + esc(t('inWorkout')) + '</span>' : '') +
         '<button class="fav-btn" type="button" data-fav="' + esc(ex.id) + '" aria-pressed="' + fav + '" aria-label="' +

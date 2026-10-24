@@ -596,7 +596,7 @@ function init() {
     const route = normalizeRouteHash(location.hash);
     if (route === 'tools') { renderHistoryInsights(); renderCalculatorHistory(); }
   });
-  subscribeToHashChanges(window, () => location.hash, syncRoute);
+  subscribeToHashChanges(window, () => normalizeRouteHash(location.hash), syncRoute);
   const observer = new MutationObserver(() => {
     if (lastLanguage !== document.documentElement.lang) {
       lastLanguage = document.documentElement.lang;

@@ -31,10 +31,13 @@ jobs:
       - uses: actions/configure-pages@v5
 
       - name: Assemble the static production site
+        env:
+          RELEASE_COMMIT: ${{ github.event.workflow_run.head_sha }}
         run: |
           mkdir -p site
           cp index.html ui.html app.css app.js bootstrap.js gym-tools.js sw.js manifest.webmanifest legacy-base.html site/
           cp -R assets data images src styles tools videos site/
+          node -e "require('node:fs').writeFileSync('site/release.json', JSON.stringify({commit:process.env.RELEASE_COMMIT,publishedAt:new Date().toISOString()})+'\n')"
 
       - uses: actions/upload-pages-artifact@v3
         with:

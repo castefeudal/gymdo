@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r73-precision-identity';
+const VERSION = '2026.10-r74-local-lab-media';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -21,6 +21,11 @@ const PRECACHE = [
   './src/features/today/v7home-view.mjs',
   './src/features/nutrition/nutritiontrend-view.mjs',
   './src/features/exercise/card-view.mjs',
+  './src/features/exercise/media-player.mjs',
+  './src/features/exercise/media-model.mjs',
+  './data/exercise-media.json',
+  './src/features/lab/results-model.mjs',
+  './src/features/lab/results-view.mjs',
   './src/features/exercise/preference-write-queue.mjs',
   './app.js',
   './src/app/router.mjs',

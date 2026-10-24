@@ -227,7 +227,10 @@ test('programme survives reloads and edits are written back to saved state', asy
   assert.match(app, /function renderStoredPlanV10\(\)/);
   assert.match(app, /item\.ex=alt;\s*savePlanV7\(\);\s*renderStoredPlanV10\(\)/);
   assert.match(app, /day\.items\.splice\(itemIndex,1\);\s*savePlanV7\(\);/);
-  assert.match(app, /'plan', 'settings', 'recentSearch', 'recentExercises'/);
+  const backupKeys = app.match(/DATA_KEYS=\[([^\]]+)\]/)[1];
+  for (const key of ['plan', 'settings', 'recentSearch', 'recentExercises', 'labResults']) {
+    assert.ok(backupKeys.includes(`'${key}'`), `${key} must be included in the production backup`);
+  }
 });
 
 test('progress view can switch between weight waist and sleep', async () => {

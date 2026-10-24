@@ -8,6 +8,8 @@
             18 связывание · 14 инициализация
    ========================================================================= */
 import './bootstrap.js';
+import { cleanLabResults } from './src/features/lab/results-model.mjs';
+import { createExerciseMediaPlayer } from './src/features/exercise/media-player.mjs';
 import { createPreferenceWriter } from './src/features/exercise/preference-write-queue.mjs';
 import { workoutAlreadySaved } from './src/features/workout/save-state.mjs';
 import { progressIntelligenceHtmlView } from './src/features/progress/progressintelligence-view.mjs';
@@ -1173,6 +1175,15 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     if (play) play.hidden = playing;
   }
 
+  var exerciseMediaPlayer;
+  function openExerciseVideo(ex) {
+    if (!exerciseMediaPlayer) exerciseMediaPlayer = createExerciseMediaPlayer({
+      frame: $('modal-media'), image: $('modal-img'), text: detailText,
+      onFallback: function () { if (S.activeId) { $('modal-img').src = exMotion(BY_ID[S.activeId]); syncModalMediaPlayback(); } }
+    });
+    exerciseMediaPlayer.open(ex, exStill(ex));
+  }
+
   function toggleModalMediaPlayback() {
     var img = $('modal-img');
     if (!img || !S.activeId) return;
@@ -1265,6 +1276,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     syncModalMediaPlayback();
 
     renderExerciseTechnique(ex);
+    openExerciseVideo(ex);
     renderExerciseCoach(ex);
     renderExerciseDose(ex);
     if (!silent) S.swapReason = '';
@@ -1295,6 +1307,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   }
 
   function closeModal() {
+    if (exerciseMediaPlayer) exerciseMediaPlayer.stop();
     var frame = $('modal-media');
     if (frame) frame.dataset.expanded = 'false';
     if (document.fullscreenElement === frame && document.exitFullscreen) {
@@ -1952,6 +1965,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   K.runSession = 'mmg.runSession.v1';
   K.plan = 'mmg.plan.v1';
   K.settings = 'mmg.settings.v1';
+  K.labResults = 'mmg.labResults.v1';
+  indexedAppStateKeys[K.labResults] = true;
   K.workoutSchema = 'mmg.workoutSchema.v4';
   K.historySchema = 'mmg.historySchema.v2';
   [K.fav,K.workout,K.profile,K.meta,K.equipmentProfileActive,K.kbju,K.tips,K.coach,K.rest,K.recentSearch,K.recentExercises,K.settings,K.calculatorHistory].forEach(function(key){indexedAppStateKeys[key]=true;});
@@ -2906,33 +2921,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     });
   }
 
-  function stopTimer() {
-    clearInterval(restTimer.id);
-    restTimer.id = 0;
-    restTimer.running = false;
-    renderTimer();
-  }
-
-  function startTimer(seconds) {
-    stopTimer();
-    restTimer.left = seconds || S.rest;
-    restTimer.running = true;
-    $('timer').classList.remove('is-done');
-    renderTimer();
-    restTimer.id = setInterval(function () {
-      restTimer.left--;
-      if (restTimer.left <= 0) {
-        restTimer.left = 0;
-        stopTimer();
-        $('timer').classList.add('is-done');
-        showToast(t('timerDone'));
-        return;
-      }
-      renderTimer();
-      if (runOpen()) $('run-rest').textContent = t('run.restLeft', { v: fmtClock(restTimer.left) });
-    }, 1000);
-    track('rest_timer_started', { sec: restTimer.left });
-  }
+  // Deadline-based implementations are assigned before application initialization.
+  var stopTimer, startTimer;
 
   /* Режим выполнения 3.0: один подход, минимум действий, сохранение сессии. */
   var runState = { ex: 0, set: 1, startedAt: 0, saved: false, lastPRs: [], personalRecords: [] };
@@ -4041,38 +4031,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   }
 
   /* ---------- 16.11 УПРАВЛЕНИЕ ДАННЫМИ ----------------------------------- */
-  var DATA_KEYS = ['fav', 'workout', 'lang', 'theme', 'density', 'profile', 'meta', 'history', 'customExercises', 'diary', 'nutritionLog', 'kbju', 'tips', 'coach', 'rest', 'plan', 'settings', 'recentSearch', 'recentExercises'];
-
-  function exportAll() {
-    var payload = { v: 3, kind: 'mmg-backup', at: new Date().toISOString(), data: {} };
-    DATA_KEYS.forEach(function (name) {
-      var raw = store.get(K[name]);
-      if (raw != null) payload.data[name] = raw;
-    });
-    return JSON.stringify(payload, null, 2);
-  }
-
-  function importAll(raw) {
-    var parsed;
-    try { parsed = JSON.parse(raw); } catch (e) { showToast(t('ioBadJson')); return false; }
-    if (!parsed || !parsed.data || typeof parsed.data !== 'object') { showToast(t('ioBadShape')); return false; }
-    var n = 0;
-    DATA_KEYS.forEach(function (name) {
-      if (typeof parsed.data[name] === 'string') { store.set(K[name], parsed.data[name]); n++; }
-    });
-    if (!n) { showToast(t('ioNothing')); return false; }
-    showToast(t('ioRestored', { n: n }));
-    setTimeout(function () { window.location.reload(); }, 900);
-    return true;
-  }
-
-  function clearAll() {
-    if (!window.confirm(t('dataConfirm'))) return;
-    DATA_KEYS.forEach(function (name) { store.remove(K[name]); });
-    ['legacyFav', 'legacyWorkout', 'legacyLang', 'legacyTheme'].forEach(function (name) { store.remove(K[name]); });
-    showToast(t('dataCleared'));
-    setTimeout(function () { window.location.reload(); }, 700);
-  }
+  // Implementations below validate, stage and verify all changes before replacing data.
+  var DATA_KEYS, exportAll, importAll, clearAll;
 
   function toggleIo(id, value) {
     var area = $(id);
@@ -5756,8 +5716,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.10-r73-precision-identity';
-  var BACKUP_SCHEMA = 10;
+  var APP_VERSION = '2026.10-r74-local-lab-media';
+  var BACKUP_SCHEMA = 11;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
   K.rollbackBackup = 'mmg.backup.rollback.v1';
@@ -5898,8 +5858,9 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   migrateEco = function(){ _migrateEcoV5(); restoreRestTimer(); };
 
   /* Production backup format: versioned, staged, validated, previewed, rollback-capable. */
-  DATA_KEYS=['customExercises','equipmentProfiles','equipmentProfileActive','exercisePreferences','calculatorHistory','fav','workout','lang','theme','density','profile','meta','history','diary','nutritionLog','kbju','tips','coach','rest','recentSearch','recentExercises','runSession','plan','settings','schema','workoutSchema','historySchema'];
+  DATA_KEYS=['labResults','customExercises','equipmentProfiles','equipmentProfileActive','exercisePreferences','calculatorHistory','fav','workout','lang','theme','density','profile','meta','history','diary','nutritionLog','kbju','tips','coach','rest','recentSearch','recentExercises','runSession','plan','settings','schema','workoutSchema','historySchema'];
   var BACKUP_LABELS = {
+    labResults:{ru:'лабораторные измерения',en:'laboratory measurements'},
     exercisePreferences:{ru:'предпочтения упражнений',en:'exercise preferences'},calculatorHistory:{ru:'история расчётов',en:'calculator history'},nutritionLog:{ru:'дневник питания',en:'nutrition log'},
     customExercises:{ru:'свои упражнения',en:'custom exercises'},equipmentProfiles:{ru:'профили оборудования',en:'equipment profiles'},equipmentProfileActive:{ru:'активный профиль оборудования',en:'active equipment profile'},fav:{ru:'избранное',en:'favorites'},workout:{ru:'тренировка',en:'workout'},lang:{ru:'язык',en:'language'},theme:{ru:'тема',en:'theme'},density:{ru:'плотность сетки',en:'grid density'},profile:{ru:'профиль',en:'profile'},meta:{ru:'данные тренировки',en:'workout meta'},history:{ru:'история',en:'history'},diary:{ru:'дневник прогресса',en:'progress diary'},kbju:{ru:'питание',en:'nutrition'},tips:{ru:'сохранённые материалы',en:'saved knowledge'},coach:{ru:'режим тренера',en:'coach mode'},rest:{ru:'настройка отдыха',en:'rest timer preset'},recentSearch:{ru:'недавние поиски',en:'recent searches'},recentExercises:{ru:'недавние упражнения',en:'recent exercises'},runSession:{ru:'активная сессия',en:'active session'},plan:{ru:'активная программа',en:'active programme'},settings:{ru:'настройки логирования',en:'logging settings'},schema:{ru:'схема данных',en:'schema'},workoutSchema:{ru:'схема тренировки',en:'workout schema'},historySchema:{ru:'схема истории',en:'history schema'}
   };
@@ -5917,7 +5878,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   }
   exportAll = function(){
     var payload={app:'markov-made-gym',schemaVersion:BACKUP_SCHEMA,createdAt:new Date().toISOString(),v:BACKUP_SCHEMA,kind:'mmg-backup',appVersion:APP_VERSION,exportedAt:new Date().toISOString(),data:{}};
-    DATA_KEYS.forEach(function(name){var raw=name==='history'?JSON.stringify(S.history):(name==='nutritionLog'?JSON.stringify(databaseNutritionDays):(name==='customExercises'?JSON.stringify(databaseCustomExercises):(name==='equipmentProfiles'?JSON.stringify(databaseEquipmentProfiles):store.get(K[name]))));if(raw!=null)payload.data[name]=raw;});
+    DATA_KEYS.forEach(function(name){var raw=name==='labResults'?(store.get(K.labResults)||'[]'):name==='history'?JSON.stringify(S.history):(name==='nutritionLog'?JSON.stringify(databaseNutritionDays):(name==='customExercises'?JSON.stringify(databaseCustomExercises):(name==='equipmentProfiles'?JSON.stringify(databaseEquipmentProfiles):store.get(K[name]))));if(raw!=null)payload.data[name]=raw;});
     return JSON.stringify(payload,null,2);
   };
   function analyzeBackup(raw){
@@ -6179,7 +6140,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   var V7_ROUTE_IDS={};
   var v7ProgramStartTracked=false;
 
-  function v7c(key){return t('v7.'+key);}
+  function v7c(key){if(key==='labs')return S.lang==='en'?'Lab results':'Анализы';return t('v7.'+key);}
   function v7RouteFromHash(){return normalizeRouteHash?normalizeRouteHash(location.hash):'home';}
   function v7Returning(){return !!(profileComplete()||S.workout.length||S.history.length||S.diary.length||databaseNutritionDays.length||S.plan||S.kbjuLast||S.favorites.length);}
   function v7CurrentWeekKey(){var d=new Date(),day=(d.getDay()+6)%7;d.setHours(12,0,0,0);d.setDate(d.getDate()-day);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -6273,6 +6234,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var host=$('v7-more-grid');if(!host)return;$('v7-more-title').textContent=v7c('more');$('v7-more-sub').textContent=v7c('moreSub');
     var groups=[
       [S.lang==='en'?'TOOLS':'ИНСТРУМЕНТЫ',[
+        ['labs','tools',S.lang==='en'?'Measurements, intervals and history.':'Измерения, интервалы и история.'],
         ['program','program',S.lang==='en'?'Build and start the next training day.':'Собери неделю и начни следующий тренировочный день.'],
         ['nutrition','nutrition',S.lang==='en'?'Calorie target, macros and trend context.':'Калории, макросы и связь с динамикой.']]],
       [S.lang==='en'?'LEARN':'ЗНАНИЯ',[
@@ -6299,9 +6261,9 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var swVersion=host.querySelector('[data-diagnostic-sw-version]');
     if(swVersion&&window.caches)window.caches.keys().then(function(keys){var prefix='mmg-gym-shell-',found=keys.filter(function(key){return key.indexOf(prefix)===0;}).sort().pop();if(document.contains(swVersion))swVersion.textContent=found?found.slice(prefix.length):(S.lang==='en'?'Active; cache version unavailable':'Активен; версия кэша недоступна');}).catch(function(){if(document.contains(swVersion))swVersion.textContent=S.lang==='en'?'Cache Storage unavailable':'Cache Storage недоступен';});
   }
-  function renderV7Nav(){qsa('[data-v7-nav]').forEach(function(el){el.textContent=v7c(el.dataset.v7Nav);});var moreSub={tools:S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные',program:S.lang==='en'?'Weekly structure and the next workout':'Структура недели и следующая тренировка',nutrition:S.lang==='en'?'Calories, macros and feedback':'Калории, макросы и обратная связь',knowledge:S.lang==='en'?'Practical contextual guides':'Практические разборы по контексту',method:S.lang==='en'?'Decision framework':'Логика принятия решений',settings:S.lang==='en'?'Interface, logging and data':'Интерфейс, логирование и данные',about:S.lang==='en'?'Author and system boundaries':'Автор и границы системы'};qsa('[data-v7-more]').forEach(function(el){el.textContent=v7c(el.dataset.v7More);});qsa('[data-v7-more-sub]').forEach(function(el){el.textContent=moreSub[el.dataset.v7MoreSub]||'';});var mt=qs('[data-v7-mobile-title]');if(mt)mt.textContent=v7c('moreTitle');}
+  function renderV7Nav(){qsa('[data-labs-nav]').forEach(function(el){el.textContent=v7c('labs');});qsa('[data-v7-nav]').forEach(function(el){el.textContent=v7c(el.dataset.v7Nav);});var moreSub={tools:S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные',program:S.lang==='en'?'Weekly structure and the next workout':'Структура недели и следующая тренировка',nutrition:S.lang==='en'?'Calories, macros and feedback':'Калории, макросы и обратная связь',knowledge:S.lang==='en'?'Practical contextual guides':'Практические разборы по контексту',method:S.lang==='en'?'Decision framework':'Логика принятия решений',settings:S.lang==='en'?'Interface, logging and data':'Интерфейс, логирование и данные',about:S.lang==='en'?'Author and system boundaries':'Автор и границы системы'};qsa('[data-v7-more]').forEach(function(el){el.textContent=v7c(el.dataset.v7More);});qsa('[data-v7-more-sub]').forEach(function(el){el.textContent=moreSub[el.dataset.v7MoreSub]||'';});var mt=qs('[data-v7-mobile-title]');if(mt)mt.textContent=v7c('moreTitle');}
   function v7FocusRoute(route){var el=$('v8-context-title')||$(route+'-title');if(el){el.setAttribute('tabindex','-1');requestAnimationFrame(function(){el.focus({preventScroll:true});window.scrollTo(0,0);});}else window.scrollTo(0,0);}
-  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);qsa('.v7-primary-nav>.v7-nav-link').forEach(function(a){var on=a.getAttribute('href')==='#'+route;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
+  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(route==='labs')renderLabs();if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);qsa('.v7-primary-nav>.v7-nav-link').forEach(function(a){var on=a.getAttribute('href')==='#'+route;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
   function navigateV7(route,focus){route=routeIsKnown&&routeIsKnown(route)?route:'home';if(location.hash!=='#'+route)location.hash=route;else{applyV7Route(focus!==false);}}
   function syncV7Floating(){var route=v7RouteFromHash(),bar=$('mfb');if(bar){var show=MOBILE_MQ.matches&&route==='library';bar.setAttribute('data-open',String(show));}var sticky=$('mobile-rest-timer');if(sticky)sticky.classList.toggle('is-raised',!!(bar&&bar.getAttribute('data-open')==='true'));}
   function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
@@ -6324,6 +6286,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     en:{home:['CONTROLLED PERFORMANCE','Next decision'],library:['MOVEMENT DATABASE','1,324 exercises'],workout:['TRAINING LOG','Current session'],progress:['FEEDBACK LOOP','Trend and decision'],more:['SYSTEM','Tools and settings'],tools:['MARKOV MADE LAB','Strength · nutrition · body · cardio · my data'],program:['PROGRAMME','Weekly structure'],nutrition:['NUTRITION','Target and trend'],knowledge:['KNOWLEDGE','Practical guides'],method:['METHOD','System logic'],settings:['SYSTEM','Local settings'],about:['MARKOV MADE','Author and boundaries'],how:['GUIDE','How to use'],faq:['HELP','Common questions'],contact:['COACHING','Personal adaptation']}
   };
   function v8RouteMeta(route){
+    if(route==='labs')return{k:'HEALTH JOURNAL',t:S.lang==='en'?'Lab results':'Анализы',m:S.lang==='en'?'Local measurements':'Локальные измерения'};
     var pack=V8_ROUTE_META[S.lang==='en'?'en':'ru'],base=pack[route]||['MARKOV MADE',v7c(route)||route],meta=base[1];
     if(route==='home'){var n=v7NextAction(),w=S.workout||[],ss=w.reduce(function(a,x){return a+(Number(x.sets)||0);},0);meta=S.plan?(S.lang==='en'?'Programme active':'Программа активна'):(w.length?(S.lang==='en'?'Session prepared':'Тренировка собрана'):(S.lang==='en'?'No session yet':'Тренировка не собрана'));}
     else if(route==='library'){var nres=S.lastFiltered&&S.lastFiltered.length!=null?S.lastFiltered.length:EX.length;meta=nres+' / '+EX.length+' '+(S.lang==='en'?'movements':'движений');}
@@ -6351,6 +6314,12 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     }
     host.innerHTML=html;
     host.hidden=!html;
+  }
+  async function renderLabs(){
+    var host=$('labs'); if(!host||host.dataset.labLang===S.lang)return;host.dataset.labLang=S.lang;
+    qsa('[data-labs-nav]').forEach(function(el){el.textContent=S.lang==='en'?'Lab results':'Анализы';});
+    var module=await import('./src/features/lab/results-view.mjs');
+    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:function(rows){return store.set(K.labResults,JSON.stringify(rows));},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays});
   }
   function renderV8Shell(route,animate){
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';

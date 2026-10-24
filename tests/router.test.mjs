@@ -4,7 +4,7 @@ import { isKnownRoute, normalizeRouteHash, ROUTE_VIEWS, subscribeToHashChanges }
 
 test('route registry exposes one view mapping for every supported route', () => {
   assert.ok(Object.isFrozen(ROUTE_VIEWS));
-  assert.equal(Object.keys(ROUTE_VIEWS).length, 15);
+  assert.equal(Object.keys(ROUTE_VIEWS).length, 16);
   for (const [route, views] of Object.entries(ROUTE_VIEWS)) {
     assert.equal(isKnownRoute(route), true);
     assert.ok(Object.isFrozen(views));

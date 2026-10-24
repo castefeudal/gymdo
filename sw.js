@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r73-precision-identity';
+const VERSION = '2026.10-r74-local-lab-media';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -6,16 +6,18 @@ const PRECACHE = [
   './assets/runtime/application.js',
   './assets/runtime/calculator-history-EXXTNB5I.js',
   './assets/runtime/chunk-2QAHXVO4.js',
-  './assets/runtime/chunk-I7MLTS4M.js',
+  './assets/runtime/chunk-5MTFQ47D.js',
+  './assets/runtime/chunk-CJGL2TUZ.js',
   './assets/runtime/decision-engine-PXY5OBCC.js',
   './assets/runtime/history-repository-XZLWYEQW.js',
   './assets/runtime/i18n-VB76NCGC.js',
-  './assets/runtime/load-modules-N3YZOI6K.js',
+  './assets/runtime/load-modules-3ZQU3B2Z.js',
   './assets/runtime/mesocycle-ETCYIBMK.js',
   './assets/runtime/nutrition-analytics-OBDU5YCR.js',
   './assets/runtime/pr-engine-EHEKVMRG.js',
   './assets/runtime/progression-VLKS4LDK.js',
-  './assets/runtime/router-CJ5HZ4YF.js',
+  './assets/runtime/results-view-NREVMFMQ.js',
+  './assets/runtime/router-GQ7X5DUD.js',
   './assets/runtime/substitution-engine-CEQUMOF4.js',
   './assets/runtime/weekly-review-4RBJ5OET.js',
   './assets/runtime/weight-trend-UMPM5GLM.js',
@@ -37,6 +39,11 @@ const PRECACHE = [
   './src/features/today/v7home-view.mjs',
   './src/features/nutrition/nutritiontrend-view.mjs',
   './src/features/exercise/card-view.mjs',
+  './src/features/exercise/media-player.mjs',
+  './src/features/exercise/media-model.mjs',
+  './data/exercise-media.json',
+  './src/features/lab/results-model.mjs',
+  './src/features/lab/results-view.mjs',
   './src/features/exercise/preference-write-queue.mjs',
   './app.js',
   './src/app/router.mjs',

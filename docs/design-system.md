@@ -24,7 +24,7 @@ Exercise media uses contain sizing. Technique separates steps, cues, mistakes, b
 
 ## Verification
 
-Visual comparison covers 360×800, 390×844, 430×932, 768×1024, 1440×900 and 1920×1080 in all themes. Baselines cover eight main routes plus exercise detail, Run Mode, filters, command palette, empty/offline and loading/error states. Screenshots disable animation only during capture; production exercise animation remains available.
+Visual comparison covers 360×800, 390×844, 430×932, 768×1024, 1440×900 and 1920×1080 in all themes. Baselines cover nine main routes plus exercise detail, Run Mode, filters, command palette, empty/offline and loading/error states. Screenshots disable animation only during capture; production exercise animation remains available.
 
 Axe checks serious/critical violations. E2E checks keyboard focus containment/return, overflow and persistence. Respect prefers-reduced-motion; motion must never carry essential information.
 

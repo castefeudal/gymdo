@@ -1,6 +1,13 @@
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises';
 import { resolve, relative, sep } from 'node:path';
+import { CORE_TRANSLATIONS, LEGACY_ENGLISH } from '../src/app/catalog.mjs';
+
+// Audited retired markup keys. Keep source compatibility, omit them only when
+// neither the generated view nor the application uses them anymore.
+const retiredKeys = new Set('nav.muscles mnav.muscles mnav.library mnav.workout mnav.nutrition mnav.program mnav.faq mnav.contact hero.panelEyebrow hero.panelTitle hero.panelText mfb.found lead.goalPh lead.context lead.contextPh lead.contextHint lead.copy modal.steps musnav.frontAria musnav.backAria nav.gTools nav.gMethod nav.gAuthor nav.libraryS nav.workoutS nav.nutritionS nav.programS nav.progressS nav.methodS nav.knowledgeS nav.howS nav.aboutS nav.contactS nav.faqS mnav.progress mnav.method mnav.knowledge mnav.about console.disclaimer console.hint onb.eyebrow onb.title onb.text onb.skip onb.back modal.dose modal.swapT'.split(' '));
+const activeCopy = await readFile(new URL('../ui.html', import.meta.url), 'utf8') + await readFile(new URL('../app.js', import.meta.url), 'utf8');
+const productionEnglish = Object.fromEntries(Object.entries(LEGACY_ENGLISH).filter(([key]) => !Object.hasOwn(CORE_TRANSLATIONS, key) && (!retiredKeys.has(key) || activeCopy.includes(key))));
 
 const directory = resolve('assets/runtime');
 await mkdir(directory, { recursive: true });
@@ -14,7 +21,14 @@ const result = await build({
   entryPoints: { application: 'app.js' }, outdir: directory,
   bundle: true, splitting: true, format: 'esm', target: 'es2022',
   minify: true, metafile: true, legalComments: 'eof', charset: 'utf8',
-  plugins: [{ name: 'shared-bootstrap', setup(build) {
+  plugins: [{ name: 'resolved-catalog', setup(build) {
+    // Resolve historical Object.assign overrides once during build. Runtime
+    // receives exactly the same final entries without shipping superseded copy.
+    build.onLoad({ filter: /[\\/]src[\\/]app[\\/]catalog\.mjs$/ }, () => ({
+      contents: `export const CORE_TRANSLATIONS=Object.freeze(${JSON.stringify(CORE_TRANSLATIONS)});export const LEGACY_ENGLISH=Object.freeze(${JSON.stringify(productionEnglish)});`,
+      loader: 'js',
+    }));
+  } }, { name: 'shared-bootstrap', setup(build) {
     // Entry registers bootstrap first. Keep its ES module singleton, including
     // the service worker listeners, outside the application bundle.
     build.onResolve({ filter: /^\.\/bootstrap\.js$/ }, () => ({ path: '../../bootstrap.js', external: true }));

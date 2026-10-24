@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-const BUILD_VERSION = '2026.10-r73-precision-identity';
+const BUILD_VERSION = '2026.10-r74-local-lab-media';
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',

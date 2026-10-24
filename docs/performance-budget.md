@@ -30,3 +30,7 @@ offline reload and previously unvisited routes. Initial route hydration keeps th
 main content transparent and inert until app readiness, with `aria-busy`, while retaining measurable geometry;
 the boot and error surfaces remain available. The first library poster is eager
 and high priority; subsequent posters remain lazy.
+
+For an installed shell, network-first requests use a three-second cache fallback
+deadline. A fetch that stays pending must not prevent offline startup indefinitely.
+Cache write failures do not discard valid network navigation responses.

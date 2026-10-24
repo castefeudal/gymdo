@@ -28,7 +28,7 @@ is claimed.
 
 ## Evidence
 
-- `npm run quality`: build, syntax, budgets and 172 unit tests pass.
+- `npm run quality`: build, syntax, budgets and 175 unit tests pass.
 - Initial local full behavior run: 200 pass, 3 existing skips, one WebKit test
   preparation race. Its corrected boot/persistence synchronization passes on retry.
 - Twelve local new-feature checks passed across Chromium desktop/mobile, Firefox
@@ -43,6 +43,9 @@ is claimed.
   protocol emulation encountered an internal browser error during local verification.
   The real-origin connection-loss scenario subsequently passed locally in all
   four browser configurations, including WebKit, with an uncached failure probe.
+  Network requests that remain pending fall back to the installed shell after
+  three seconds; direct worker tests cover pending/rejected fetches and cache
+  write failure without discarding a valid online response.
 
 ## Published-site Lighthouse baseline
 

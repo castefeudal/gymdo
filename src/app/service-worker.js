@@ -43,21 +43,33 @@ async function trimMedia(cache) {
   while (keys.length > MEDIA_LIMIT) await cache.delete(keys.shift());
 }
 
-async function networkFirstNavigation(request) {
-  if (self.navigator.onLine === false) {
-    const cached = await caches.match('./index.html');
-    if (cached) return cached;
-  }
+async function shellResponse(request, key = request) {
+  let cached;
+  try { cached = await caches.match(key, { ignoreSearch: true }); } catch {}
+  if (cached && self.navigator.onLine === false) return { response: cached, fromCache: true };
+  let timer;
   try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) {
-      const cache = await caches.open(SHELL);
-      await cache.put('./index.html', response.clone());
-    }
-    return response;
+    const network = fetch(request, { cache: 'no-store' });
+    // An unreachable origin may leave fetch pending rather than rejecting.
+    // A previously installed shell must remain usable in that condition.
+    const response = cached ? await Promise.race([
+      network,
+      new Promise(resolve => { timer = setTimeout(() => resolve(cached), 3000); }),
+    ]) : await network;
+    return { response, fromCache: response === cached };
   } catch {
-    return caches.match('./index.html');
+    return { response: cached || Response.error(), fromCache: true };
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+async function networkFirstNavigation(request) {
+  const { response, fromCache } = await shellResponse(request, './index.html');
+  if (!fromCache && response.ok) {
+    try { const cache = await caches.open(SHELL); await cache.put('./index.html', response.clone()); } catch {}
+  }
+  return response;
 }
 
 self.addEventListener('fetch', (event) => {
@@ -102,13 +114,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (PRECACHE.some((path) => url.pathname.endsWith(path.replace('./', '/')))) {
-    event.respondWith((async () => {
-      try {
-        return await fetch(request, { cache: 'no-store' });
-      } catch {
-        return caches.match(request, { ignoreSearch: true });
-      }
-    })());
+    event.respondWith(shellResponse(request).then(result => result.response));
   }
 });
 

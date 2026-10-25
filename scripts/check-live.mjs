@@ -56,7 +56,14 @@ for(const [name,engine,width] of configurations){
     await expect(page.locator('html')).toHaveAttribute('data-route-ready','library');
     await expect(page.locator('#grid .card').first()).toBeVisible();
     await page.locator('#search').fill('0025');
-    await page.locator('#grid [data-open="0025"]').click();
+    try { await page.locator('#grid [data-open="0025"]').click(); }
+    catch(error){
+     await mkdir('artifacts/live-r75-failure',{recursive:true});
+     const state=await page.evaluate(()=>({url:location.href,route:document.documentElement.dataset.routeReady,query:document.querySelector('#search')?.value,count:document.querySelector('#results-count')?.textContent,active:document.activeElement?.id}));
+     await page.screenshot({path:'artifacts/live-r75-failure/search.png'});
+     await writeFile('artifacts/live-r75-failure/search.json',JSON.stringify({name,theme,lang,state,error:String(error)},null,2));
+     throw error;
+    }
     await expect(page.locator('#modal-scroll')).toBeVisible();
     await expect(page.locator('#modal')).toHaveAttribute('aria-busy','false');
     await page.locator('#modal-close').click();

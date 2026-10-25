@@ -4175,6 +4175,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
 
   /* Плавающие элементы: FAB на desktop, панель действий на mobile. */
   function syncFloating() {
+    if(document.body.dataset.v7Ready==='true'){syncV7Floating();return;}
     var past = window.pageYOffset > 700;
     var fab = $('fab');
     if (fab) fab.setAttribute('data-open', String(past && !MOBILE_MQ.matches));

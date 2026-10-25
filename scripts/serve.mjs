@@ -6,6 +6,18 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)));
 const port = Number(process.env.PORT || 4173);
+// Reuse unchanged public bytes during parallel browser QA. Browser requests still
+// use no-store; file changes and the connection-loss fixture remain observable.
+const fileCache=new Map();let fileCacheBytes=0;
+function publicBytes(file,info){
+  if(!/\.(?:html|css|js|mjs|json|woff2|svg)$/.test(file)||info.size>3*1024*1024)return null;
+  const signature=info.mtimeMs+':'+info.size,hit=fileCache.get(file);
+  if(hit?.signature===signature)return hit;
+  if(hit){fileCacheBytes-=hit.body.length;fileCache.delete(file);}
+  const body=readFileSync(file),entry={signature,body,gzip:null};
+  while(fileCacheBytes+body.length>8*1024*1024&&fileCache.size){const key=fileCache.keys().next().value;fileCacheBytes-=fileCache.get(key).body.length;fileCache.delete(key);}
+  fileCache.set(file,entry);fileCacheBytes+=body.length;return entry;
+}
 const contentTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.gif', 'image/gif'],
@@ -66,9 +78,10 @@ createServer((request, response) => {
     response.writeHead(404).end('Not found');
     return;
   }
+  const cached=publicBytes(file,info);
   // Optional production-like compression for local Lighthouse, not an audit bypass.
   if(process.env.MMG_COMPRESS==='1' && /\.(?:css|js|mjs|html|json)$/.test(file) && /gzip/.test(request.headers['accept-encoding']||'')){
-    const body=gzipSync(readFileSync(file));
+    const body=cached?(cached.gzip||=gzipSync(cached.body)):gzipSync(readFileSync(file));
     response.writeHead(200,{'Content-Type':contentTypes.get(extname(file))||'application/octet-stream','Content-Encoding':'gzip','Content-Length':body.length,'Cache-Control':'no-store','Vary':'Accept-Encoding'});
     response.end(request.method==='HEAD'?undefined:body);return;
   }
@@ -80,6 +93,7 @@ createServer((request, response) => {
     'X-Content-Type-Options': 'nosniff',
   });
   if (request.method === 'HEAD') response.end();
+  else if(cached)response.end(cached.body);
   else createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
   process.stdout.write(`Static test server listening at http://127.0.0.1:${port}\n`);

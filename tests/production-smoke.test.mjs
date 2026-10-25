@@ -40,7 +40,7 @@ test('exercise GIF media uses a fresh revision and cache write failures stay non
   const sw = await read('sw.js');
   assert.match(app, /MEDIA_REVISION = '20260927-media4'/);
   assert.match(app, /\.gif\?v=' \+ MEDIA_REVISION/);
-  assert.match(sw, /const VERSION = '2026\.\d{2}-r\d+-[a-z0-9-]+'/);
+  assert.match(sw, /const VERSION = '2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+'/);
   assert.match(sw, /Cache Storage is an optimisation only/);
   assert.match(sw, /ignoreSearch: true/);
 });
@@ -99,8 +99,8 @@ test('exercise detail view keeps full-frame media and structured guidance', asyn
 
 test('detail assets use a cache-busting revision', async () => {
   const index = (await read('index.html')) + (await read('ui.html'));
-  assert.match(index, /app\.css\?v=2026\.\d{2}-r\d+-[a-z0-9-]+/);
-  assert.match(index, /entry\.mjs\?v=2026\.\d{2}-r\d+-[a-z0-9-]+/);
+  assert.match(index, /app\.css\?v=2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
+  assert.match(index, /entry\.mjs\?v=2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
 });
 
 test('detail media box itself stays inside the visual frame and step counter increments once', async () => {
@@ -261,7 +261,7 @@ test('first paint restores readability preference before flagship stylesheet', a
   const hydration = index.search(/localStorage\.getItem\(['"]mmg\.settings\.v1['"]\)/);
   const stylesheet = index.indexOf('app.css?v=');
   assert.ok(hydration >= 0 && stylesheet > hydration, 'reading preference must hydrate before stylesheet paint');
-  assert.match(index, /data-app-version=["']?2026\.\d{2}-r\d+-[a-z0-9-]+/);
+  assert.match(index, /data-app-version=["']?2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
 });
 
 
@@ -284,6 +284,6 @@ test('in-library quick scenarios reuse preset state and session balance flags du
   const block = await read('styles/source/library.css');
   assert.match(block, /\.v10-library-quick\s*\{/);
   assert.match(block, /\.v10-library-quick-btn\[aria-pressed="true"\]/);
-  assert.match(index, /app\.css\?v=2026\.\d{2}-r\d+-[a-z0-9-]+/);
-  assert.match(index, /entry\.mjs\?v=2026\.\d{2}-r\d+-[a-z0-9-]+/);
+  assert.match(index, /app\.css\?v=2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
+  assert.match(index, /entry\.mjs\?v=2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
 });

@@ -34,10 +34,10 @@
 <link rel=apple-touch-icon href=./assets/brand/apple-touch-icon-180.png sizes=180x180>
 <link rel=manifest href=./manifest.webmanifest>
 <script>(function(){try{var e=localStorage.getItem("mmg.theme.v2")||localStorage.getItem("mmg_theme_v7");["obsidian","soft","ivory"].indexOf(e)!==-1&&(document.documentElement.setAttribute("data-theme",e),document.documentElement.style.colorScheme=e==="obsidian"?"dark":"light");var t=JSON.parse(localStorage.getItem("mmg.settings.v1")||"{}");t&&["balanced","comfortable","large"].indexOf(t.reading)!==-1&&document.documentElement.setAttribute("data-reading",t.reading)}catch{}})();</script>
-<link rel=stylesheet href="./app.css?v=2026.10-r75-premium-fitness">
+<link rel=stylesheet href="./app.css?v=2026.10-r75.1-gif-and-nav-polish">
 <link rel=preload href=./assets/fonts/inter-latin.woff2 as=font type=font/woff2 crossorigin>
 <link rel=preload href=./assets/fonts/inter-cyrillic.woff2 as=font type=font/woff2 crossorigin>
-<link rel=modulepreload href="./src/app/entry.mjs?v=2026.10-r75-premium-fitness">
+<link rel=modulepreload href="./src/app/entry.mjs?v=2026.10-r75.1-gif-and-nav-polish">
 <link rel=modulepreload href=./bootstrap.js>
 <link rel=modulepreload href=./src/app/router.mjs>
 <link rel=modulepreload href=./assets/runtime/application.js>
@@ -53,7 +53,7 @@
 <style>:root{--mmg-boot-bg:#080c11;--mmg-boot-text:#f4f7f5;--mmg-boot-muted:#93a1ad;--mmg-boot-line:rgba(226,238,232,.12);--mmg-boot-accent:#bef47d;color-scheme:dark}html[data-theme=soft]{--mmg-boot-bg:#eef1f3;--mmg-boot-text:#101820;--mmg-boot-muted:#5a6772;--mmg-boot-line:rgba(16,32,44,.14);--mmg-boot-accent:#3f7a18;color-scheme:light}html[data-theme=ivory]{--mmg-boot-bg:#f4f2ec;--mmg-boot-text:#171a12;--mmg-boot-muted:#5f6558;--mmg-boot-line:rgba(34,30,20,.13);--mmg-boot-accent:#4c6a1e;color-scheme:light}html,body{min-height:100%}body{margin:0;background:var(--mmg-boot-bg)}#mmg-boot{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:var(--mmg-boot-bg);color:var(--mmg-boot-text);transition:opacity .18s ease,transform .18s ease,visibility .18s}#mmg-boot[data-hidden=true]{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-4px)}.mmg-boot-card{width:min(100%,420px)}.mmg-boot-mark{display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:center}.mmg-boot-mark svg{width:42px;height:42px}.mmg-boot-brand{font:750 12px/1.25 system-ui,sans-serif;letter-spacing:.11em}.mmg-boot-brand span{display:block;margin-top:3px;color:var(--mmg-boot-muted);font-size:12px;letter-spacing:.2em}.mmg-boot-rail{position:relative;height:2px;margin:32px 0 14px;overflow:hidden;background:var(--mmg-boot-line)}.mmg-boot-rail:after{content:"";position:absolute;inset:0 auto 0 -35%;width:35%;background:var(--mmg-boot-accent);animation:mmg-boot-measure 1.15s ease-in-out infinite}.mmg-boot-status{margin:0;color:var(--mmg-boot-muted);font:520 13px/1.5 system-ui,sans-serif}.mmg-boot-error{display:none;margin-top:20px;padding:14px;border:1px solid rgba(240,102,107,.42);color:var(--mmg-boot-text);font:500 13px/1.5 system-ui,sans-serif}#mmg-boot[data-error=true] .mmg-boot-error{display:block}#mmg-boot[data-error=true] .mmg-boot-rail{display:none}.mmg-boot-error button,.mmg-boot-error a{min-height:40px;margin:12px 8px 0 0;padding:0 13px;border:1px solid var(--mmg-boot-line);background:transparent;color:inherit;font:inherit;text-decoration:none;cursor:pointer}.mmg-boot-error button{border-color:var(--mmg-boot-accent);color:var(--mmg-boot-accent)}@keyframes mmg-boot-measure{0%{transform:translate(0)}to{transform:translate(390%)}}@media(prefers-reduced-motion:reduce){#mmg-boot{transition:none}.mmg-boot-rail:after{animation:none;left:32%;width:36%}}</style>
 <script type=application/ld+json>{"@context":"https://schema.org","@type":"SoftwareApplication","name":"MARKOV MADE GYM","applicationCategory":"HealthApplication","operatingSystem":"Web","isAccessibleForFree":true,"inLanguage":["ru","en"],"description":"Local-first система тренировок, прогрессии, питания, состава тела и прозрачных fitness-расчётов.","featureList":["Библиотека упражнений","Конструктор тренировки","Run Mode и таймер отдыха","Прогресс","Питание","MARKOV MADE LAB"]}</script>
 </head>
-<body data-app-version=2026.10-r75-premium-fitness>
+<body data-app-version=2026.10-r75.1-gif-and-nav-polish>
 <div id=mmg-boot role=status aria-live=polite aria-label="Загрузка MARKOV MADE GYM">
 <div class=mmg-boot-card>
 <div class=mmg-boot-mark><svg viewBox="0 0 64 64" aria-hidden=true><path d="M14 50V14h7.2L32 34.6V45L20.6 28.4V50Z" fill=currentColor/><path d="M50 50V14h-7.2L32 34.6V45l11.4-16.6V50Z" fill="var(--mmg-boot-accent)"/></svg><div class=mmg-boot-brand>MARKOV MADE<span>GYM</span></div></div>
@@ -69,6 +69,6 @@
 </div>
 <div id=app-root></div>
 <noscript><p style="color:var(--mmg-boot-text);padding:24px">Для MARKOV MADE GYM нужен JavaScript. Enable JavaScript to use MARKOV MADE GYM.</p><a href=./legacy-base.html>Резервный экран / Backup screen</a></noscript>
-<script type=module src="./src/app/entry.mjs?v=2026.10-r75-premium-fitness"></script>
+<script type=module src="./src/app/entry.mjs?v=2026.10-r75.1-gif-and-nav-polish"></script>
 </body>
 </html>

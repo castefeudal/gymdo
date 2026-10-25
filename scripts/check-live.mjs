@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 
 const base=process.env.MMG_LIVE_URL||'https://castefeudal.github.io/gymdo/';
 const expected=process.env.MMG_LIVE_COMMIT;
-const version='2026.10-r75-premium-fitness';
+const version='2026.10-r75.1-gif-and-nav-polish';
 const release=await (await fetch(new URL('release.json?verify='+Date.now(),base),{cache:'no-store'})).json();
 if(expected&&release.commit!==expected)throw Error(`Release mismatch: ${release.commit} != ${expected}`);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -88,6 +88,6 @@ for(const [name,engine,width] of configurations){
   }
  }finally{await browser.close();}
 }
-await mkdir('artifacts/live-r75',{recursive:true});
-await writeFile('artifacts/live-r75/results.json',JSON.stringify({base,release,version,artifactMatches:paths.length,checks:results.length,results},null,2)+'\n');
+await mkdir('artifacts/live-r75-1',{recursive:true});
+await writeFile('artifacts/live-r75-1/results.json',JSON.stringify({base,release,version,artifactMatches:paths.length,checks:results.length,results},null,2)+'\n');
 console.log(`Live proof passed: ${results.length} route/theme/language/viewport combinations, real OCR and installed offline boot.`);

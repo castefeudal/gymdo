@@ -17,7 +17,7 @@ test('canonical shell does not use payload bootstrap or document.write', async (
 
 test('bootstrap subscribes before the app can emit ready', async () => {
   const index = (await read('index.html')) + (await read('ui.html'));
-  const app = index.indexOf('<script type="module" src="./src/app/entry.mjs');
+  const app = index.search(/<script type=["']?module["']? src=["']?\.\/src\/app\/entry\.mjs/);
   const appSource = await read('app.js');
   assert.ok(app >= 0, 'entry must be loaded as a JavaScript module');
   const entry = await read('src/app/entry.mjs');
@@ -118,7 +118,7 @@ test('one semantic palette owns the three themes', async () => {
 test('saved theme is hydrated before stylesheet and runtime keeps theme metadata in sync', async () => {
   const index = (await read('index.html')) + (await read('ui.html'));
   const app = (await read('app.js')) + (await read('src/features/workout/run-view.mjs')) + (await read('src/features/exercise/card-view.mjs'));
-  const hydrate = index.indexOf("localStorage.getItem('mmg.theme.v2')");
+  const hydrate = index.search(/localStorage\.getItem\(['"]mmg\.theme\.v2['"]\)/);
   const stylesheet = index.indexOf('app.css?v=');
   assert.ok(hydrate >= 0 && stylesheet > hydrate, 'saved theme must resolve before stylesheet paint');
   assert.match(app, /document\.documentElement\.style\.colorScheme = S\.theme === 'obsidian' \? 'dark' : 'light'/);
@@ -172,11 +172,11 @@ test('legacy production artifacts are classified and Pages ships only the active
 test('generated shell uses a single compiled feature stylesheet and matching versions', async () => {
   const index = await read('index.html');
   const build = await read('scripts/build-index.mjs');
-  assert.equal((index.match(/rel="stylesheet"/g) || []).length, 1);
+  assert.equal((index.match(/rel=["']?stylesheet["']?(?=[\s>])/g) || []).length, 1);
   assert.match(index, /app\.css/);
   assert.match(index, /ui\.html/);
   const version = build.match(/const BUILD_VERSION = '([^']+)'/)?.[1];
-  assert.ok(index.includes(`data-app-version="${version}"`));
+  assert.equal(index.match(/data-app-version=["']?([^\s"'>]+)/)?.[1],version);
   assert.ok((await read('app.js')).includes(`APP_VERSION = '${version}'`));
   assert.ok((await read('sw.js')).includes(`const VERSION = '${version}'`));
   assert.doesNotMatch(await read('ui.html'), /class="v8-rail"/);
@@ -255,10 +255,10 @@ test('progress view can switch between weight waist and sleep', async () => {
 
 test('first paint restores readability preference before flagship stylesheet', async () => {
   const index = (await read('index.html')) + (await read('ui.html'));
-  const hydration = index.indexOf("localStorage.getItem('mmg.settings.v1')");
+  const hydration = index.search(/localStorage\.getItem\(['"]mmg\.settings\.v1['"]\)/);
   const stylesheet = index.indexOf('app.css?v=');
   assert.ok(hydration >= 0 && stylesheet > hydration, 'reading preference must hydrate before stylesheet paint');
-  assert.match(index, /data-app-version="2026\.\d{2}-r\d+-[a-z0-9-]+"/);
+  assert.match(index, /data-app-version=["']?2026\.\d{2}-r\d+-[a-z0-9-]+/);
 });
 
 

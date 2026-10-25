@@ -40,7 +40,14 @@ const files = Object.keys(result.metafile.outputs).map(file => `./${relative(pro
 const initial = new Set();
 function visit(file){if(initial.has(file))return;initial.add(file);for(const dep of result.metafile.outputs[file]?.imports||[])if(!dep.external&&dep.kind!=='dynamic-import')visit(dep.path);}
 visit('assets/runtime/application.js');
-await writeFile('assets/runtime-metrics.json',JSON.stringify({initialFiles:[...initial].sort(),initialBytes:[...initial].reduce((sum,file)=>sum+(result.metafile.outputs[file]?.bytes||0),0),totalBytes:Object.values(result.metafile.outputs).reduce((sum,file)=>sum+file.bytes,0)},null,2)+'\n');
+// These domain modules are awaited during init, despite using dynamic imports.
+// Discover their built graph so the document can avoid a late loader waterfall.
+const boot = new Set(initial);
+function visitBoot(file){if(boot.has(file))return;boot.add(file);for(const dep of result.metafile.outputs[file]?.imports||[])if(!dep.external)visitBoot(dep.path);}
+const bootLoader=Object.entries(result.metafile.outputs).find(([,output])=>output.entryPoint==='src/app/load-modules.mjs')?.[0];
+if(!bootLoader)throw new Error('Boot module graph missing');
+visitBoot(bootLoader);
+await writeFile('assets/runtime-metrics.json',JSON.stringify({initialFiles:[...initial].sort(),initialBytes:[...initial].reduce((sum,file)=>sum+(result.metafile.outputs[file]?.bytes||0),0),bootFiles:[...boot].sort(),bootBytes:[...boot].reduce((sum,file)=>sum+(result.metafile.outputs[file]?.bytes||0),0),totalBytes:Object.values(result.metafile.outputs).reduce((sum,file)=>sum+file.bytes,0)},null,2)+'\n');
 const template = await readFile(new URL('../src/app/service-worker.js', import.meta.url), 'utf8');
 await writeFile(new URL('../sw.js', import.meta.url), template.replace('// GENERATED_RUNTIME_ASSETS', files.map(file => `  '${file}',`).join('\n')));
 await writeFile(new URL('../assets/runtime-manifest.json', import.meta.url), JSON.stringify(files, null, 2) + '\n');

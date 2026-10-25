@@ -25,6 +25,9 @@ const metrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json'
 const initial=metrics.initialBytes<=480_000;
 console.log(`${initial?'PASS':'FAIL'} initial static JS graph: ${metrics.initialBytes}/480000 B; optional food/report views remain lazy`);
 if(!initial)failed=true;
+const boot=Number.isFinite(metrics.bootBytes)&&metrics.bootBytes<=480_000;
+console.log(`${boot?'PASS':'FAIL'} complete boot JS graph: ${metrics.bootBytes}/480000 B`);
+if(!boot)failed=true;
 for (const budget of budgets) {
   const label = budget.label || budget.file;
   const files = budget.directory ? await listCssFiles(budget.directory) : [budget.file];

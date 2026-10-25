@@ -1,7 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { transform } from 'esbuild';
 
 const BUILD_VERSION = '2026.10-r75-premium-fitness';
-const initialModules=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8')).initialFiles.filter(file=>!file.endsWith('/application.js'));
+const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
+const initialModules=(runtimeMetrics.bootFiles||runtimeMetrics.initialFiles).filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -123,7 +125,7 @@ const index = `<!doctype html>
   <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercise-catalog.json';document.head.append(l);if(location.hash==='#library'){const p=document.createElement('link');p.rel='preload';p.as='image';p.href='./images/1201-0JtKWum.jpg';document.head.append(p);}}</script>
   <link rel="preload" href="./ui.html" as="fetch" crossorigin="anonymous">
   <link rel="preload" href="./data/content.json" as="fetch" crossorigin="anonymous">
-  <style>${bootCss}</style>
+  <style>${(await transform(bootCss,{loader:'css',minify:true})).code.trim()}</style>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
 </head>
 <body data-app-version="${BUILD_VERSION}">
@@ -147,5 +149,12 @@ const index = `<!doctype html>
 </html>
 `;
 
-await writeFile(new URL('../index.html', import.meta.url), index);
-console.log(`index.html written: ${Buffer.byteLength(index)} bytes`);
+let output=index.replace(/\n[ \t]+/g,'\n');
+for(const match of [...output.matchAll(/<script>([\s\S]*?)<\/script>/g)]){
+  const code=(await transform(match[1],{loader:'js',minify:true,target:'es2022'})).code.trim();
+  output=output.replace(match[0],`<script>${code}</script>`);
+}
+// Only values legal without HTML attribute quotes; authored strings stay intact.
+output=output.replace(/(\s[\w:-]+)="([A-Za-z0-9._:/#+-]+)"/g,'$1=$2');
+await writeFile(new URL('../index.html', import.meta.url), output);
+console.log(`index.html written: ${Buffer.byteLength(output)} bytes`);

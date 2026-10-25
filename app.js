@@ -11,6 +11,7 @@ import './bootstrap.js';
 import {createJournalWriter,captureJournalDraft,restoreJournalDraft} from './src/features/journals/view-lifecycle.mjs';
 import { cleanLabResults } from './src/features/lab/results-model.mjs';
 import { createExerciseMediaPlayer } from './src/features/exercise/media-player.mjs';
+import { createExercisePreviewController } from './src/features/exercise/preview-motion.mjs';
 import { createPreferenceWriter } from './src/features/exercise/preference-write-queue.mjs';
 import { workoutAlreadySaved } from './src/features/workout/save-state.mjs';
 import { progressIntelligenceHtmlView } from './src/features/progress/progressintelligence-view.mjs';
@@ -746,6 +747,8 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     }).join('');
   }
 
+  var syncExercisePreviewCards = function () {};
+
   function renderResults() {
     var items = getFiltered();
     S.lastFiltered = items;
@@ -764,6 +767,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     } else {
       grid.innerHTML = visible.map(cardHtml).join('');
     }
+    syncExercisePreviewCards();
 
     $('results-count').innerHTML = fmt(t('resultsLine'), {
       found: items.length, total: EX.length, shown: visible.length
@@ -4822,6 +4826,8 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   }
 
   function bindLibrary() {
+    syncExercisePreviewCards = createExercisePreviewController({ grid: $('grid'), findExercise: function (id) { return BY_ID[id]; }, stillSource: exStill, motionSource: exMotion, reducedMotion: REDUCED_MOTION }).observeVisibleCards;
+    syncExercisePreviewCards();
     $('grid').addEventListener('click', function (e) {
       var trigger = e.target.closest('[data-pref-toggle]');
       if (!trigger) return;
@@ -4963,28 +4969,6 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
         if (inWorkout(add.dataset.add)) removeFromWorkout(add.dataset.add);
         else addToWorkout(add.dataset.add);
       }
-    });
-
-    // GIF-превью работают на мыши, стилусе и гибридных/сенсорных устройствах.
-    $('grid').addEventListener('pointerover', function (e) {
-      var card = e.target.closest('.card');
-      if (!card || card.contains(e.relatedTarget)) return;
-      var ex = BY_ID[card.dataset.id];
-      var img = qs('img', card);
-      if (!ex || !img || img.dataset.motion === '1') return;
-      img.dataset.still = exStill(ex);
-      img.dataset.motion = '1';
-      img.dataset.mediaFailed = '';
-      img.setAttribute('data-ex-media', '');
-      img.src = exMotion(ex);
-    });
-    $('grid').addEventListener('pointerout', function (e) {
-      var card = e.target.closest('.card');
-      if (!card || card.contains(e.relatedTarget)) return;
-      var img = qs('img', card);
-      if (!img || img.dataset.motion !== '1') return;
-      img.dataset.motion = '0';
-      img.src = img.dataset.still;
     });
 
     // Мобильная панель фильтров

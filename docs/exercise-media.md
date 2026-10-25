@@ -33,6 +33,12 @@ This is not adaptive bitrate streaming. The quality badge uses decoded video
 dimensions, never the declared dimensions. Closing or changing an exercise
 stops playback and detaches all sources. A network or decode error restores GIF.
 
+Exercise cards use still images until a mouse pointer enters or a keyboard user
+focuses a card. On touch and hybrid devices, cards animate as they enter the
+viewport and return to still images after scrolling away. Only nearby visible
+cards animate; `prefers-reduced-motion` keeps card previews still. The full
+exercise viewer keeps its explicit play control for users who request motion.
+
 Prioritize common squat, hinge, horizontal/vertical push and pull movements.
 Record rights evidence before adding each asset; verify technique with a qualified
 reviewer. Test each codec, reduced motion, failure, fullscreen and offline fallback.

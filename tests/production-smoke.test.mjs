@@ -54,10 +54,13 @@ test('active exercise views always request GIF animation and service worker leav
   assert.match(sw, /Exercise GIFs are intentionally not intercepted/);
 });
 
-test('GIF previews are not gated by fine-pointer detection', async () => {
-  const app = (await read('app.js')) + (await read('src/features/workout/run-view.mjs')) + (await read('src/features/exercise/card-view.mjs'));
-  assert.doesNotMatch(app, /if \(FINE_POINTER\.matches\) \{\s*\$\('grid'\)\.addEventListener\('pointerover'/);
-  assert.match(app, /GIF-превью работают на мыши, стилусе и гибридных\/сенсорных устройствах/);
+test('GIF previews follow touch visibility, mouse/keyboard focus, and reduced-motion preference', async () => {
+  const previews = await read('src/features/exercise/preview-motion.mjs');
+  assert.match(previews, /IntersectionObserver/);
+  assert.match(previews, /event\.pointerType === 'touch'/);
+  assert.match(previews, /reducedMotion\.matches/);
+  assert.match(previews, /focusin/);
+  assert.match(previews, /focusout/);
 });
 
 test('PWA update lifecycle is controlled and shell assets are network-first', async () => {

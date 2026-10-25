@@ -1,0 +1,54 @@
+[
+  {
+    "route": "home",
+    "median": {
+      "best-practices": 100,
+      "accessibility": 100,
+      "seo": 100,
+      "performance": 81.0
+    },
+    "lighthouseVersion": "13.5.0",
+    "requestedUrl": "https://castefeudal.github.io/gymdo/#home",
+    "runs": 3,
+    "mode": "mobile"
+  },
+  {
+    "route": "library",
+    "median": {
+      "best-practices": 100,
+      "accessibility": 100,
+      "seo": 100,
+      "performance": 53.0
+    },
+    "lighthouseVersion": "13.5.0",
+    "requestedUrl": "https://castefeudal.github.io/gymdo/#library",
+    "runs": 3,
+    "mode": "mobile"
+  },
+  {
+    "route": "home",
+    "median": {
+      "best-practices": 100,
+      "accessibility": 100,
+      "seo": 100,
+      "performance": 99.0
+    },
+    "lighthouseVersion": "13.5.0",
+    "requestedUrl": "https://castefeudal.github.io/gymdo/#home",
+    "runs": 3,
+    "mode": "desktop"
+  },
+  {
+    "route": "library",
+    "median": {
+      "best-practices": 100,
+      "accessibility": 100,
+      "seo": 100,
+      "performance": 74.0
+    },
+    "lighthouseVersion": "13.5.0",
+    "requestedUrl": "https://castefeudal.github.io/gymdo/#library",
+    "runs": 3,
+    "mode": "desktop"
+  }
+]

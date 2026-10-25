@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-const BUILD_VERSION = '2026.10-r73-precision-identity';
+const BUILD_VERSION = '2026.10-r75-premium-fitness';
+const initialModules=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8')).initialFiles.filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -112,8 +113,13 @@ const index = `<!doctype html>
   })();
   </script>
   <link rel="stylesheet" href="./app.css?v=${BUILD_VERSION}">
+  <link rel="preload" href="./assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="modulepreload" href="./assets/runtime/application.js">
+  ${initialModules.map(file=>`<link rel="modulepreload" href="./${file}">`).join('\n  ')}
+  <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercise-catalog.json';document.head.append(l);if(location.hash==='#library'){const p=document.createElement('link');p.rel='preload';p.as='image';p.href='./images/1201-0JtKWum.jpg';document.head.append(p);}}</script>
   <link rel="preload" href="./ui.html" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="./data/content.json" as="fetch" crossorigin="anonymous">
   <style>${bootCss}</style>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>
 </head>

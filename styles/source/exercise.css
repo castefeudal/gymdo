@@ -602,6 +602,7 @@
 /* @sequence 2251 */
 #modal .modal-media::before {
   content: "";
+  pointer-events: none;
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -1750,7 +1751,7 @@ html[data-theme="ivory"] .modal-media-expand {
   overflow: hidden;
 }
 /* @sequence 8005 */
-#modal .modal-media img{
+#modal .modal-media img, #modal .modal-media video{
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -1770,9 +1771,23 @@ html[data-theme="ivory"] .modal-media-expand {
 #modal .modal-media img.is-ready{
   opacity: 1;
 }
+/* @sequence 12001 */
+#modal .modal-media video{
+  opacity: 1;
+}
+/* @sequence 12002 */
+.exercise-video-options{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
 /* @sequence 8007 */
 #modal .modal-media-chrome{
   position: static;
+  pointer-events: auto;
   z-index: auto;
   left: auto;
   right: auto;

@@ -1,0 +1,24 @@
+/* @sequence 12300 */
+.lab-import{padding:24px;margin-block:24px}
+/* @sequence 12301 */
+.lab-import label{display:grid;gap:8px;margin-block:14px}
+/* @sequence 12302 */
+.lab-import textarea{font-size:16px;line-height:1.6;white-space:pre-wrap}
+/* @sequence 12303 */
+.lab-import input[type=file]{max-width:100%;font:inherit}
+/* @sequence 12304 */
+.lab-trend figure{margin:16px 0;padding:16px 0;border-bottom:1px solid var(--border-subtle)}
+/* @sequence 12305 */
+.lab-trend svg{width:100%;max-height:220px}
+/* @sequence 12306 */
+.lab-trend table{width:100%;font-variant-numeric:tabular-nums;border-collapse:collapse;font-size:14px}
+/* @sequence 12307 */
+.lab-trend th,.lab-trend td{padding:8px;text-align:start;border-bottom:1px solid var(--border-subtle)}
+/* @sequence 12308 */
+.lab-estimate{padding:24px;margin-block:24px}
+/* @sequence 12309 */
+.lab-estimate label{display:grid;gap:8px;margin-block:16px}
+/* @sequence 12310 */
+.lab-estimate .food-check{display:flex;align-items:flex-start;gap:10px}
+/* @sequence 12311 */
+.lab-estimate summary,.lab-import summary{font-weight:650;cursor:pointer;line-height:1.5;overflow-wrap:anywhere}

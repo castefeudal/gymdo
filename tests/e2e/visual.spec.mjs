@@ -8,7 +8,7 @@ const sizes = [
   ['768', 768, 1024], ['1440', 1440, 900], ['1920', 1920, 1080],
 ];
 const themes = ['obsidian', 'soft', 'ivory'];
-const routes = ['home', 'library', 'workout', 'progress', 'program', 'nutrition', 'tools', 'settings'];
+const routes = ['home', 'library', 'workout', 'progress', 'program', 'nutrition', 'labs', 'tools', 'settings'];
 const fixedTime = new Date('2026-10-04T09:00:00.000Z');
 
 async function prepare(page, theme, populated = true) {
@@ -35,6 +35,8 @@ async function ready(page, route) {
   await expect(page.locator('html')).toHaveAttribute('data-route-ready', route);
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
   if (route === 'tools') await expect(page.locator('[data-lab-form]').first()).toBeVisible();
+  if (route === 'labs') await expect(page.locator('.lab-result-form')).toBeVisible();
+  if (route === 'nutrition') await expect(page.locator('[data-food-add]')).toBeVisible();
   if (route === 'library') await expect(page.locator('#grid .card').first()).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 }
@@ -92,6 +94,7 @@ for (const [size, width, height] of sizes.filter(([name]) => ['360', '390', '144
       if (state === 'detail') {
         await page.locator('#grid [data-open]').first().click();
         await expect(page.locator('#modal')).toHaveAttribute('data-open', 'true');
+        await expect(page.locator('#modal-scroll')).toBeVisible();
         const titleBounds = await page.locator('#modal-title').boundingBox();
         const closeBounds = await page.locator('#modal-close').boundingBox();
         expect(titleBounds.y).toBeGreaterThanOrEqual(0);

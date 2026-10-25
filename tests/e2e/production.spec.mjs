@@ -16,7 +16,7 @@ test('backup export attempts a file download and always exposes its JSON fallbac
   const backup = await exportBackup(page);
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^markov-made-gym-backup-.*\.json$/);
-  expect(backup).toMatchObject({ app: 'markov-made-gym', schemaVersion: 10, kind: 'mmg-backup' });
+  expect(backup).toMatchObject({ app: 'markov-made-gym', schemaVersion: 12, kind: 'mmg-backup' });
 });
 
 async function readIndexedUserState(page, key, fallback = null) {
@@ -436,7 +436,7 @@ test('legacy workout history migrates to IndexedDB without a 20-session cap', as
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page);
   expect(backup.app).toBe('markov-made-gym');
-  expect(backup.schemaVersion).toBe(10);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.calculatorHistory)).toEqual([]);
   expect(JSON.parse(backup.data.history)).toHaveLength(28);
   expect(JSON.parse(backup.data.customExercises)).toHaveLength(1);
@@ -516,7 +516,7 @@ test('partial IndexedDB collections merge missing legacy rows without replacing 
   expect(restored.nutritionDays.map(row => row.date).sort()).toEqual(['2026-09-19', '2026-09-20']);
 });
 
-test('custom exercise joins the Library, saved workout, Run Mode, history and schema v10 backup', async ({ page }) => {
+test('custom exercise joins the Library, saved workout, Run Mode, history and schema v12 backup', async ({ page }) => {
   test.setTimeout(90_000);
   await page.goto('/index.html#library');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
@@ -564,7 +564,7 @@ test('custom exercise joins the Library, saved workout, Run Mode, history and sc
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page);
   const customExercises = JSON.parse(backup.data.customExercises);
-  expect(backup.schemaVersion).toBe(10);
+  expect(backup.schemaVersion).toBe(12);
   expect(customExercises).toHaveLength(1);
   expect(customExercises[0]).toMatchObject({
     nameRu: 'Мой жим гантели', nameEn: 'My dumbbell press',
@@ -605,7 +605,7 @@ test('equipment profiles constrain Library choices, survive reload and preserve 
   await page.goto('/index.html#settings');
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page, '#v7-data-actions [data-v7-data="export"]');
-  expect(backup.schemaVersion).toBe(10);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.equipmentProfiles)).toHaveLength(5);
   const importedProfileId = backup.data.equipmentProfileActive;
   expect(importedProfileId).toMatch(/^equipment-/);
@@ -677,7 +677,7 @@ test('exercise preferences persist, affect library ranking and round-trip throug
 
   await page.goto('/index.html#settings');
   const backup = await exportBackup(page);
-  expect(backup.schemaVersion).toBe(10);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.exercisePreferences)[exerciseId]).toBe('discomfort');
   expect(JSON.parse(backup.data.profile)).toMatchObject({ goal: 'muscle', place: 'gym', done: true });
 
@@ -798,7 +798,7 @@ test('hash routes and MARKOV MADE LAB calculators are usable', async ({ page }) 
   expect(results[0]).toMatchObject({ calculatorId: 'lab-e1rm', title: 'Оценка одноповторного максимума', evidenceId: 'estimated-1rm' });
   await page.goto('/index.html#settings');
   const calculatorBackup = await exportBackup(page);
-  expect(calculatorBackup.schemaVersion).toBe(10);
+  expect(calculatorBackup.schemaVersion).toBe(12);
   expect(JSON.parse(calculatorBackup.data.calculatorHistory)).toHaveLength(1);
   await page.goto('/index.html#library');
   await expect(page.locator('#library')).toBeVisible();
@@ -806,11 +806,18 @@ test('hash routes and MARKOV MADE LAB calculators are usable', async ({ page }) 
 });
 
 test('mobile shell has no horizontal page overflow', async ({ page }) => {
-  await page.goto('/index.html#home');
-  for (const [width, height] of [[360, 800], [390, 844], [430, 932]]) {
+  for(const lang of ['ru','en']){
+  await page.goto('/index.html?lang='+lang+'#home');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await page.evaluate(()=>document.fonts.ready);
+  for (const [width, height] of [[320, 800], [360, 800], [390, 844], [430, 932]]) {
     await page.setViewportSize({ width, height });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, `page overflow at ${width}x${height}`).toBeLessThanOrEqual(1);
+    const labels=await page.locator('.mobile-app-nav a>span:not(.mobile-nav-badge)').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,overflow:node.scrollWidth-Math.ceil(node.getBoundingClientRect().width),font:parseFloat(getComputedStyle(node).fontSize)})));
+    expect(labels).toHaveLength(5);
+    for(const label of labels){expect(label.overflow,`${lang} ${width}: ${label.text}`).toBeLessThanOrEqual(1);expect(label.font).toBeGreaterThanOrEqual(14);}
+  }
   }
 });
 
@@ -943,9 +950,12 @@ test('Run Mode announces a history-backed estimated one-rep-max record', async (
   await page.locator('#grid [data-add="' + exerciseId + '"]').click();
   await expect.poll(async () => (await readIndexedUserState(page, 'mmg.workout.v2', [])).length, { timeout: 10_000 }).toBe(1);
   await page.goto('/index.html#workout');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'workout');
   const workoutSets = page.locator('.workout-item [data-field="sets"]');
   await workoutSets.fill('1');
   await workoutSets.press('Tab');
+  await expect.poll(async () => (await readIndexedUserState(page, 'mmg.workout.v2'))[0].sets).toBe(1);
   await page.locator('[data-v8-start-run]:visible, #w-run:visible').first().click();
   await page.locator('[data-run-field="weight"]').fill('105');
   const beforeStep = Number(await page.locator('[data-run-field="weight"]').inputValue());
@@ -1042,6 +1052,8 @@ test('Workout superset runs in alternating rounds and survives workout storage',
   const exerciseNames = [];
   for (const id of exerciseIds) {
     const card = page.locator('#grid [data-add="' + id + '"]').locator('xpath=ancestor::article[contains(@class,"card")]');
+    await card.scrollIntoViewIfNeeded();
+    await expect(card.locator('.card-title')).toBeVisible();
     exerciseNames.push(await card.locator('.card-title').innerText());
     await page.locator('#grid [data-add="' + id + '"]').click();
   }
@@ -1056,6 +1068,7 @@ test('Workout superset runs in alternating rounds and survives workout storage',
   const savedWorkout = await readIndexedUserState(page, 'mmg.workout.v2', []);
   expect(savedWorkout[0].groupType).toBe('superset');
   expect(savedWorkout[1].groupId).toBe(savedWorkout[0].groupId);
+  expect(exerciseNames.every(name=>name.trim().length>0)).toBe(true);
   await page.locator('[data-v8-start-run]:visible, #w-run:visible').first().click();
   await expect(page.locator('.run-name')).toHaveText(exerciseNames[0]);
   await page.locator('#run-next').click();

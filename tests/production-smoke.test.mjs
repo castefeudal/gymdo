@@ -152,7 +152,9 @@ test('PWA manifest is relative-origin and points to a valid shell', async () => 
 test('service worker precaches the same shell resources as the index', async () => {
   const sw = await read('sw.js');
   const pages = await read('.github/workflows/pages.yml');
-  for (const resource of ['index.html', 'ui.html', 'src/app/entry.mjs', 'app.css', 'app.js', 'tools/workout-groups.mjs', 'src/app/router.mjs', 'src/app/state.mjs', 'src/app/i18n.mjs', 'src/app/catalog.mjs', 'src/app/load-modules.mjs', 'src/persistence/history-repository.mjs', 'src/persistence/local-first-store.mjs', 'src/features/command-palette/search.mjs', 'src/data/exercise-repository.mjs', 'src/features/workout/workout-records.mjs', 'src/features/workout/progression-adapter.mjs', 'src/features/exercise/preferences.mjs', 'src/features/today/decision-engine.mjs', 'src/features/exercise/substitution-engine.mjs', 'src/features/workout/pr-engine.mjs', 'src/features/nutrition/nutrition-analytics.mjs', 'src/features/progress/weight-trend.mjs', 'src/features/progress/summary.mjs', 'src/features/progress/chart-model.mjs', 'src/features/progress/chart-view.mjs', 'data/content.json', 'data/exercises-compact.json']) assert.match(sw, new RegExp(resource.replaceAll('.', '\\.')));
+  const runtime = JSON.parse(await read('assets/runtime-manifest.json'));
+  for (const resource of [...runtime, './index.html', './ui.html', './src/app/entry.mjs', './app.css', './bootstrap.js', './gym-tools.js', './src/app/router.mjs', './tools/gym-calculators.mjs', './tools/lab-calculators.mjs', './src/features/lab/evidence-registry.mjs', './src/features/nutrition/nutrition-analytics.mjs', './data/content.json', './data/exercise-catalog.json', './data/exercise-details.json', './data/exercise-media.json']) assert.ok(sw.includes("'" + resource + "'"), resource + ' must work offline');
+  assert.ok(!sw.includes("'./app.js'"), 'authored app must not duplicate the compiled runtime in precache');
   assert.match(pages, /cp -R assets data images src styles tools videos site\//);
   assert.doesNotMatch(sw, /legacy-base\.html|r2\.payload/);
 });
@@ -223,11 +225,22 @@ test('flagship 10 surface includes weekly pulse, contextual actions, workout bal
 
 test('programme survives reloads and edits are written back to saved state', async () => {
   const app = (await read('app.js')) + (await read('src/features/workout/run-view.mjs')) + (await read('src/features/exercise/card-view.mjs'));
-  assert.match(app, /hasPersistedExerciseState = !!\(store\.get\(K\.fav\) \|\| store\.get\(K\.workout\) \|\| store\.get\(K\.plan\) \|\| store\.get\(K\.exercisePreferences\) \|\| Object\.keys\(databaseExercisePreferences\)\.length \|\| databaseCustomExercises\.length\)/);
+  const expression=app.match(/var hasPersistedExerciseState = ([^;]+);/)[1];
+  const needsCatalog=new Function('store','K','databaseExercisePreferences','databaseCustomExercises','return '+expression);
+  const keys={fav:'fav',workout:'workout',plan:'plan'};
+  const check=(value,prefs={},custom=[])=>needsCatalog({json:(key,fallback)=>value[key]??fallback},keys,prefs,custom);
+  assert.equal(check({fav:[],workout:[],plan:null}),false);
+  assert.equal(check({plan:{days:[{}]}}),true);
+  assert.equal(check({workout:[{id:'0025'}]}),true);
+  assert.equal(check({}, {'0025':'preferred'}),true);
+  assert.equal(check({}, {}, [{id:'custom1'}]),true);
   assert.match(app, /function renderStoredPlanV10\(\)/);
   assert.match(app, /item\.ex=alt;\s*savePlanV7\(\);\s*renderStoredPlanV10\(\)/);
   assert.match(app, /day\.items\.splice\(itemIndex,1\);\s*savePlanV7\(\);/);
-  assert.match(app, /'plan', 'settings', 'recentSearch', 'recentExercises'/);
+  const backupKeys = app.match(/DATA_KEYS=\[([^\]]+)\]/)[1];
+  for (const key of ['plan', 'settings', 'recentSearch', 'recentExercises', 'labResults']) {
+    assert.ok(backupKeys.includes(`'${key}'`), `${key} must be included in the production backup`);
+  }
 });
 
 test('progress view can switch between weight waist and sleep', async () => {

@@ -12,7 +12,7 @@ export function createInitialState() {
     equipment: [],
     favOnly: false,
     sort: 'recommended',
-    limit: 60,
+    limit: 24,
     favorites: [],
     exercisePreferences: {},
     workout: [],

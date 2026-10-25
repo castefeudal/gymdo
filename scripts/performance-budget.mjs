@@ -3,10 +3,10 @@ import { gzipSync } from 'node:zlib';
 
 const budgets = [
   { file: 'app.js', raw: 446_000, gzip: 127_000 },
-  { file: 'app.css', raw: 272_000, gzip: 48_500 },
+  { file: 'app.css', raw: 276_000, gzip: 49_000 },
   { file: 'ui.html', raw: 117_000, gzip: 28_000 },
   { file: 'index.html', raw: 10_000, gzip: 4_000 },
-  { directory: 'assets/runtime', label: 'production JS (all chunks)', raw: 480_000, gzip: 160_000 },
+  { directory: 'assets/runtime', label: 'production JS (all chunks including food/PDF review)', raw: 520_000, gzip: 175_000 },
   { file: 'gym-tools.js', raw: 50_000, gzip: 16_000 },
 ];
 
@@ -21,6 +21,10 @@ async function listCssFiles(directory) {
 }
 
 let failed = false;
+const metrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
+const initial=metrics.initialBytes<=480_000;
+console.log(`${initial?'PASS':'FAIL'} initial static JS graph: ${metrics.initialBytes}/480000 B; optional food/report views remain lazy`);
+if(!initial)failed=true;
 for (const budget of budgets) {
   const label = budget.label || budget.file;
   const files = budget.directory ? await listCssFiles(budget.directory) : [budget.file];

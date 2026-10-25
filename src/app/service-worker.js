@@ -1,63 +1,29 @@
-const VERSION = '2026.10-r73-precision-identity';
+const VERSION = '2026.10-r75-premium-fitness';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
+// Bundle outputs include their own lazy modules. Do not also cache authored copies.
 const PRECACHE = [
 // GENERATED_RUNTIME_ASSETS
   './',
   './index.html',
   './app.css',
+  './assets/fonts/inter-latin.woff2',
+  './assets/fonts/inter-cyrillic.woff2',
+  './assets/fonts/inter-latin-ext.woff2',
   './ui.html',
   './src/app/entry.mjs',
-  './src/features/workout/workout-view.mjs',
-  './src/features/exercise/exercisetechnique-view.mjs',
-  './src/features/settings/v7settings-view.mjs',
-  './src/features/program/programwizard-view.mjs',
-  './src/features/workout/history-view.mjs',
-  './src/features/progress/progressintelligence-view.mjs',
-  './src/features/workout/save-state.mjs',
-  './src/features/workout/run-view.mjs',
-  './src/features/workout/session-lifecycle.mjs',
-  './src/features/today/v7home-view.mjs',
-  './src/features/nutrition/nutritiontrend-view.mjs',
-  './src/features/exercise/card-view.mjs',
-  './src/features/exercise/preference-write-queue.mjs',
-  './app.js',
   './src/app/router.mjs',
-  './src/features/command-palette/search.mjs',
-  './src/features/backup/backup-fields.mjs',
-  './src/data/exercise-repository.mjs',
-  './src/features/workout/workout-records.mjs',
-  './src/features/workout/equipment-increments.mjs',
-  './src/features/workout/progression-adapter.mjs',
-  './src/features/exercise/preferences.mjs',
-  './src/app/state.mjs',
-  './src/app/i18n.mjs',
-  './src/app/catalog.mjs',
-  './src/app/load-modules.mjs',
   './bootstrap.js',
   './gym-tools.js',
   './tools/gym-calculators.mjs',
   './tools/lab-calculators.mjs',
-  './tools/progression.mjs',
-  './tools/workout-groups.mjs',
-  './src/persistence/history-repository.mjs',
-  './src/persistence/local-first-store.mjs',
-  './src/features/today/decision-engine.mjs',
-  './src/features/program/mesocycle.mjs',
-  './src/features/program/weekly-review.mjs',
-  './src/features/program/plan-builder.mjs',
   './src/features/lab/evidence-registry.mjs',
-  './src/features/exercise/substitution-engine.mjs',
-  './src/features/workout/pr-engine.mjs',
   './src/features/nutrition/nutrition-analytics.mjs',
-  './src/features/progress/weight-trend.mjs',
-  './src/features/progress/diary-analytics.mjs',
-  './src/features/progress/summary.mjs',
-  './src/features/progress/chart-model.mjs',
-  './src/features/progress/chart-view.mjs',
   './data/content.json',
-  './data/exercises-compact.json',
+  './data/exercise-catalog.json',
+  './data/exercise-details.json',
+  './data/exercise-media.json',
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
@@ -81,17 +47,35 @@ async function trimMedia(cache) {
   while (keys.length > MEDIA_LIMIT) await cache.delete(keys.shift());
 }
 
-async function networkFirstNavigation(request) {
+let shellRetryAt = 0;
+async function shellResponse(request, key = request) {
+  let cached;
+  try { cached = await caches.match(key, { ignoreSearch: true }); } catch {}
+  if (cached && (self.navigator.onLine === false || Date.now() < shellRetryAt)) return { response: cached, fromCache: true };
+  let timer;
   try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) {
-      const cache = await caches.open(SHELL);
-      await cache.put('./index.html', response.clone());
-    }
-    return response;
+    const network = fetch(request, { cache: 'no-store' });
+    // An unreachable origin may leave fetch pending rather than rejecting.
+    // A previously installed shell must remain usable in that condition.
+    const response = cached ? await Promise.race([
+      network,
+      new Promise(resolve => { timer = setTimeout(() => { shellRetryAt = Date.now() + 15000; resolve(cached); }, 3000); }),
+    ]) : await network;
+    return { response, fromCache: response === cached };
   } catch {
-    return caches.match('./index.html');
+    shellRetryAt = Date.now() + 15000;
+    return { response: cached || Response.error(), fromCache: true };
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+async function networkFirstNavigation(request) {
+  const { response, fromCache } = await shellResponse(request, './index.html');
+  if (!fromCache && response.ok) {
+    try { const cache = await caches.open(SHELL); await cache.put('./index.html', response.clone()); } catch {}
+  }
+  return response;
 }
 
 self.addEventListener('fetch', (event) => {
@@ -102,6 +86,11 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+  // Optional local OCR/PDF engines are cached only when used, never during install.
+  if (/\/assets\/vendor\//.test(url.pathname)) {
+    event.respondWith((async()=>{const cache=await caches.open(SHELL);const hit=await cache.match(request);if(hit)return hit;const response=await fetch(request);if(response.ok){try{await cache.put(request,response.clone());}catch{}}return response;})());
     return;
   }
 
@@ -116,6 +105,7 @@ self.addEventListener('fetch', (event) => {
       const cache = await caches.open(MEDIA);
       const hit = await cache.match(request);
       if (hit) return hit;
+      if (self.navigator.onLine === false || Date.now() < shellRetryAt) return caches.match('./images/exercise-placeholder.svg');
       try {
         const response = await fetch(request);
         if (response.ok) {
@@ -136,13 +126,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (PRECACHE.some((path) => url.pathname.endsWith(path.replace('./', '/')))) {
-    event.respondWith((async () => {
-      try {
-        return await fetch(request, { cache: 'no-store' });
-      } catch {
-        return caches.match(request, { ignoreSearch: true });
-      }
-    })());
+    event.respondWith(shellResponse(request).then(result => result.response));
   }
 });
 

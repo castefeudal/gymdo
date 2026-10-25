@@ -1,3 +1,5 @@
+import { cleanLabResults } from '../lab/results-model.mjs';
+import { cleanFoodDiary } from '../nutrition/food-model.mjs';
 const JSON_FIELDS_LIMIT = 50_000_000;
 export function parseBackupJson(raw) {
   try { return JSON.parse(raw); } catch { return null; }
@@ -16,6 +18,11 @@ export function validateBackupField(name, raw, adapters = {}) {
 
   const value = parseBackupJson(raw);
   if (value === null) return null;
+  if (name === 'foodDiary') { const clean = cleanFoodDiary(value); return clean ? JSON.stringify(clean) : null; }
+  if (name === 'labResults') {
+    const clean = cleanLabResults(value);
+    return clean ? JSON.stringify(clean) : null;
+  }
   const stringify = (next) => JSON.stringify(next);
   const exists = (id) => typeof adapters.exerciseExists === 'function' && adapters.exerciseExists(String(id));
 

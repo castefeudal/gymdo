@@ -122,7 +122,7 @@ import { normalizeRouteHash, subscribeToHashChanges } from './src/app/router.mjs
       reloading = true;
       window.location.reload();
     });
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (registration) {
+    function registerWorker(){navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (registration) {
       if (registration.waiting && navigator.serviceWorker.controller) showUpdate(registration);
       registration.addEventListener('updatefound', function () {
         var worker = registration.installing;
@@ -133,6 +133,8 @@ import { normalizeRouteHash, subscribeToHashChanges } from './src/app/router.mjs
       });
     }).catch(function () {
       // PWA is optional at runtime; the application remains usable online.
-    });
+    });}
+    if(document.documentElement.dataset.appReady==='true')registerWorker();
+    else window.addEventListener('mmg:ready',registerWorker,{once:true});
   }
 })();

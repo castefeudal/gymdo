@@ -11,6 +11,7 @@ export const ROUTE_VIEWS = Object.freeze({
   tools: Object.freeze(['tools']),
   program: Object.freeze(['program']),
   nutrition: Object.freeze(['nutrition']),
+  labs: Object.freeze(['labs']),
   knowledge: Object.freeze(['knowledge']),
   method: Object.freeze(['method']),
   about: Object.freeze(['about']),

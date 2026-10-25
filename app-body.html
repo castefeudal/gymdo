@@ -28,6 +28,7 @@
       <a class="v7-nav-link" href="#nutrition" data-v7-nav="nutrition">Питание</a>
       <a class="v7-nav-link" href="#progress" data-v7-nav="progress">Прогресс</a>
       <a class="v7-nav-link" href="#tools" data-v7-nav="tools">Инструменты</a>
+      <a class="v7-nav-link" href="#labs" data-labs-nav>Анализы</a>
       <div class="nav-group" data-navgroup="more" data-open="false">
         <button type="button" aria-expanded="false" aria-controls="navmenu-more"><span data-v7-nav="more">Ещё</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-menu" id="navmenu-more">
@@ -104,7 +105,7 @@
   </div>
 </div>
 
-<main id="top">
+<main id="top" aria-busy="true" inert>
 
   <!-- V7 HOME / RETURNING USER APP SHELL ------------------------------------ -->
   <section class="section v7-app-view" id="home" aria-labelledby="v7-home-title" hidden>
@@ -509,7 +510,7 @@
 
           <div class="load-row" id="load-row">
             <p class="small" id="load-note"></p>
-            <button class="btn btn-solid" id="load-more" type="button">Показать ещё 60</button>
+            <button class="btn btn-solid" id="load-more" type="button">Показать ещё 24</button>
             <button class="btn btn-quiet" id="show-all" type="button" data-i18n="library.showAll">Показать все</button>
           </div>
         </div>
@@ -607,6 +608,8 @@
   <!-- КБЖУ ------------------------------------------------------------------ -->
   <section class="section section-alt" id="nutrition" aria-labelledby="nutrition-title">
     <div class="container">
+      <section id="food-diary" aria-label="Дневник продуктов"></section>
+
       <div class="section-head">
         <div>
           <p class="eyebrow" data-i18n="kbju.eyebrow">Питание</p>
@@ -763,6 +766,7 @@
       </div>
     </div>
   </section>
+  <section id="labs" class="section v7-app-view" aria-label="Lab results / Анализы" hidden></section>
 
   <!-- ПЛАН ------------------------------------------------------------------ -->
   <section class="section" id="program" aria-labelledby="program-title">

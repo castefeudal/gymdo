@@ -5,11 +5,11 @@ test.use({ serviceWorkers: 'block' });
 test('library previews fit their frames and pagination retains the complete catalog',async({page})=>{
   await page.setViewportSize({width:320,height:844});
   await page.goto('/index.html#library');await expect(page.locator('#mmg-boot')).toHaveCount(0);
-  await expect(page.locator('#grid .card')).toHaveCount(24);
+  await expect(page.locator('#grid .card')).toHaveCount(12);
   const image=page.locator('#grid .card-media img').first();await image.evaluate(img=>img.decode());
   const bounds=await image.evaluate(img=>{const frame=img.parentElement.getBoundingClientRect(),box=img.getBoundingClientRect();return {fit:getComputedStyle(img).objectFit,inside:box.top>=frame.top&&box.bottom<=frame.bottom&&box.left>=frame.left&&box.right<=frame.right,natural:img.naturalHeight};});
   expect(bounds.fit).toBe('contain');expect(bounds.inside).toBe(true);expect(bounds.natural).toBeGreaterThan(0);
-  await page.locator('#load-more').click();await expect(page.locator('#grid .card')).toHaveCount(48);await expect(page.locator('#results-count')).toContainText('1324');
+  await page.locator('#load-more').click();await expect(page.locator('#grid .card')).toHaveCount(24);await expect(page.locator('#results-count')).toContainText('1324');
 });
 
 test('instruction loading opens an immediate closable dialog and never reopens after Escape',async({page})=>{

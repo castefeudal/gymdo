@@ -3,7 +3,7 @@ import { transform } from 'esbuild';
 
 const BUILD_VERSION = '2026.10-r75-premium-fitness';
 const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
-const initialModules=(runtimeMetrics.bootFiles||runtimeMetrics.initialFiles).filter(file=>!file.endsWith('/application.js'));
+const initialModules=[...runtimeMetrics.initialFiles,...runtimeMetrics.bootFiles.filter(file=>file.includes('/load-modules-'))].filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',

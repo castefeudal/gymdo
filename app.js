@@ -552,7 +552,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   /* ---------- 6. СОСТОЯНИЕ ------------------------------------------------ */
   var S = createInitialState();
 
-  var PAGE = 24;
+  var PAGE = 12;
 
   function isFav(id) { return S.favorites.indexOf(id) !== -1; }
   function inWorkout(id) {

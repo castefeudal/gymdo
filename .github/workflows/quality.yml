@@ -97,7 +97,7 @@ jobs:
         run: npm run visual -- --workers=3
       - name: Generate Linux baselines for review
         if: ${{ inputs.refresh_visual_baselines }}
-        run: npm run visual -- --workers=3 --update-snapshots
+        run: npm run visual -- --workers=3 --update-snapshots=all
       - name: Upload baselines (accept only after the entire Quality run succeeds)
         if: ${{ inputs.refresh_visual_baselines && success() }}
         uses: actions/upload-artifact@v4

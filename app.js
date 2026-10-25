@@ -4635,6 +4635,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     $('cmdk-input').value = '';
     renderCmdk('');
     openOverlay($('cmdk'), $('cmdk-input'), { scrim: false });
+    if(!DATA_READY)ensureData().then(function(){renderCmdk($('cmdk-input').value);});
   }
 
   function bindHeader() {
@@ -6321,12 +6322,12 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var host=$('labs'); if(!host||host.dataset.labLang===S.lang)return;host.dataset.labLang=S.lang;
     qsa('[data-labs-nav]').forEach(function(el){el.textContent=S.lang==='en'?'Lab results':'Анализы';});
     var module=await import('./src/features/lab/results-view.mjs');
-    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays});
+    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays.concat((store.json(K.foodDiary,{entries:[]}).entries||[]))});
   }
   async function renderFoods(){
     var host=$('food-diary');if(!host||host.dataset.foodLang===S.lang)return;host.dataset.foodLang=S.lang;
     var module=await import('./src/features/nutrition/food-view.mjs');
-    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:async function(value){if(!store.set(K.foodDiary,JSON.stringify(value)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),weights:S.diary,target:S.lastKbju&&S.lastKbju.calories,publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'accurate',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
+    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:async function(value){if(!store.set(K.foodDiary,JSON.stringify(value)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),weights:S.diary,target:S.lastKbju&&S.lastKbju.calories,publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'estimated',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
   }
   function renderV8Shell(route,animate){
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';
@@ -6488,7 +6489,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     document.documentElement.dataset.storageReady = 'true';
     document.documentElement.dataset.storageMode = historyRepository ? 'indexeddb' : 'degraded';
     var initialRoute = (location.hash || '#home').slice(1).split('?')[0];
-    var hasPersistedExerciseState = !!(store.get(K.fav) || store.get(K.workout) || store.get(K.plan) || store.get(K.exercisePreferences) || Object.keys(databaseExercisePreferences).length || databaseCustomExercises.length);
+    var hasPersistedExerciseState = !!((store.json(K.fav,[])||[]).length || (store.json(K.workout,[])||[]).length || store.json(K.plan,null) || Object.keys(databaseExercisePreferences).length || databaseCustomExercises.length);
     var needsData = dataRouteNeedsLibrary(initialRoute) || hasPersistedExerciseState;
     if (needsData) window.dispatchEvent(new CustomEvent('mmg:stage', { detail: { key: 'data' } }));
     var contentLoaded = await loadContent();
@@ -6583,11 +6584,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     });
     window.dispatchEvent(new CustomEvent('mmg:ready', { detail: { exercises: DATA_READY ? EX.length : DATA_EXPECTED, content: !!contentLoaded, dataReady: DATA_READY } }));
 
-    if (!DATA_READY) {
-      var preload = function () { ensureData().then(function () { refreshDataDependentUI(); }); };
-      if (window.requestIdleCallback) window.requestIdleCallback(preload, { timeout: 4000 });
-      else window.setTimeout(preload, 1200);
-    }
+    // Catalog loads on exercise routes/search; a new user's Today stays light.
   }
 
   if (document.readyState === 'loading') {

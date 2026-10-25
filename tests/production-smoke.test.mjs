@@ -225,7 +225,15 @@ test('flagship 10 surface includes weekly pulse, contextual actions, workout bal
 
 test('programme survives reloads and edits are written back to saved state', async () => {
   const app = (await read('app.js')) + (await read('src/features/workout/run-view.mjs')) + (await read('src/features/exercise/card-view.mjs'));
-  assert.match(app, /hasPersistedExerciseState = !!\(store\.get\(K\.fav\) \|\| store\.get\(K\.workout\) \|\| store\.get\(K\.plan\) \|\| store\.get\(K\.exercisePreferences\) \|\| Object\.keys\(databaseExercisePreferences\)\.length \|\| databaseCustomExercises\.length\)/);
+  const expression=app.match(/var hasPersistedExerciseState = ([^;]+);/)[1];
+  const needsCatalog=new Function('store','K','databaseExercisePreferences','databaseCustomExercises','return '+expression);
+  const keys={fav:'fav',workout:'workout',plan:'plan'};
+  const check=(value,prefs={},custom=[])=>needsCatalog({json:(key,fallback)=>value[key]??fallback},keys,prefs,custom);
+  assert.equal(check({fav:[],workout:[],plan:null}),false);
+  assert.equal(check({plan:{days:[{}]}}),true);
+  assert.equal(check({workout:[{id:'0025'}]}),true);
+  assert.equal(check({}, {'0025':'preferred'}),true);
+  assert.equal(check({}, {}, [{id:'custom1'}]),true);
   assert.match(app, /function renderStoredPlanV10\(\)/);
   assert.match(app, /item\.ex=alt;\s*savePlanV7\(\);\s*renderStoredPlanV10\(\)/);
   assert.match(app, /day\.items\.splice\(itemIndex,1\);\s*savePlanV7\(\);/);

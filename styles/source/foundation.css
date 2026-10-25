@@ -4946,5 +4946,5 @@ body[data-v8-returning="true"] .section {
 }
 /* @sequence 12003 */
 html:not([data-app-ready="true"]) main{
-  opacity: 0;
+  display: none;
 }

@@ -115,7 +115,7 @@ const index = `<!doctype html>
   <link rel="preload" href="./assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="modulepreload" href="./assets/runtime/application.js">
-  <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercises-compact.json';document.head.append(l);}</script>
+  <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercise-catalog.json';document.head.append(l);if(location.hash==='#library'){const p=document.createElement('link');p.rel='preload';p.as='image';p.href='./images/1201-0JtKWum.jpg';document.head.append(p);}}</script>
   <link rel="preload" href="./ui.html" as="fetch" crossorigin="anonymous">
   <style>${bootCss}</style>
   <script type="application/ld+json">${JSON.stringify(structuredData)}</script>

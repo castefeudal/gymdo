@@ -15,7 +15,8 @@ applications reject newer envelopes rather than silently dropping food records.
 
 An incomplete food day is not automatically published as full daily consumption.
 The explicit Day complete action confirms replacement of the legacy daily total
-and feeds existing calorie/weight trend and adaptive expenditure tools. The user
+and feeds existing calorie/weight trend and adaptive expenditure tools.
+These totals are marked estimated; completeness does not prove measurement accuracy. The user
 can continue entering legacy day totals directly. Empty dates are not zero intake.
 Period averages use days with entries and clearly report coverage. Weight changes
 remain recorded observations, not proof that a meal caused a body-weight change.

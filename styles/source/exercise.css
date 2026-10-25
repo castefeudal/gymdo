@@ -1784,6 +1784,8 @@ html[data-theme="ivory"] .modal-media-expand {
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+/* @sequence 12320 */
+#grid .card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 /* @sequence 8007 */
 #modal .modal-media-chrome{
   position: static;

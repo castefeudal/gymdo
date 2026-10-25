@@ -14,3 +14,11 @@
 .lab-trend table{width:100%;font-variant-numeric:tabular-nums;border-collapse:collapse;font-size:14px}
 /* @sequence 12307 */
 .lab-trend th,.lab-trend td{padding:8px;text-align:start;border-bottom:1px solid var(--border-subtle)}
+/* @sequence 12308 */
+.lab-estimate{padding:24px;margin-block:24px}
+/* @sequence 12309 */
+.lab-estimate label{display:grid;gap:8px;margin-block:16px}
+/* @sequence 12310 */
+.lab-estimate .food-check{display:flex;align-items:flex-start;gap:10px}
+/* @sequence 12311 */
+.lab-estimate summary,.lab-import summary{font-weight:650;cursor:pointer;line-height:1.5;overflow-wrap:anywhere}

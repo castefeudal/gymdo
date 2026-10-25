@@ -33,7 +33,7 @@ jobs:
       - name: Syntax, build, performance budget and unit checks
         run: npm run quality
       - name: Generated production assets must be current
-        run: git diff --exit-code -- index.html ui.html app-body.html app.css sw.js assets/runtime assets/runtime-manifest.json assets/runtime-metrics.json assets/fonts assets/vendor
+        run: git diff --exit-code -- index.html ui.html app-body.html app.css sw.js assets/runtime assets/runtime-manifest.json assets/runtime-metrics.json assets/fonts assets/vendor data/exercise-catalog.json data/exercise-details.json
 
   behavior:
     needs: foundation

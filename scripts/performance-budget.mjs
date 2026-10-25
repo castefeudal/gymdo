@@ -3,7 +3,7 @@ import { gzipSync } from 'node:zlib';
 
 const budgets = [
   { file: 'app.js', raw: 446_000, gzip: 127_000 },
-  { file: 'app.css', raw: 272_000, gzip: 48_500 },
+  { file: 'app.css', raw: 276_000, gzip: 49_000 },
   { file: 'ui.html', raw: 117_000, gzip: 28_000 },
   { file: 'index.html', raw: 10_000, gzip: 4_000 },
   { directory: 'assets/runtime', label: 'production JS (all chunks including food/PDF review)', raw: 520_000, gzip: 175_000 },

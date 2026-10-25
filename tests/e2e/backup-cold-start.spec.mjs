@@ -49,7 +49,7 @@ test('a catalog error refuses import and keeps current data intact', async ({ pa
   await page.goto('/index.html#settings');
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const previous = await exportedState(page);
-  await page.route('**/data/exercises-compact.json', route => route.fulfill({ status: 503, body: 'Unavailable' }));
+  await page.route('**/data/exercise-catalog.json', route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await chooseBackup(page);
   await expect(page.locator('#toast')).toContainText('Импорт не применён');
   const after = await exportedState(page);

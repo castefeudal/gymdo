@@ -153,7 +153,7 @@ test('service worker precaches the same shell resources as the index', async () 
   const sw = await read('sw.js');
   const pages = await read('.github/workflows/pages.yml');
   const runtime = JSON.parse(await read('assets/runtime-manifest.json'));
-  for (const resource of [...runtime, './index.html', './ui.html', './src/app/entry.mjs', './app.css', './bootstrap.js', './gym-tools.js', './src/app/router.mjs', './tools/gym-calculators.mjs', './tools/lab-calculators.mjs', './src/features/lab/evidence-registry.mjs', './src/features/nutrition/nutrition-analytics.mjs', './data/content.json', './data/exercises-compact.json', './data/exercise-media.json']) assert.ok(sw.includes("'" + resource + "'"), resource + ' must work offline');
+  for (const resource of [...runtime, './index.html', './ui.html', './src/app/entry.mjs', './app.css', './bootstrap.js', './gym-tools.js', './src/app/router.mjs', './tools/gym-calculators.mjs', './tools/lab-calculators.mjs', './src/features/lab/evidence-registry.mjs', './src/features/nutrition/nutrition-analytics.mjs', './data/content.json', './data/exercise-catalog.json', './data/exercise-details.json', './data/exercise-media.json']) assert.ok(sw.includes("'" + resource + "'"), resource + ' must work offline');
   assert.ok(!sw.includes("'./app.js'"), 'authored app must not duplicate the compiled runtime in precache');
   assert.match(pages, /cp -R assets data images src styles tools videos site\//);
   assert.doesNotMatch(sw, /legacy-base\.html|r2\.payload/);

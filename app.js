@@ -422,6 +422,12 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   var DATA_EXPECTED = 1324;
   var DATA_READY = false;
   var DATA_PROMISE = null;
+  var DETAILS_READY = false, DETAILS_PROMISE = null;
+  async function ensureDetails(){
+    if(DETAILS_READY)return true;
+    if(!DETAILS_PROMISE)DETAILS_PROMISE=(async function(){try{var response=await fetch(new URL('./data/exercise-details.json',document.baseURI));if(!response.ok)throw Error();var data=await response.json();EX.forEach(function(ex){if(!ex.custom){if(!Array.isArray(data[ex.id]))throw Error();ex.stepsEn=data[ex.id][0];ex.stepsRu=data[ex.id][1];}});DETAILS_READY=true;return true;}catch{DETAILS_PROMISE=null;showToast(S.lang==='en'?'Exercise instructions could not load. Retry when connected.':'Не удалось загрузить технику. Повтори при доступной сети.');return false;}})();
+    return DETAILS_PROMISE;
+  }
 
   function makeCustomExerciseRuntimeRecord(record, index) {
     return createCustomExerciseRuntimeRecord(record, index, { equipmentWeight: EQUIP_WEIGHT, normalize: norm, transliterate: translitRu });
@@ -440,7 +446,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   async function fetchData() {
     var raw;
     try {
-      var response = await fetch(new URL('./data/exercises-compact.json', document.baseURI), { credentials: 'same-origin' });
+      var response = await fetch(new URL('./data/exercise-catalog.json', document.baseURI), { credentials: 'same-origin' });
       if (!response.ok) throw new Error('exercise data ' + response.status);
       raw = await response.json();
     } catch (e) {
@@ -1247,9 +1253,10 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     setModalTabActive(best);
   }
 
-  function openExercise(id, trigger, silent) {
+  async function openExercise(id, trigger, silent) {
     var ex = BY_ID[id];
     if (!ex) return;
+    if(!ex.custom&&!await ensureDetails())return;
     S.activeId = id;
     if (trigger) modalReturnFocus = trigger;
 
@@ -3154,8 +3161,9 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     renderRun();
   }
 
-  function openRun() {
+  async function openRun() {
     if (!S.workout.length) { showToast(t('workoutEmptyTitle')); return; }
+    if(S.workout.some(function(item){return !BY_ID[item.id]?.custom;})&&!await ensureDetails())return;
     var validSaved = S.runSession && Date.now() - Number(S.runSession.startedAt || 0) < 8 * 3600000;
     if (validSaved) {
       runState.ex = clamp(Number(S.runSession.ex) || 0, 0, S.workout.length);
@@ -6557,7 +6565,6 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     await new Promise(function(resolve){setTimeout(resolve,0);});
     bindObservers();
     heroPeek();
-    refreshDataDependentUI();
     document.documentElement.dataset.coreReady = 'true';
     document.documentElement.dataset.routeReady = v7RouteFromHash();
     document.documentElement.dataset.appReady = 'true';

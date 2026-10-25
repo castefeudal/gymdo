@@ -115,6 +115,9 @@ const index = `<!doctype html>
   <link rel="stylesheet" href="./app.css?v=${BUILD_VERSION}">
   <link rel="preload" href="./assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="modulepreload" href="./src/app/entry.mjs?v=${BUILD_VERSION}">
+  <link rel="modulepreload" href="./bootstrap.js">
+  <link rel="modulepreload" href="./src/app/router.mjs">
   <link rel="modulepreload" href="./assets/runtime/application.js">
   ${initialModules.map(file=>`<link rel="modulepreload" href="./${file}">`).join('\n  ')}
   <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercise-catalog.json';document.head.append(l);if(location.hash==='#library'){const p=document.createElement('link');p.rel='preload';p.as='image';p.href='./images/1201-0JtKWum.jpg';document.head.append(p);}}</script>

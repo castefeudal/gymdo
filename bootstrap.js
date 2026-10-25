@@ -29,8 +29,9 @@ import { normalizeRouteHash, subscribeToHashChanges } from './src/app/router.mjs
     if (!boot) return;
     setStage('ready');
     requestAnimationFrame(function () {
-      boot.dataset.hidden = 'true';
-      window.setTimeout(function () { boot.remove(); }, 240);
+      // Readiness already means the final interface is painted next frame.
+      // Keeping an opaque overlay for another 240ms delays content and input.
+      boot.remove();
     });
   }
 

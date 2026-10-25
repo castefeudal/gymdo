@@ -42,6 +42,7 @@ import { progressChartModel } from './src/features/progress/chart-model.mjs';
 import { renderProgressChart } from './src/features/progress/chart-view.mjs';
 import { backupEnvelopeError, parseBackupJson, validateBackupField } from './src/features/backup/backup-fields.mjs';
 import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/features/workout/equipment-increments.mjs';
+import { normalizeText, formatDateLabel, transliterateRu, compareText } from './src/app/text-utils.mjs';
 
 (function () {
   'use strict';
@@ -55,11 +56,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ESC_MAP[c]; }); }
 
   function norm(v) {
-    return String(v == null ? '' : v)
-      .toLowerCase()
-      .replace(/\u0451/g, '\u0435')      // ё → е
-      .replace(/[^\p{L}\p{N}]+/gu, ' ')  // всё, кроме букв и цифр → пробел
-      .trim();
+    return normalizeText(v);
   }
 
   function clamp(n, min, max) { return n < min ? min : n > max ? max : n; }
@@ -606,15 +603,15 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
 
     var coll = S.lang === 'en' ? 'en' : 'ru';
     if (S.sort === 'name') {
-      out.sort(function (a, b) { return exName(a).localeCompare(exName(b), coll); });
+      out.sort(function (a, b) { return compareText(exName(a),exName(b),coll); });
     } else if (S.sort === 'muscle') {
       out.sort(function (a, b) {
-        var d = labelMu(a.target).localeCompare(labelMu(b.target), coll);
+        var d = compareText(labelMu(a.target),labelMu(b.target),coll);
         return d || (b.score - a.score);
       });
     } else if (S.sort === 'equipment') {
       out.sort(function (a, b) {
-        var d = labelEq(a.equip).localeCompare(labelEq(b.equip), coll);
+        var d = compareText(labelEq(a.equip),labelEq(b.equip),coll);
         return d || (b.score - a.score);
       });
     } else if (S.sort === 'favorites') {
@@ -797,7 +794,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   function filterListHtml(values, counts, labelFn, kind, selected) {
     return values.slice().sort(function (a, b) {
       var sa = selected.indexOf(a) !== -1 ? 1 : 0, sb = selected.indexOf(b) !== -1 ? 1 : 0;
-      return (sb - sa) || counts[b] - counts[a] || labelFn(a).localeCompare(labelFn(b), S.lang === 'en' ? 'en' : 'ru');
+      return (sb - sa) || counts[b] - counts[a] || compareText(labelFn(a),labelFn(b),S.lang);
     }).map(function (v) {
       var on = selected.indexOf(v) !== -1;
       return '<button class="filter-btn" type="button" data-filter-kind="' + kind + '" data-filter-value="' + esc(v) +
@@ -926,7 +923,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var inZone = EX.filter(function (ex) { return ex.zone === zone; });
     var byTarget = Object.create(null);
     inZone.forEach(function (ex) { byTarget[ex.target] = (byTarget[ex.target] || 0) + 1; });
-    var targets = Object.keys(byTarget).sort(function (a, b) { return byTarget[b] - byTarget[a] || labelMu(a).localeCompare(labelMu(b), S.lang === 'en' ? 'en' : 'ru'); });
+    var targets = Object.keys(byTarget).sort(function (a, b) { return byTarget[b] - byTarget[a] || compareText(labelMu(a),labelMu(b),S.lang); });
     if (title) title.textContent = labelZone(zone);
     if (subtitle) subtitle.textContent = (S.lang === 'en' ? countPhraseI18n(inZone.length, 'exercise', 'en') + ' · choose a target muscle or keep the whole area.' : countPhraseI18n(inZone.length, 'exercise', 'ru') + ' · уточни мышцу или оставь активной всю зону.');
     board.innerHTML = '<div class="muscle-detail"><div class="muscle-detail-grid">' + targets.map(function (tg) {
@@ -3253,7 +3250,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var currentProgram=historyFilters.programme,currentExercise=historyFilters.exercise;
     var days=Array.from(new Set(S.history.map(function(h){return h.planDay;}).filter(function(day){return day!=null&&Number.isFinite(Number(day));}))).sort(function(a,b){return Number(a)-Number(b);});
     programme.innerHTML='<option value="">'+(S.lang==='en'?'All programmes':'Все программы')+'</option><option value="unplanned">'+(S.lang==='en'?'Unplanned':'Без программы')+'</option>'+days.map(function(day){return'<option value="day:'+esc(String(day))+'">'+esc(S.lang==='en'?'Day ':'День ')+esc(String(Number(day)+1))+'</option>';}).join('');
-    var exerciseIds=Array.from(new Set(S.history.flatMap(function(h){return(h.items||[]).map(function(item){return String(item.id||'');}).filter(Boolean);}))).sort(function(a,b){return exName(BY_ID[a]||{id:a}).localeCompare(exName(BY_ID[b]||{id:b}),S.lang);});
+    var exerciseIds=Array.from(new Set(S.history.flatMap(function(h){return(h.items||[]).map(function(item){return String(item.id||'');}).filter(Boolean);}))).sort(function(a,b){return compareText(exName(BY_ID[a]||{id:a}),exName(BY_ID[b]||{id:b}),S.lang);});
     exercise.innerHTML='<option value="">'+(S.lang==='en'?'All exercises':'Все упражнения')+'</option>'+exerciseIds.map(function(id){var ex=BY_ID[id];return'<option value="'+esc(id)+'">'+esc(ex?exName(ex):id)+'</option>';}).join('');
     programme.value=currentProgram;exercise.value=currentExercise;
     var strings=S.lang==='en'?{search:'Search',placeholder:'Workout, exercise or note',from:'From date',to:'To date',programme:'Programme',exercise:'Exercise',min:'Minutes from',max:'to',pr:'Has PR'}:{search:'Поиск',placeholder:'Тренировка, упражнение, заметка',from:'С даты',to:'По дату',programme:'Программа',exercise:'Упражнение',min:'Минуты от',max:'до',pr:'Есть PR'};
@@ -5756,11 +5753,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   K.rollbackBackup = 'mmg.backup.rollback.v1';
 
   /* Search transliteration is additive: original RU/EN names remain the source of truth. */
-  var RU_LAT = {
-    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ы':'y','э':'e','ю':'yu','я':'ya','ь':'','ъ':''
-  };
   function translitRu(value){
-    return norm(value).split('').map(function(ch){ return Object.prototype.hasOwnProperty.call(RU_LAT,ch) ? RU_LAT[ch] : ch; }).join('');
+    return transliterateRu(value);
   }
 
   var _exerciseDiscoveryRankV5 = exerciseDiscoveryRank;
@@ -6218,7 +6212,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var view=views[decision.recommendation];
     return view?Object.assign({decision:decision},view):{type:'library',title:v7c('discover'),why:v7c('discoverWhy'),evidence:[]};
   }
-  function v7DateLabel(){try{return new Intl.DateTimeFormat(S.lang==='en'?'en-GB':'ru-RU',{weekday:'long',day:'numeric',month:'long'}).format(new Date());}catch(e){return todayISO();}}
+  function v7DateLabel(){try{return formatDateLabel(S.lang);}catch(e){return todayISO();}}
   function v7PlanSummary(){if(!S.plan||!S.plan.days)return{v:'—',s:v7c('noPlan')};var done=(S.plan.completedDays||[]).length;return{v:done+' / '+S.plan.days.length,s:(S.lang==='en'?'sessions ':'тренировок ')+v7c('completed')};}
   function v7TrendSummary(){if(S.diary.length<2)return{v:'—',s:v7c('noTrend')};var d=diaryDelta('weight',14);if(d===null)return{v:'—',s:v7c('noTrend')};return{v:(d>0?'+':'')+d.toFixed(1)+' '+t('kg'),s:S.lang==='en'?'14-day weight change':'изменение веса за 14 дней'};}
   function v10WeekStartTime(){var d=new Date(),day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d.getTime();}

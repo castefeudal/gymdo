@@ -135,7 +135,14 @@ import { normalizeRouteHash, subscribeToHashChanges } from './src/app/router.mjs
     }).catch(function () {
       // PWA is optional at runtime; the application remains usable online.
     });}
-    if(document.documentElement.dataset.appReady==='true')registerWorker();
-    else window.addEventListener('mmg:ready',registerWorker,{once:true});
+    function afterFirstPaint(){
+      var started=false;
+      function start(){if(started)return;started=true;registerWorker();}
+      requestAnimationFrame(function(){requestAnimationFrame(start);});
+      // Background tabs may suspend animation frames; keep offline installation.
+      window.setTimeout(start,250);
+    }
+    if(document.documentElement.dataset.appReady==='true')afterFirstPaint();
+    else window.addEventListener('mmg:ready',afterFirstPaint,{once:true});
   }
 })();

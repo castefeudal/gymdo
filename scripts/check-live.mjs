@@ -52,7 +52,10 @@ for(const [name,engine,width] of configurations){
     expect(backup.schemaVersion).toBe(12);
     expect(JSON.parse(backup.data.foodDiary).entries).toEqual([]);
     expect(JSON.parse(backup.data.labResults)).toEqual([]);
-    await page.evaluate(()=>location.hash='library');await page.locator('#search').fill('0025');
+    await page.evaluate(()=>location.hash='library');
+    await expect(page.locator('html')).toHaveAttribute('data-route-ready','library');
+    await expect(page.locator('#grid .card').first()).toBeVisible();
+    await page.locator('#search').fill('0025');
     await page.locator('#grid [data-open="0025"]').click();
     await expect(page.locator('#modal-scroll')).toBeVisible();
     await expect(page.locator('#modal')).toHaveAttribute('aria-busy','false');

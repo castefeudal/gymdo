@@ -1290,9 +1290,10 @@ body[data-v8-returning="true"] .v8-context-bar {
     right: 0;
     bottom: 0;
     height: auto;
-    grid-template-columns: repeat(5,minmax(0,1fr));
+    grid-template-columns: repeat(5,auto);
+    justify-content: space-between;
     gap: 0;
-    padding: 6px 6px calc(7px + var(--safe-b));
+    padding: 6px 2px calc(7px + var(--safe-b));
     border-top: 1px solid var(--border-subtle);
     border-radius: 0;
     background: color-mix(in srgb,var(--bg-canvas) 86%,transparent);
@@ -1308,7 +1309,7 @@ body[data-v8-returning="true"] .v8-context-bar {
     justify-content: center;
     gap: 5px;
     min-height: 52px;
-    min-width: 0;
+    min-width: 44px;
     padding: 5px 2px;
     border: 0;
     border-radius: 12px;
@@ -1335,9 +1336,10 @@ body[data-v8-returning="true"] .v8-context-bar {
   .mobile-app-nav a>span {
     font-size: 14px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+    overflow: visible;
+    letter-spacing: -.025em;
+    font-weight: 600;
+    max-width: none;
   }
   .mobile-app-nav a.is-active,.mobile-app-nav a[aria-current="page"] {
     color: var(--accent);

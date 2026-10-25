@@ -19,6 +19,7 @@ try {
       for (const route of ['home', 'library', 'workout', 'program', 'nutrition', 'progress', 'labs', 'tools', 'settings']) {
         await page.evaluate(route => { location.hash = route; }, route);
         await page.locator(`html[data-route-ready="${route}"]`).waitFor();
+        if (route === 'nutrition') await page.locator('[data-food-add]').waitFor();
         if (route === 'labs') await page.locator('.lab-result-form').waitFor();
         if (route === 'library') await page.locator('#grid .card').first().waitFor();
         if (route === 'tools') await page.locator('[data-lab-form]').first().waitFor();

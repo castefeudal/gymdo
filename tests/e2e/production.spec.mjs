@@ -806,11 +806,18 @@ test('hash routes and MARKOV MADE LAB calculators are usable', async ({ page }) 
 });
 
 test('mobile shell has no horizontal page overflow', async ({ page }) => {
-  await page.goto('/index.html#home');
-  for (const [width, height] of [[360, 800], [390, 844], [430, 932]]) {
+  for(const lang of ['ru','en']){
+  await page.goto('/index.html?lang='+lang+'#home');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await page.evaluate(()=>document.fonts.ready);
+  for (const [width, height] of [[320, 800], [360, 800], [390, 844], [430, 932]]) {
     await page.setViewportSize({ width, height });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, `page overflow at ${width}x${height}`).toBeLessThanOrEqual(1);
+    const labels=await page.locator('.mobile-app-nav a>span:not(.mobile-nav-badge)').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,overflow:node.scrollWidth-Math.ceil(node.getBoundingClientRect().width),font:parseFloat(getComputedStyle(node).fontSize)})));
+    expect(labels).toHaveLength(5);
+    for(const label of labels){expect(label.overflow,`${lang} ${width}: ${label.text}`).toBeLessThanOrEqual(1);expect(label.font).toBeGreaterThanOrEqual(14);}
+  }
   }
 });
 

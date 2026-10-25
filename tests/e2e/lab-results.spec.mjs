@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {switchLocale} from './locale-support.mjs';
 test('laboratory measurements survive reload and support edit and history comparison', async ({ page }) => {
   await page.goto('/index.html#labs');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
@@ -62,7 +63,18 @@ test('a failed laboratory write retains input and does not claim durable success
   await expect(page.locator('[data-lab-result-status]')).toContainText('Не удалось сохранить');
   await expect(page.locator('.lab-result-entry')).toHaveCount(0);
   await expect(form.locator('[name=value]')).toHaveValue('20');
+  await switchLocale(page,'en','labs');await expect(form.locator('[name=value]')).toHaveValue('20');await expect(page.locator('.lab-result-entry')).toHaveCount(0);
+  await switchLocale(page,'ru','labs');
   await page.evaluate(() => window.restoreLaboratoryWrite());
   await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page.locator('.lab-result-entry')).toHaveCount(1);
+});
+
+test('laboratory language changes retain assay inputs, units and the edited record identity',async({page})=>{
+ await page.goto('/index.html#labs');const form=page.locator('.lab-result-form');await expect(form).toBeVisible();
+ await form.locator('[name=marker]').selectOption('albumin');await form.locator('[name=unit]').selectOption('g/dL');
+ for(const[key,value]of Object.entries({value:'4.3',date:'2026-10-20',low:'3.5',high:'5',laboratory:'Original Lab',method:'Assay A'}))await form.locator(`[name="${key}"]`).fill(value);
+ await switchLocale(page,'en','labs');await expect(form.locator('[name=unit]')).toHaveValue('g/dL');await expect(form.locator('[name=value]')).toHaveValue('4.3');await expect(form.locator('[name=date]')).toHaveValue('2026-10-20');
+ await form.locator('[type=submit]').click();await expect(page.locator('.lab-result-entry')).toHaveCount(1);
+ await switchLocale(page,'ru','labs');await form.locator('[name=value]').fill('4.5');await form.locator('[type=submit]').click();await expect(page.locator('.lab-result-entry')).toHaveCount(1);await expect(page.locator('.lab-result-value')).toContainText('4.5');
 });

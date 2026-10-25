@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {switchLocale} from './locale-support.mjs';
 test('food catalog, servings, recipe, edit, history and analytics survive reload',async({page})=>{
  await page.goto('/index.html#nutrition');await expect(page.locator('#mmg-boot')).toHaveCount(0);
  const root=page.locator('#food-diary');await expect(root.locator('[data-food-create]')).toHaveCount(1);
@@ -25,4 +26,18 @@ test('food catalog, servings, recipe, edit, history and analytics survive reload
   restored.once('dialog',dialog=>dialog.accept());const choosing=restored.waitForEvent('filechooser');await restored.locator('#data-import').click();const chooser=await choosing;const navigation=restored.waitForNavigation();await chooser.setFiles({name:'food-backup.json',mimeType:'application/json',buffer:Buffer.from(raw)});await navigation;
   await restored.evaluate(()=>location.hash='nutrition');await expect(restored.locator('#food-diary .food-entry')).toHaveCount(1);await expect(restored.locator('#food-diary .food-entry')).toContainText('370');
  }finally{await restored.close();}
+});
+
+test('language changes preserve food drafts and keep a single active catalog handler',async({page})=>{
+ await page.goto('/index.html#nutrition');const root=page.locator('#food-diary');await root.locator('[data-food-product] summary').click();
+ const form=root.locator('[data-food-create]');
+ const fill=async name=>{for(const [key,value]of Object.entries({name,calories:'370',protein:'13',fat:'7',carbs:'60',portion:'50',source:'Original label'}))await form.locator(`[name="${key}"]`).fill(value);};
+ await fill('Locale oats');await switchLocale(page,'en','nutrition');await expect(form.locator('[name=name]')).toHaveValue('Locale oats');await expect(form.locator('[name=source]')).toHaveValue('Original label');
+ await form.locator('[type=submit]').click();await expect(root.locator('.food-item')).toHaveCount(1);
+ await fill('Locale rice');await form.locator('[type=submit]').click();await expect(root.locator('.food-item')).toHaveCount(2);
+ await switchLocale(page,'ru','nutrition');await switchLocale(page,'en','nutrition');
+ await root.locator('[data-food-favorite]').first().click();await expect(root.locator('[data-food-favorite]').first()).toHaveAttribute('aria-pressed','true');
+ let dialogs=0;page.on('dialog',async dialog=>{dialogs++;await dialog.accept();});
+ await root.locator('[data-food-remove]').last().click();await expect(root.locator('.food-item')).toHaveCount(1);expect(dialogs).toBe(1);
+ await page.reload();await expect(root.locator('.food-item')).toHaveCount(1);await expect(root.locator('.food-item')).toContainText('Locale oats');
 });

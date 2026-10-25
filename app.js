@@ -8,6 +8,7 @@
             18 связывание · 14 инициализация
    ========================================================================= */
 import './bootstrap.js';
+import {createJournalWriter,captureJournalDraft,restoreJournalDraft} from './src/features/journals/view-lifecycle.mjs';
 import { cleanLabResults } from './src/features/lab/results-model.mjs';
 import { createExerciseMediaPlayer } from './src/features/exercise/media-player.mjs';
 import { createPreferenceWriter } from './src/features/exercise/preference-write-queue.mjs';
@@ -551,7 +552,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   /* ---------- 6. СОСТОЯНИЕ ------------------------------------------------ */
   var S = createInitialState();
 
-  var PAGE = 60;
+  var PAGE = 24;
 
   function isFav(id) { return S.favorites.indexOf(id) !== -1; }
   function inWorkout(id) {
@@ -1992,6 +1993,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   K.labResults = 'mmg.labResults.v1';
   K.foodDiary = 'mmg.foodDiary.v1';
   indexedAppStateKeys[K.foodDiary] = true;
+  var writeJournal=createJournalWriter({read:store.get,write:store.set,remove:store.remove,flush:flushAppStateWrites,persistent:function(){return indexedAppStateReady||storageOk;}});
   indexedAppStateKeys[K.labResults] = true;
   K.workoutSchema = 'mmg.workoutSchema.v4';
   K.historySchema = 'mmg.historySchema.v2';
@@ -6350,12 +6352,16 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     var host=$('labs'); if(!host)return;if(host.dataset.labLang===S.lang){host.dispatchEvent(new Event('labs:refresh'));return;}host.dataset.labLang=S.lang;
     qsa('[data-labs-nav]').forEach(function(el){el.textContent=S.lang==='en'?'Lab results':'Анализы';});
     var module=await import('./src/features/lab/results-view.mjs');
-    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:function(){return S.history;},nutrition:function(){return databaseNutritionDays.concat((store.json(K.foodDiary,{entries:[]}).entries||[]));}});
+    await writeJournal.pending(K.labResults);await host.reportPending;var draft=captureJournalDraft(host);
+    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:function(rows){return writeJournal(K.labResults,rows);},lang:S.lang,esc:esc,today:todayISO(),history:function(){return S.history;},nutrition:function(){return databaseNutritionDays.concat((store.json(K.foodDiary,{entries:[]}).entries||[]));}});
+    restoreJournalDraft(host,draft);host.dispatchEvent(new Event('labs:refresh'));
   }
   async function renderFoods(){
     var host=$('food-diary');if(!host)return;if(host.dataset.foodLang===S.lang){host.dispatchEvent(new Event('food:refresh'));return;}host.dataset.foodLang=S.lang;
     var module=await import('./src/features/nutrition/food-view.mjs');
-    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:async function(value){if(!store.set(K.foodDiary,JSON.stringify(value)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),weights:function(){return S.diary;},target:function(){return S.kbjuLast&&S.kbjuLast.target;},publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'estimated',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
+    await writeJournal.pending(K.foodDiary);var draft=captureJournalDraft(host);
+    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:function(value){return writeJournal(K.foodDiary,value);},lang:S.lang,esc:esc,today:todayISO(),weights:function(){return S.diary;},target:function(){return S.kbjuLast&&S.kbjuLast.target;},publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'estimated',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
+    restoreJournalDraft(host,draft);host.dispatchEvent(new Event('food:refresh'));
   }
   function renderV8Shell(route,animate){
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';

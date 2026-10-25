@@ -1,6 +1,9 @@
 import { MEALS, MACROS, emptyFoodDiary, cleanFoodDiary, foodTotals, recipeFromEntries, foodPeriod } from './food-model.mjs';
+import {beginJournalView} from '../journals/view-lifecycle.mjs';
 
 export function renderFoodDiary({ host, read, write, lang, esc, today, publishDay, weights, target }) {
+  const signal=beginJournalView(host);
+  const listen=(type,handler)=>host.addEventListener(type,handler,{signal});
   const t = (ru, en) => lang === 'en' ? en : ru;
   host.setAttribute('aria-label',t('Дневник продуктов','Food diary'));
   let state = cleanFoodDiary(read() || emptyFoodDiary());
@@ -24,9 +27,10 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     busy = true; host.setAttribute('aria-busy', 'true');
     try {
       if (!await write(next)) throw Error();
+      if(signal.aborted)return true;
       state = next; status.textContent = t('Сохранено на устройстве.', 'Saved on this device.'); render(); return true;
     } catch { status.textContent = t('Не удалось сохранить. Ввод сохранён в форме; повтори попытку.', 'Could not save. Your input remains in the form; try again.'); return false; }
-    finally { busy = false; host.setAttribute('aria-busy', 'false'); }
+    finally { busy = false; if(!signal.aborted)host.setAttribute('aria-busy', 'false'); }
   }
   const foodById = id => [...state.products, ...state.recipes].find(food => food.id === id);
   const dayEntries = () => state.entries.filter(row => row.date === get('day').value);
@@ -39,10 +43,13 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
   }
   function render() {
     const planned=typeof target==='function'?target():target;
+    if(form.elements.entry.value&&!editingFood)editingFood=state.entries.find(row=>row.id===form.elements.entry.value)?.food||null;
     const selected = form.elements.food.value;
     const foods = [...state.products, ...state.recipes];
     form.elements.food.innerHTML = foods.map(food => `<option value="${food.id}">${esc(food.name)}${state.recipes.includes(food) ? ' · '+t('блюдо','recipe') : ''}</option>`).join('');
+    if(editingFood&&!foods.some(food=>food.id===editingFood.id))form.elements.food.add(new Option(editingFood.name,editingFood.id));
     if (foods.some(food => food.id === selected)) form.elements.food.value = selected;
+    else if(editingFood&&form.elements.entry.value)form.elements.food.value=editingFood.id;
     const query = get('search').value.toLocaleLowerCase();
     const visible = foods.filter(food => food.name.toLocaleLowerCase().includes(query) && (!get('favorites').checked || food.favorite));
     q('[data-food-catalog]').innerHTML = visible.slice(0, 100).map(food => `<article class="food-item"><button class="btn btn-quiet" data-food-select="${food.id}" type="button">${esc(food.name)}</button><p class="small">${line(food)} / 100 g · ${t('Введено пользователем', 'User entered')}</p><p class="small">${esc(food.source)}</p><div class="food-actions"><button class="btn btn-quiet" data-food-favorite="${food.id}" aria-pressed="${food.favorite}" type="button">${t('Избранное','Favorite')}</button><button class="btn btn-quiet" data-food-edit="${food.id}" type="button">${t('Изменить','Edit')}</button><button class="btn btn-quiet" data-food-remove="${food.id}" type="button">${t('Удалить','Delete')}</button></div></article>`).join('') || `<p class="empty">${t('Продуктов пока нет. Добавь первый по этикетке — без вымышленных пищевых значений.', 'No foods yet. Add your first label — no invented nutrition values.')}</p>`;
@@ -63,22 +70,24 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     event.preventDefault(); if (busy) return;
     const item = Object.fromEntries(new FormData(productForm));
     item.id ||= crypto.randomUUID(); item.favorite = foodById(item.id)?.favorite || false;
+    productForm.elements.id.value=item.id;
     [...MACROS, 'portion'].forEach(key => item[key] = Number(item[key]));
     const key = state.recipes.some(food => food.id === item.id) ? 'recipes' : 'products';
-    if (await save({ ...state, [key]: [...state[key].filter(food => food.id !== item.id), item] })) { productForm.reset(); form.elements.food.value = item.id; preview(); }
+    if (await save({ ...state, [key]: [...state[key].filter(food => food.id !== item.id), item] })&&!signal.aborted) { productForm.reset(); form.elements.food.value = item.id; preview(); }
   });
   form.addEventListener('submit', async event => {
     event.preventDefault(); if(busy)return;
     const food = editingFood?.id === form.elements.food.value ? editingFood : foodById(form.elements.food.value), id = form.elements.entry.value || crypto.randomUUID();
     if(!food)return;
+    form.elements.entry.value=id;
     const grams = Number(form.elements.amount.value) * (form.elements.unit.value === 'servings' ? food.portion : 1);
     const next = { ...state, entries: [...state.entries.filter(row => row.id !== id), {id, date:get('day').value, meal:get('meal').value, food:{...food}, grams}] };
     if(!cleanFoodDiary(next)){status.textContent=t('Проверь дату и граммовку до 10 000 г.','Check date and amount up to 10,000 g.');return;}
     if(await save(next)){form.elements.entry.value='';editingFood=null;}
   });
-  host.addEventListener('input', event => { if(event.target===get('search'))render(); else if(form.contains(event.target))preview(); });
-  host.addEventListener('change', event => { if(event.target===get('day')||event.target===get('period')||event.target===get('meal')||event.target===get('favorites'))render(); else preview(); });
-  host.addEventListener('click', async event => {
+  listen('input', event => { if(event.target===get('search'))render(); else if(form.contains(event.target))preview(); });
+  listen('change', event => { if(event.target===get('day')||event.target===get('period')||event.target===get('meal')||event.target===get('favorites'))render(); else preview(); });
+  listen('click', async event => {
     const b = event.target.closest('button'); if(!b||busy)return;
     if(b.dataset.foodSelect){ form.elements.food.value=b.dataset.foodSelect;form.elements.entry.value='';form.elements.amount.value=1;form.elements.unit.value='servings';preview();form.elements.amount.focus(); }
     if(b.dataset.foodFavorite){const id=b.dataset.foodFavorite;await save({...state,products:state.products.map(f=>f.id===id?{...f,favorite:!f.favorite}:f),recipes:state.recipes.map(f=>f.id===id?{...f,favorite:!f.favorite}:f)});}
@@ -99,6 +108,6 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
       busy=true;try{await publishDay(get('day').value,foodTotals(rows));status.textContent=t('Итог дня обновлён в аналитике.','Daily analytics updated.');}catch{status.textContent=t('Итог не сохранён. Повтори попытку.','Total not saved. Try again.');}finally{busy=false;}
     }
   });
-  host.addEventListener('food:refresh',render);
+  listen('food:refresh',render);
   render();
 }

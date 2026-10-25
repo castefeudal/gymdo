@@ -1,8 +1,10 @@
 import { LAB_MARKERS, cleanLabResults, labCanonicalValue, labPosition } from './results-model.mjs';
 import { labTrend } from './trend-model.mjs';
 import { mountReportTools } from './report-view.mjs';
+import {beginJournalView} from '../journals/view-lifecycle.mjs';
 
 export function renderLabWorkspace({ host, read, write, lang, esc, today, history, nutrition }) {
+  const signal=beginJournalView(host);
   const text = (ru, en) => lang === 'en' ? en : ru;
   const rows = cleanLabResults(read());
   if(!rows){host.innerHTML='<p role=alert>'+text('Данные повреждены. Экспортируй копию в настройках перед восстановлением.','Invalid data. Export a backup in Settings before recovery.')+'</p>';return;}
@@ -58,7 +60,7 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     }).join('') : `<p class="empty">${text('Здесь появятся твои измерения. Добавь результат из лабораторного бланка.', 'Your measurements will appear here. Add a result from your laboratory report.')}</p>`;
   }
   list();
-  host.addEventListener('labs:refresh',list);
+  host.addEventListener('labs:refresh',list,{signal});
   host.querySelector('[data-lab-result-filter]').addEventListener('change', list);
   let busy = false;
   async function persist(next) {
@@ -71,10 +73,12 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     const row = Object.fromEntries(new FormData(form));
     row.value = Number(row.value);
     row.id ||= crypto.randomUUID();
+    controls.id.value=row.id;
     const clean = cleanLabResults([row]);
     if (!clean) { status.textContent = text('Проверь дату, значение и границы интервала.', 'Check the date, value and interval limits.'); return; }
     const next = cleanLabResults([...rows.filter(item => item.id !== row.id), clean[0]]);
-    if (!await persist(next)) { status.textContent = text('Не удалось сохранить. Скопируй введённые данные.', 'Could not save. Copy your input before leaving.'); return; }
+    const accepted=await persist(next);if(signal.aborted)return;
+    if (!accepted) { status.textContent = text('Не удалось сохранить. Скопируй введённые данные.', 'Could not save. Copy your input before leaving.'); return; }
     rows.splice(0, rows.length, ...next);
     controls.id.value = row.id;
     status.textContent = text('Сохранено на устройстве.', 'Saved on this device.');
@@ -92,7 +96,7 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     }
     if (remove && confirm(text('Удалить это измерение?', 'Delete this measurement?'))) {
       const next = rows.filter(row => row.id !== remove.dataset.labDelete);
-      if (await persist(next)) { rows.splice(0, rows.length, ...next); list(); }
+      if (await persist(next)&&!signal.aborted) { rows.splice(0, rows.length, ...next); list(); }
     }
   });
 }

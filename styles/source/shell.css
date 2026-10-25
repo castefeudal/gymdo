@@ -1370,3 +1370,13 @@ body[data-v8-returning="true"] .v8-context-bar {
     letter-spacing: .14em;
   }
 }
+
+/* @sequence 7050 */
+@media (min-width:901px) and (max-width:1399px){
+  :root{--header-h:112px;}
+  .topbar-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:48px 44px;gap:4px 16px;padding-block:8px;}
+  .topbar-inner>.brand{grid-column:1;grid-row:1;justify-self:start;}
+  .topbar-inner>.nav-tools{grid-column:2;grid-row:1;justify-self:end;}
+  .topbar-inner>.v7-primary-nav{grid-column:1/-1;grid-row:2;justify-content:center;margin-left:0;}
+  .v7-primary-nav>.v7-nav-link,.v7-primary-nav>.nav-group>button{min-height:44px;}
+}

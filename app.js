@@ -6259,6 +6259,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var host=$('v7-more-grid');if(!host)return;$('v7-more-title').textContent=v7c('more');$('v7-more-sub').textContent=v7c('moreSub');
     var groups=[
       [S.lang==='en'?'TOOLS':'ИНСТРУМЕНТЫ',[
+        ['tools','tools',S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные'],
         ['labs','tools',S.lang==='en'?'Measurements, intervals and history.':'Измерения, интервалы и история.'],
         ['program','program',S.lang==='en'?'Build and start the next training day.':'Собери неделю и начни следующий тренировочный день.'],
         ['nutrition','nutrition',S.lang==='en'?'Calorie target, macros and trend context.':'Калории, макросы и связь с динамикой.']]],

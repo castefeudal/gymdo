@@ -2,12 +2,24 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 test.use({ serviceWorkers: 'block' });
 
+test('instruction loading opens an immediate closable dialog and never reopens after Escape',async({page})=>{
+  await page.route('**/data/exercise-details.json',async route=>{const response=await route.fetch();await new Promise(resolve=>setTimeout(resolve,400));await route.fulfill({response});});
+  await page.goto('/index.html#library');await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  const done=page.waitForResponse('**/data/exercise-details.json');
+  await page.locator('#grid [data-open]').first().click();
+  await expect(page.locator('#modal')).toHaveAttribute('data-open','true');
+  await page.keyboard.press('Escape');await expect(page.locator('#modal')).toHaveAttribute('data-open','false');
+  await done;await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(page.locator('#modal')).toHaveAttribute('data-open','false');
+});
+
 test('reduced motion starts with a still and permits explicit playback', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/index.html#library');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
   await page.locator('#search').fill('0025');
   await page.locator('#grid [data-open="0025"]').click();
+  await expect(page.locator('#modal')).toBeVisible();
+  await expect(page.locator('#modal-scroll')).toBeVisible();
   const image = page.locator('#modal-img');
   const still = await image.getAttribute('data-still');
   await expect(image).toHaveAttribute('src', still);

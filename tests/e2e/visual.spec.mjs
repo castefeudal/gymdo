@@ -94,6 +94,7 @@ for (const [size, width, height] of sizes.filter(([name]) => ['360', '390', '144
       if (state === 'detail') {
         await page.locator('#grid [data-open]').first().click();
         await expect(page.locator('#modal')).toHaveAttribute('data-open', 'true');
+        await expect(page.locator('#modal-scroll')).toBeVisible();
         const titleBounds = await page.locator('#modal-title').boundingBox();
         const closeBounds = await page.locator('#modal-close').boundingBox();
         expect(titleBounds.y).toBeGreaterThanOrEqual(0);

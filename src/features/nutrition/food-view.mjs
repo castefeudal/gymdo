@@ -38,6 +38,7 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     q('[data-food-preview]').textContent = food ? `${Math.round(grams * 10) / 10} g · ${line(foodTotals([{ food, grams }]))}` : t('Сначала создай продукт с данными с этикетки.', 'Create a food using its label values first.');
   }
   function render() {
+    const planned=typeof target==='function'?target():target;
     const selected = form.elements.food.value;
     const foods = [...state.products, ...state.recipes];
     form.elements.food.innerHTML = foods.map(food => `<option value="${food.id}">${esc(food.name)}${state.recipes.includes(food) ? ' · '+t('блюдо','recipe') : ''}</option>`).join('');
@@ -48,9 +49,9 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     const [start, end] = foodPeriod(get('day').value || today, get('period').value);
     const entries = state.entries.filter(row => row.date >= start && row.date <= end);
     const dates = [...new Set(entries.map(row => row.date))].sort().reverse(), totals = foodTotals(entries);
-    const measured = weights.filter(row => row.date >= start && row.date <= end && Number(row.weight) > 0).sort((a,b)=>a.date.localeCompare(b.date));
+    const measured = (typeof weights==='function'?weights():weights).filter(row => row.date >= start && row.date <= end && Number(row.weight) > 0).sort((a,b)=>a.date.localeCompare(b.date));
     const weightText = measured.length >= 2 ? `${measured[0].weight} → ${measured.at(-1).weight} kg (${measured[0].date} – ${measured.at(-1).date})` : t('Для динамики веса нужны два измерения.', 'Weight trend needs two measurements.');
-    q('[data-food-summary]').innerHTML = `<p class="food-total num">${line(totals)}</p><p>${t('Дней с записями','Days with entries')}: ${dates.length}. ${t('Среднее по записанным дням','Average per recorded day')}: ${dates.length ? `${Math.round(totals.calories/dates.length)} kcal · ${Math.round(totals.protein/dates.length)} g ${t('белка','protein')}` : '—'}.</p><p class="small">${esc(weightText)}</p><p class="small">${target ? `${t('План калорий','Calorie target')}: ${Math.round(target)} kcal. ` : ''}${t('Неполный дневник не позволяет оценить энергозатраты. Для коррекции цели используй сверку ниже и 2–3 недели полных данных.', 'Partial diaries cannot establish energy expenditure. Use the check-in below and 2–3 weeks of complete data before adjusting targets.')}</p>`;
+    q('[data-food-summary]').innerHTML = `<p class="food-total num">${line(totals)}</p><p>${t('Дней с записями','Days with entries')}: ${dates.length}. ${t('Среднее по записанным дням','Average per recorded day')}: ${dates.length ? `${Math.round(totals.calories/dates.length)} kcal · ${Math.round(totals.protein/dates.length)} g ${t('белка','protein')}` : '—'}.</p><p class="small">${esc(weightText)}</p><p class="small">${planned ? `${t('План калорий','Calorie target')}: ${Math.round(planned)} kcal. ` : ''}${t('Неполный дневник не позволяет оценить энергозатраты. Для коррекции цели используй сверку ниже и 2–3 недели полных данных.', 'Partial diaries cannot establish energy expenditure. Use the check-in below and 2–3 weeks of complete data before adjusting targets.')}</p>`;
     q('[data-food-entries]').innerHTML = dates.map(date => `<section class="food-day"><h4>${date}</h4>${MEALS.map((meal, i) => {
       const rows = entries.filter(row => row.date === date && row.meal === meal);
       return rows.length ? `<h5>${labels[i]} · ${foodTotals(rows).calories} kcal</h5>${rows.map(row => `<article class="food-entry"><div><strong>${esc(row.food.name)}</strong><p class="small">${row.grams} g · ${line(foodTotals([row]))}</p></div><div class="food-actions"><button type="button" class="btn btn-quiet" data-entry-edit="${row.id}">${t('Изменить','Edit')}</button><button type="button" class="btn btn-quiet" data-entry-remove="${row.id}">${t('Удалить','Delete')}</button></div></article>`).join('')}` : '';
@@ -98,5 +99,6 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
       busy=true;try{await publishDay(get('day').value,foodTotals(rows));status.textContent=t('Итог дня обновлён в аналитике.','Daily analytics updated.');}catch{status.textContent=t('Итог не сохранён. Повтори попытку.','Total not saved. Try again.');}finally{busy=false;}
     }
   });
+  host.addEventListener('food:refresh',render);
   render();
 }

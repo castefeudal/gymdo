@@ -1256,9 +1256,25 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   async function openExercise(id, trigger, silent) {
     var ex = BY_ID[id];
     if (!ex) return;
-    if(!ex.custom&&!await ensureDetails())return;
     S.activeId = id;
-    if (trigger) modalReturnFocus = trigger;
+    if (trigger && !trigger.closest('#modal')) modalReturnFocus = trigger;
+    var openedWhileLoading=false;
+    $('modal').setAttribute('aria-busy','false');
+    $('modal-scroll').hidden=false;
+    $('modal-fav').disabled=$('modal-add').disabled=false;
+    if(!ex.custom&&!DETAILS_READY){
+      $('modal-title').textContent=exName(ex);
+      $('modal-kicker').textContent=detailText('Загрузка техники…','Loading instructions…');
+      $('modal-scroll').hidden=true;
+      $('modal').setAttribute('aria-busy','true');
+      $('modal-fav').disabled=$('modal-add').disabled=true;
+      if(!silent){openOverlay($('modal'),$('modal-close'));openedWhileLoading=true;}
+      if(!await ensureDetails()){if(S.activeId===id)closeModal();return;}
+      if(S.activeId!==id)return;
+      $('modal-scroll').hidden=false;
+      $('modal').setAttribute('aria-busy','false');
+      $('modal-fav').disabled=$('modal-add').disabled=false;
+    }
 
     $('modal-kicker').textContent = labelZone(ex.zone) + ' · ' + labelMu(ex.target);
     $('modal-title').textContent = exName(ex);
@@ -1295,7 +1311,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     if (!silent) {
       var scroll = $('modal-scroll');
       if (scroll) scroll.scrollTop = 0;
-      openOverlay($('modal'), $('modal-close'));
+      if(!openedWhileLoading)openOverlay($('modal'), $('modal-close'));
       track('exercise_open', { id: ex.id });
     }
   }
@@ -1731,7 +1747,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     el.setAttribute('aria-hidden', 'false');
     el.setAttribute('data-open', 'true');
     if (el.hasAttribute('hidden')) el.removeAttribute('hidden');
-    overlayStack.push({ el: el, onClose: opts.onClose, returnFocus: document.activeElement });
+    if(!overlayStack.some(function(entry){return entry.el===el;}))overlayStack.push({ el: el, onClose: opts.onClose, returnFocus: document.activeElement });
     lockBody(true);
     if (opts.scrim !== false) {
       var scrim = $('scrim');
@@ -1739,6 +1755,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
       scrim.setAttribute('data-open', 'true');
     }
     window.setTimeout(function () {
+      if(el.getAttribute('data-open')!=='true')return;
       var target = focusTarget || qs(FOCUSABLE, el);
       if (target && typeof target.focus === 'function') target.focus();
     }, 20);
@@ -3163,7 +3180,11 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
 
   async function openRun() {
     if (!S.workout.length) { showToast(t('workoutEmptyTitle')); return; }
-    if(S.workout.some(function(item){return !BY_ID[item.id]?.custom;})&&!await ensureDetails())return;
+    var routeAtStart=location.hash,starter=document.activeElement,loadingButton=starter&&starter.matches('[data-v8-start-run],#w-run');
+    if(loadingButton){starter.disabled=true;starter.setAttribute('aria-busy','true');}
+    try{if(S.workout.some(function(item){return !BY_ID[item.id]?.custom;})&&!await ensureDetails())return;}
+    finally{if(loadingButton){starter.disabled=false;starter.removeAttribute('aria-busy');}}
+    if(location.hash!==routeAtStart||!S.workout.length)return;
     var validSaved = S.runSession && Date.now() - Number(S.runSession.startedAt || 0) < 8 * 3600000;
     if (validSaved) {
       runState.ex = clamp(Number(S.runSession.ex) || 0, 0, S.workout.length);
@@ -3367,6 +3388,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     }
 
     S.kbjuLast = { target: ctx.target, goal: ctx.goal, date: todayISO() };
+    if($('food-diary'))$('food-diary').dispatchEvent(new Event('food:refresh'));
     store.set(K.kbju, JSON.stringify(S.kbjuLast));
     renderWeeklyNutritionBudget();
     renderDashIfVisible();
@@ -4115,22 +4137,19 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   /* Единая точка перерисовки всего авторского слоя — вызывается из applyLang. */
   function renderEco(initial) {
     if (!C) return;
-    renderConsole();
-    renderSystem();
-    renderMethod();
-    renderCoachLib(S.lastFiltered);
-    renderCoachWorkout();
-    renderGuides('guides-workout', 'workout');
-    renderGuides('guides-nutrition', 'nutrition');
-    renderGuides('guides-program', 'program');
-    renderGuides('guides-progress', 'progress');
-    renderHistory();
-    renderKb();
-    renderProgress();
-    renderAsks('lead-asks');
-    renderLeadGoals();
+    var route=v7RouteFromHash();
+    if(route==='home')renderConsole();
+    if(route==='system')renderSystem();
+    if(route==='method')renderMethod();
+    if(route==='library')renderCoachLib(S.lastFiltered);
+    if(route==='workout'){renderCoachWorkout();renderGuides('guides-workout','workout');renderHistory();}
+    if(route==='nutrition')renderGuides('guides-nutrition','nutrition');
+    if(route==='program')renderGuides('guides-program','program');
+    if(route==='progress'){renderGuides('guides-progress','progress');renderProgress();}
+    if(route==='knowledge')renderKb();
+    if(route==='contact'){renderAsks('lead-asks');renderLeadGoals();}
     renderTimer();
-    renderAbout();
+    if(route==='about')renderAbout();
     updateMobileBar();
     if (!initial) {
       if ($('checkin-out').getAttribute('data-filled') === 'true') { try { runCheckin(); } catch (e) { /* пересчёт не критичен */ } }
@@ -6274,7 +6293,7 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
   }
   function renderV7Nav(){qsa('[data-labs-nav]').forEach(function(el){el.textContent=v7c('labs');});qsa('[data-v7-nav]').forEach(function(el){el.textContent=v7c(el.dataset.v7Nav);});var moreSub={tools:S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные',program:S.lang==='en'?'Weekly structure and the next workout':'Структура недели и следующая тренировка',nutrition:S.lang==='en'?'Calories, macros and feedback':'Калории, макросы и обратная связь',knowledge:S.lang==='en'?'Practical contextual guides':'Практические разборы по контексту',method:S.lang==='en'?'Decision framework':'Логика принятия решений',settings:S.lang==='en'?'Interface, logging and data':'Интерфейс, логирование и данные',about:S.lang==='en'?'Author and system boundaries':'Автор и границы системы'};qsa('[data-v7-more]').forEach(function(el){el.textContent=v7c(el.dataset.v7More);});qsa('[data-v7-more-sub]').forEach(function(el){el.textContent=moreSub[el.dataset.v7MoreSub]||'';});var mt=qs('[data-v7-mobile-title]');if(mt)mt.textContent=v7c('moreTitle');}
   function v7FocusRoute(route){var el=$('v8-context-title')||$(route+'-title');if(el){el.setAttribute('tabindex','-1');requestAnimationFrame(function(){el.focus({preventScroll:true});window.scrollTo(0,0);});}else window.scrollTo(0,0);}
-  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);qsa('.v7-primary-nav>.v7-nav-link').forEach(function(a){var on=a.getAttribute('href')==='#'+route;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
+  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}renderEco(false);if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);qsa('.v7-primary-nav>.v7-nav-link').forEach(function(a){var on=a.getAttribute('href')==='#'+route;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
   function navigateV7(route,focus){route=routeIsKnown&&routeIsKnown(route)?route:'home';if(location.hash!=='#'+route)location.hash=route;else{applyV7Route(focus!==false);}}
   function syncV7Floating(){var route=v7RouteFromHash(),bar=$('mfb');if(bar){var show=MOBILE_MQ.matches&&route==='library';bar.setAttribute('data-open',String(show));}var sticky=$('mobile-rest-timer');if(sticky)sticky.classList.toggle('is-raised',!!(bar&&bar.getAttribute('data-open')==='true'));}
   function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
@@ -6327,15 +6346,15 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     host.hidden=!html;
   }
   async function renderLabs(){
-    var host=$('labs'); if(!host||host.dataset.labLang===S.lang)return;host.dataset.labLang=S.lang;
+    var host=$('labs'); if(!host)return;if(host.dataset.labLang===S.lang){host.dispatchEvent(new Event('labs:refresh'));return;}host.dataset.labLang=S.lang;
     qsa('[data-labs-nav]').forEach(function(el){el.textContent=S.lang==='en'?'Lab results':'Анализы';});
     var module=await import('./src/features/lab/results-view.mjs');
-    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:S.history,nutrition:databaseNutritionDays.concat((store.json(K.foodDiary,{entries:[]}).entries||[]))});
+    module.renderLabWorkspace({host:host,read:function(){return store.json(K.labResults,[]);},write:async function(rows){if(!store.set(K.labResults,JSON.stringify(rows)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),history:function(){return S.history;},nutrition:function(){return databaseNutritionDays.concat((store.json(K.foodDiary,{entries:[]}).entries||[]));}});
   }
   async function renderFoods(){
-    var host=$('food-diary');if(!host||host.dataset.foodLang===S.lang)return;host.dataset.foodLang=S.lang;
+    var host=$('food-diary');if(!host)return;if(host.dataset.foodLang===S.lang){host.dispatchEvent(new Event('food:refresh'));return;}host.dataset.foodLang=S.lang;
     var module=await import('./src/features/nutrition/food-view.mjs');
-    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:async function(value){if(!store.set(K.foodDiary,JSON.stringify(value)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),weights:S.diary,target:S.lastKbju&&S.lastKbju.calories,publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'estimated',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
+    module.renderFoodDiary({host:host,read:function(){return store.json(K.foodDiary,null);},write:async function(value){if(!store.set(K.foodDiary,JSON.stringify(value)))return false;try{await flushAppStateWrites();return indexedAppStateReady||storageOk;}catch{return false;}},lang:S.lang,esc:esc,today:todayISO(),weights:function(){return S.diary;},target:function(){return S.kbjuLast&&S.kbjuLast.target;},publishDay:async function(date,totals){var old=databaseNutritionDays.find(function(row){return row.date===date;})||{};var record=Object.assign({},old,totals,{date:date,accuracy:'estimated',updatedAt:new Date().toISOString()});if(historyRepository)await historyRepository.putNutritionDay(record);databaseNutritionDays=cleanNutritionDays(databaseNutritionDays.filter(function(row){return row.date!==date;}).concat([record]));if(!store.set(K.nutritionLog,JSON.stringify(databaseNutritionDays)))throw Error();renderNutritionLog();renderWeeklyNutritionBudget();renderNutritionTrend();}});
   }
   function renderV8Shell(route,animate){
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';
@@ -6565,6 +6584,8 @@ import { cleanLoadIncrementOverrides, equipmentLoadIncrement } from './src/featu
     await new Promise(function(resolve){setTimeout(resolve,0);});
     bindObservers();
     heroPeek();
+    if(initialRoute==='nutrition')await import('./src/features/nutrition/food-view.mjs');
+    if(initialRoute==='labs')await import('./src/features/lab/results-view.mjs');
     document.documentElement.dataset.coreReady = 'true';
     document.documentElement.dataset.routeReady = v7RouteFromHash();
     document.documentElement.dataset.appReady = 'true';

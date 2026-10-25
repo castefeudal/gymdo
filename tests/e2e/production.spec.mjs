@@ -1045,6 +1045,8 @@ test('Workout superset runs in alternating rounds and survives workout storage',
   const exerciseNames = [];
   for (const id of exerciseIds) {
     const card = page.locator('#grid [data-add="' + id + '"]').locator('xpath=ancestor::article[contains(@class,"card")]');
+    await card.scrollIntoViewIfNeeded();
+    await expect(card.locator('.card-title')).toBeVisible();
     exerciseNames.push(await card.locator('.card-title').innerText());
     await page.locator('#grid [data-add="' + id + '"]').click();
   }
@@ -1059,6 +1061,7 @@ test('Workout superset runs in alternating rounds and survives workout storage',
   const savedWorkout = await readIndexedUserState(page, 'mmg.workout.v2', []);
   expect(savedWorkout[0].groupType).toBe('superset');
   expect(savedWorkout[1].groupId).toBe(savedWorkout[0].groupId);
+  expect(exerciseNames.every(name=>name.trim().length>0)).toBe(true);
   await page.locator('[data-v8-start-run]:visible, #w-run:visible').first().click();
   await expect(page.locator('.run-name')).toHaveText(exerciseNames[0]);
   await page.locator('#run-next').click();

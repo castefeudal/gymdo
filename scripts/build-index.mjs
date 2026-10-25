@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-const BUILD_VERSION = '2026.10-r74-local-lab-media';
+const BUILD_VERSION = '2026.10-r75-premium-fitness';
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -112,6 +112,8 @@ const index = `<!doctype html>
   })();
   </script>
   <link rel="stylesheet" href="./app.css?v=${BUILD_VERSION}">
+  <link rel="preload" href="./assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/inter-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="modulepreload" href="./assets/runtime/application.js">
   <link rel="preload" href="./ui.html" as="fetch" crossorigin="anonymous">
   <style>${bootCss}</style>

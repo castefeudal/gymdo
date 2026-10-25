@@ -37,6 +37,10 @@ const result = await build({
   } }],
 });
 const files = Object.keys(result.metafile.outputs).map(file => `./${relative(process.cwd(), file).split(sep).join('/')}`).sort();
+const initial = new Set();
+function visit(file){if(initial.has(file))return;initial.add(file);for(const dep of result.metafile.outputs[file]?.imports||[])if(!dep.external&&dep.kind!=='dynamic-import')visit(dep.path);}
+visit('assets/runtime/application.js');
+await writeFile('assets/runtime-metrics.json',JSON.stringify({initialFiles:[...initial].sort(),initialBytes:[...initial].reduce((sum,file)=>sum+(result.metafile.outputs[file]?.bytes||0),0),totalBytes:Object.values(result.metafile.outputs).reduce((sum,file)=>sum+file.bytes,0)},null,2)+'\n');
 const template = await readFile(new URL('../src/app/service-worker.js', import.meta.url), 'utf8');
 await writeFile(new URL('../sw.js', import.meta.url), template.replace('// GENERATED_RUNTIME_ASSETS', files.map(file => `  '${file}',`).join('\n')));
 await writeFile(new URL('../assets/runtime-manifest.json', import.meta.url), JSON.stringify(files, null, 2) + '\n');

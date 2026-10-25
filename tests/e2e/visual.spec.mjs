@@ -36,6 +36,7 @@ async function ready(page, route) {
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
   if (route === 'tools') await expect(page.locator('[data-lab-form]').first()).toBeVisible();
   if (route === 'labs') await expect(page.locator('.lab-result-form')).toBeVisible();
+  if (route === 'nutrition') await expect(page.locator('[data-food-add]')).toBeVisible();
   if (route === 'library') await expect(page.locator('#grid .card').first()).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 }

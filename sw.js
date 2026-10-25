@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r74-local-lab-media';
+const VERSION = '2026.10-r75-premium-fitness';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -8,24 +8,31 @@ const PRECACHE = [
   './assets/runtime/calculator-history-EXXTNB5I.js',
   './assets/runtime/chunk-2QAHXVO4.js',
   './assets/runtime/chunk-5MTFQ47D.js',
-  './assets/runtime/chunk-6YRQLB4Y.js',
+  './assets/runtime/chunk-D5HF5SA5.js',
+  './assets/runtime/chunk-HIS2USCZ.js',
+  './assets/runtime/chunk-NMLJROAV.js',
   './assets/runtime/decision-engine-PXY5OBCC.js',
+  './assets/runtime/food-view-4ZWRDBOY.js',
   './assets/runtime/history-repository-XZLWYEQW.js',
   './assets/runtime/i18n-VB76NCGC.js',
-  './assets/runtime/load-modules-3ZQU3B2Z.js',
+  './assets/runtime/load-modules-COA6BLIM.js',
   './assets/runtime/mesocycle-ETCYIBMK.js',
   './assets/runtime/nutrition-analytics-OBDU5YCR.js',
   './assets/runtime/pr-engine-EHEKVMRG.js',
   './assets/runtime/progression-VLKS4LDK.js',
-  './assets/runtime/results-view-YB2ON4KO.js',
+  './assets/runtime/results-view-MEGIQU4X.js',
   './assets/runtime/router-GQ7X5DUD.js',
   './assets/runtime/substitution-engine-CEQUMOF4.js',
+  './assets/runtime/trend-model-DYDFAEWB.js',
   './assets/runtime/weekly-review-4RBJ5OET.js',
   './assets/runtime/weight-trend-UMPM5GLM.js',
   './assets/runtime/workout-groups-LBZAVUAE.js',
   './',
   './index.html',
   './app.css',
+  './assets/fonts/inter-latin.woff2',
+  './assets/fonts/inter-cyrillic.woff2',
+  './assets/fonts/inter-latin-ext.woff2',
   './ui.html',
   './src/app/entry.mjs',
   './src/app/router.mjs',
@@ -100,6 +107,11 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+  // Optional local OCR/PDF engines are cached only when used, never during install.
+  if (/\/assets\/vendor\//.test(url.pathname)) {
+    event.respondWith((async()=>{const cache=await caches.open(SHELL);const hit=await cache.match(request);if(hit)return hit;const response=await fetch(request);if(response.ok){try{await cache.put(request,response.clone());}catch{}}return response;})());
     return;
   }
 

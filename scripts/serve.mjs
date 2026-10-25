@@ -1,4 +1,5 @@
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream, statSync, readFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { createServer } from 'node:http';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,8 @@ const contentTypes = new Map([
   ['.mjs', 'text/javascript; charset=utf-8'],
   ['.mp4', 'video/mp4'],
   ['.webm', 'video/webm'],
+  ['.woff2', 'font/woff2'],
+  ['.wasm', 'application/wasm'],
   ['.png', 'image/png'],
   ['.svg', 'image/svg+xml'],
   ['.webmanifest', 'application/manifest+json; charset=utf-8'],
@@ -62,6 +65,12 @@ createServer((request, response) => {
   if (!info.isFile()) {
     response.writeHead(404).end('Not found');
     return;
+  }
+  // Optional production-like compression for local Lighthouse, not an audit bypass.
+  if(process.env.MMG_COMPRESS==='1' && /\.(?:css|js|mjs|html|json)$/.test(file) && /gzip/.test(request.headers['accept-encoding']||'')){
+    const body=gzipSync(readFileSync(file));
+    response.writeHead(200,{'Content-Type':contentTypes.get(extname(file))||'application/octet-stream','Content-Encoding':'gzip','Content-Length':body.length,'Cache-Control':'no-store','Vary':'Accept-Encoding'});
+    response.end(request.method==='HEAD'?undefined:body);return;
   }
 
   response.writeHead(200, {

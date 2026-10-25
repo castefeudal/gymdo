@@ -16,7 +16,7 @@ test('backup export attempts a file download and always exposes its JSON fallbac
   const backup = await exportBackup(page);
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^markov-made-gym-backup-.*\.json$/);
-  expect(backup).toMatchObject({ app: 'markov-made-gym', schemaVersion: 11, kind: 'mmg-backup' });
+  expect(backup).toMatchObject({ app: 'markov-made-gym', schemaVersion: 12, kind: 'mmg-backup' });
 });
 
 async function readIndexedUserState(page, key, fallback = null) {
@@ -436,7 +436,7 @@ test('legacy workout history migrates to IndexedDB without a 20-session cap', as
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page);
   expect(backup.app).toBe('markov-made-gym');
-  expect(backup.schemaVersion).toBe(11);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.calculatorHistory)).toEqual([]);
   expect(JSON.parse(backup.data.history)).toHaveLength(28);
   expect(JSON.parse(backup.data.customExercises)).toHaveLength(1);
@@ -516,7 +516,7 @@ test('partial IndexedDB collections merge missing legacy rows without replacing 
   expect(restored.nutritionDays.map(row => row.date).sort()).toEqual(['2026-09-19', '2026-09-20']);
 });
 
-test('custom exercise joins the Library, saved workout, Run Mode, history and schema v11 backup', async ({ page }) => {
+test('custom exercise joins the Library, saved workout, Run Mode, history and schema v12 backup', async ({ page }) => {
   test.setTimeout(90_000);
   await page.goto('/index.html#library');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
@@ -564,7 +564,7 @@ test('custom exercise joins the Library, saved workout, Run Mode, history and sc
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page);
   const customExercises = JSON.parse(backup.data.customExercises);
-  expect(backup.schemaVersion).toBe(11);
+  expect(backup.schemaVersion).toBe(12);
   expect(customExercises).toHaveLength(1);
   expect(customExercises[0]).toMatchObject({
     nameRu: 'Мой жим гантели', nameEn: 'My dumbbell press',
@@ -605,7 +605,7 @@ test('equipment profiles constrain Library choices, survive reload and preserve 
   await page.goto('/index.html#settings');
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   const backup = await exportBackup(page, '#v7-data-actions [data-v7-data="export"]');
-  expect(backup.schemaVersion).toBe(11);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.equipmentProfiles)).toHaveLength(5);
   const importedProfileId = backup.data.equipmentProfileActive;
   expect(importedProfileId).toMatch(/^equipment-/);
@@ -677,7 +677,7 @@ test('exercise preferences persist, affect library ranking and round-trip throug
 
   await page.goto('/index.html#settings');
   const backup = await exportBackup(page);
-  expect(backup.schemaVersion).toBe(11);
+  expect(backup.schemaVersion).toBe(12);
   expect(JSON.parse(backup.data.exercisePreferences)[exerciseId]).toBe('discomfort');
   expect(JSON.parse(backup.data.profile)).toMatchObject({ goal: 'muscle', place: 'gym', done: true });
 
@@ -798,7 +798,7 @@ test('hash routes and MARKOV MADE LAB calculators are usable', async ({ page }) 
   expect(results[0]).toMatchObject({ calculatorId: 'lab-e1rm', title: 'Оценка одноповторного максимума', evidenceId: 'estimated-1rm' });
   await page.goto('/index.html#settings');
   const calculatorBackup = await exportBackup(page);
-  expect(calculatorBackup.schemaVersion).toBe(11);
+  expect(calculatorBackup.schemaVersion).toBe(12);
   expect(JSON.parse(calculatorBackup.data.calculatorHistory)).toHaveLength(1);
   await page.goto('/index.html#library');
   await expect(page.locator('#library')).toBeVisible();

@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r74-local-lab-media';
+const VERSION = '2026.10-r75-premium-fitness';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -8,6 +8,9 @@ const PRECACHE = [
   './',
   './index.html',
   './app.css',
+  './assets/fonts/inter-latin.woff2',
+  './assets/fonts/inter-cyrillic.woff2',
+  './assets/fonts/inter-latin-ext.woff2',
   './ui.html',
   './src/app/entry.mjs',
   './src/app/router.mjs',
@@ -82,6 +85,11 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+  // Optional local OCR/PDF engines are cached only when used, never during install.
+  if (/\/assets\/vendor\//.test(url.pathname)) {
+    event.respondWith((async()=>{const cache=await caches.open(SHELL);const hit=await cache.match(request);if(hit)return hit;const response=await fetch(request);if(response.ok){try{await cache.put(request,response.clone());}catch{}}return response;})());
     return;
   }
 

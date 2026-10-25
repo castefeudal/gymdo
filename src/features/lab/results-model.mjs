@@ -2,6 +2,8 @@
 export const LAB_MARKERS = [
   ['testosterone', 'Общий тестостерон', 'Total testosterone', ['nmol/L', 'ng/dL'], 0.0347],
   ['shbg', 'ГСПГ', 'SHBG', ['nmol/L']],
+  ['albumin', 'Альбумин', 'Albumin', ['g/L', 'g/dL'], 10],
+  ['freeTestosterone', 'Свободный тестостерон (измеренный)', 'Free testosterone (measured)', ['pmol/L', 'pg/mL'], 3.467],
   ['lh', 'ЛГ', 'LH', ['IU/L']], ['fsh', 'ФСГ', 'FSH', ['IU/L']],
   ['estradiol', 'Эстрадиол', 'Estradiol', ['pmol/L', 'pg/mL'], 3.671],
   ['prolactin', 'Пролактин', 'Prolactin', ['mIU/L', 'ng/mL']],

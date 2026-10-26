@@ -5975,7 +5975,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var failed=writeBackupValues(report.staged);
     if(failed.length){
       var rb=analyzeBackup(rollback); if(rb.ok)writeBackupValues(rb.staged);
-      showToast(S.lang==='en'?'Import could not be written safely; previous data was restored.':'Не удалось безопасно записать импорт; предыдущие данные восстановлены.');
+      showToast(S.lang==='en'?'Import failed. Check your data and backup before continuing.':'Ошибка импорта. Проверь данные и резервную копию.');
       return false;
     }
     var importedHistory = report.staged.history ? jsonValue(report.staged.history) : null;
@@ -5990,7 +5990,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (report.staged.customExercises && historyRepository) indexedWrites.push(historyRepository.replaceCustomExercises(importedCustomExercises));
     if (report.staged.equipmentProfiles && historyRepository) indexedWrites.push(historyRepository.replaceEquipmentProfiles(importedEquipmentProfiles));
     if (report.staged.exercisePreferences && historyRepository) indexedWrites.push(writePreferenceSnapshot(importedExercisePreferences));
-    Promise.all(indexedWrites).then(async function () {
+    return Promise.all(indexedWrites).then(async function () {
       if (importedExercisePreferences && historyRepository) {
         var persistedPreferences = await historyRepository.readExercisePreferences();
         var preferenceIds = Object.keys(importedExercisePreferences).sort();
@@ -6013,7 +6013,8 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       if (importedExercisePreferences) { databaseExercisePreferences = importedExercisePreferences; S.exercisePreferences = importedExercisePreferences; }
       showToast(t('ioRestored',{n:Object.keys(report.staged).length}));
       window.setTimeout(function(){window.location.reload();},650);
-    }).catch(function () {
+      return true;
+    }).catch(async function () {
       var previous = analyzeBackup(rollback);
       if (previous.ok) {
         writeBackupValues(previous.staged);
@@ -6024,16 +6025,16 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
         if (historyRepository && previous.staged.customExercises) restores.push(historyRepository.replaceCustomExercises(jsonValue(previous.staged.customExercises)));
         if (historyRepository && previous.staged.equipmentProfiles) restores.push(historyRepository.replaceEquipmentProfiles(jsonValue(previous.staged.equipmentProfiles)));
         if (historyRepository && previous.staged.exercisePreferences) restores.push(writePreferenceSnapshot(cleanIdbExercisePreferences(jsonValue(previous.staged.exercisePreferences))));
-        Promise.all(restores).then(function () {
+        await Promise.all(restores).then(function () {
           if (previous.staged.customExercises) databaseCustomExercises = cleanCustomExercises(jsonValue(previous.staged.customExercises));
           if (previous.staged.nutritionLog) databaseNutritionDays = cleanNutritionDays(jsonValue(previous.staged.nutritionLog));
           if (previous.staged.equipmentProfiles) databaseEquipmentProfiles = cleanEquipmentProfiles(jsonValue(previous.staged.equipmentProfiles));
           if (previous.staged.exercisePreferences) { databaseExercisePreferences = cleanIdbExercisePreferences(jsonValue(previous.staged.exercisePreferences)); S.exercisePreferences = databaseExercisePreferences; }
         }).catch(function () {});
       }
-      showToast(S.lang==='en'?'Import could not be verified; the previous backup was restored.':'Импорт не удалось проверить; прежняя резервная копия восстановлена.');
+      showToast(S.lang==='en'?'Import failed. Check your data and backup before continuing.':'Ошибка импорта. Проверь данные и резервную копию.');
+      return false;
     });
-    return true;
   };
   clearAll = function(){
     if(!window.confirm(t('dataConfirm')))return;
@@ -6083,7 +6084,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var last=Number(store.get(K.lastBackup)||0), due=S.history.length>=3 && (!last||Date.now()-last>30*86400000);
     if(!storageOk){el.hidden=false;el.dataset.tone='warn';el.textContent=S.lang==='en'?'Session-only mode: browser storage is unavailable, so changes may disappear after reload. Export anything important before leaving.':'Режим без постоянного хранилища: браузер не даёт сохранять данные, поэтому изменения могут исчезнуть после перезагрузки. Экспортируй важное перед выходом.';return;}
     var corrupt=storageWarnings.filter(function(w){return w.type==='json';}).length;
-    if(corrupt){el.hidden=false;el.dataset.tone='warn';el.textContent=S.lang==='en'?'Invalid local data was isolated instead of being silently overwritten. Working defaults are active; export a fresh backup after checking your data.':'Некорректные локальные данные изолированы, а не молча перезаписаны. Сейчас используются рабочие значения; после проверки данных сохрани свежую копию.';return;}
+    if(corrupt){el.hidden=false;el.dataset.tone='warn';el.textContent=S.lang==='en'?'Invalid local data detected. Check storage and export your data before clearing it.':'Обнаружены повреждённые данные. Проверь хранилище и экспортируй данные перед очисткой.';return;}
     if(due){el.hidden=false;el.dataset.tone='ok';el.textContent=S.lang==='en'?'You already have training history on this device. Download a backup occasionally so browser cleanup cannot erase it.':'На устройстве уже накопилась история тренировок. Периодически скачивай резервную копию, чтобы очистка браузера не удалила её.';return;}
     el.hidden=true;
   }

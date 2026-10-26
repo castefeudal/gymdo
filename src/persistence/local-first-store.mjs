@@ -10,6 +10,7 @@ export function createLocalFirstStore({
   now = Date.now,
 } = {}) {
   const memory = Object.create(null);
+  const protectedKeys = new Set();
 
   function get(key) {
     if (Object.prototype.hasOwnProperty.call(memory, key)) return memory[key];
@@ -21,6 +22,10 @@ export function createLocalFirstStore({
   }
 
   function set(key, value) {
+    if (protectedKeys.has(key)) {
+      onWarning({ key, type: 'write', at: now() });
+      return false;
+    }
     memory[key] = value;
     try {
       if (storage && !isIndexedDBOwned(key)) storage.setItem(key, value);
@@ -37,6 +42,7 @@ export function createLocalFirstStore({
   }
 
   function remove(key) {
+    protectedKeys.delete(key);
     delete memory[key];
     try { if (storage) storage.removeItem(key); } catch {}
     try { enqueueIndexedDBWrite(key, '', true); } catch {}
@@ -49,13 +55,19 @@ export function createLocalFirstStore({
       const parsed = JSON.parse(raw);
       return parsed == null ? fallback : parsed;
     } catch {
+      if (protectedKeys.has(key)) return fallback;
       const recoveryKey = `mmg.recovery.${String(key).replace(/[^a-z0-9_.-]/gi, '_')}.${now()}`;
+      let durable = false;
       try {
         memory[recoveryKey] = raw;
-        if (storage) storage.setItem(recoveryKey, raw);
+        if (storage) {
+          storage.setItem(recoveryKey, raw);
+          durable = storage.getItem(recoveryKey) === raw;
+        }
       } catch {}
-      onWarning({ key, type: 'json', recoveryKey, at: now() });
-      remove(key);
+      onWarning({ key, type: 'json', recoveryKey, at: now(), ...(durable ? {} : { recoveryFailed: true }) });
+      if (durable) remove(key);
+      else protectedKeys.add(key);
       return fallback;
     }
   }

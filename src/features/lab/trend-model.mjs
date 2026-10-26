@@ -1,9 +1,20 @@
 import { labCanonicalValue } from './results-model.mjs';
+export function labChange(current, previous) {
+  if (!current || !previous || current.marker !== previous.marker || !current.laboratory?.trim() || !current.method?.trim() || current.laboratory !== previous.laboratory || current.method !== previous.method) return null;
+  const before = current.unit === previous.unit ? previous.value : labCanonicalValue(previous);
+  const after = current.unit === previous.unit ? current.value : labCanonicalValue(current);
+  if (before == null || after == null || !Number.isFinite(before) || !Number.isFinite(after)) return null;
+  const canonicalDelta = after - before;
+  const factor = current.unit === previous.unit ? 1 : (labCanonicalValue({ ...current, value: 1 }) ?? 0);
+  if (!factor) return null;
+  return { absolute: canonicalDelta / factor, relative: before > 0 ? canonicalDelta / before * 100 : null };
+}
 export function labTrend(rows,marker){
   const groups=new Map();
   for(const row of rows.filter(row=>row.marker===marker)){
     const value=labCanonicalValue(row),unit=value==null?row.unit:'canonical';
-    const key=JSON.stringify([row.laboratory,row.method,unit]);
+    // Missing provenance cannot establish that two assays are comparable.
+    const key=JSON.stringify([row.laboratory,row.method,unit,(!row.laboratory?.trim()||!row.method?.trim())?row.id:null]);
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push({...row,plotValue:value??row.value});
   }

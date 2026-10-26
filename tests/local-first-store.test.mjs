@@ -58,3 +58,16 @@ test('memory-only mode keeps values for the current app lifetime', () => {
   store.remove('lang');
   assert.equal(store.get('lang'), null);
 });
+
+test('failed quarantine preserves the original and blocks accidental replacement', () => {
+  const storage = memoryStorage({ profile: '{broken' });
+  storage.setItem = () => { throw new Error('quota exceeded'); };
+  const writes = [], warnings = [];
+  const store = createLocalFirstStore({ storage, enqueueIndexedDBWrite: (...args) => writes.push(args), onWarning: warning => warnings.push(warning), now: () => 123 });
+  assert.deepEqual(store.json('profile', {}), {});
+  assert.equal(storage.getItem('profile'), '{broken');
+  assert.equal(store.set('profile', '{}'), false);
+  assert.equal(store.get('profile'), '{broken');
+  assert.deepEqual(writes, []);
+  assert.equal(warnings[0].recoveryFailed, true);
+});

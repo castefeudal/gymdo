@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {switchLocale} from './locale-support.mjs';
+test('comparable results display absolute and relative change', async ({ page }) => {
+  await page.goto('/index.html#labs');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  const form = page.locator('.lab-result-form');
+  await form.locator('[name=laboratory]').fill('Lab A');
+  await form.locator('[name=method]').fill('Assay A');
+  await form.locator('[name=date]').fill('2026-01-01');
+  await form.locator('[name=value]').fill('10');
+  await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
+  await expect(page.locator('[data-lab-result-status]')).toContainText('Сохранено');
+  await form.getByRole('button', { name: 'Отменить правку' }).click();
+  await form.locator('[name=laboratory]').fill('Lab A');
+  await form.locator('[name=method]').fill('Assay A');
+  await form.locator('[name=date]').fill('2026-02-01');
+  await form.locator('[name=value]').fill('12');
+  await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
+  await expect(page.locator('.lab-result-entry').first()).toContainText('+2 nmol/L (+20%)');
+});
 test('laboratory measurements survive reload and support edit and history comparison', async ({ page }) => {
   await page.goto('/index.html#labs');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);

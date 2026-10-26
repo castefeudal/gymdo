@@ -5897,6 +5897,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     return JSON.stringify(payload,null,2);
   };
   function analyzeBackup(raw){
+    if(raw.length>50000000)return{ok:false,code:'size'};
     var parsed;
     try{parsed=JSON.parse(raw);}catch(e){return{ok:false,code:'json'};}
     var envelopeError=backupEnvelopeError(parsed,BACKUP_SCHEMA);
@@ -5971,7 +5972,9 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     }
     if(!report.changed.length){showToast(S.lang==='en'?'Backup is valid; nothing to change.':'Копия корректна; изменений нет.');return true;}
     if(!window.confirm(backupPreviewText(report)))return false;
-    var rollback=exportAll(); store.set(K.rollbackBackup,rollback);
+    var rollback=exportAll();
+    try { if(!storageOk || !store.set(K.rollbackBackup,rollback) || window.localStorage.getItem(K.rollbackBackup)!==rollback) throw Error(); }
+    catch(e) { showToast(S.lang==='en'?'No rollback copy. Import cancelled.':'Нет копии для отката. Импорт отменён.'); return false; }
     var failed=writeBackupValues(report.staged);
     if(failed.length){
       var rb=analyzeBackup(rollback); if(rb.ok)writeBackupValues(rb.staged);

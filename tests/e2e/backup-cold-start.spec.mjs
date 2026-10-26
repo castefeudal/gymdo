@@ -57,3 +57,23 @@ test('a catalog error refuses import and keeps current data intact', async ({ pa
   expect(after.exercisePreferences).toEqual(previous.exercisePreferences);
   expect(after.favorites).toEqual(previous.favorites);
 });
+
+test('a failed rollback snapshot cancels import without changing stored data', async ({ page }) => {
+  await page.goto('/index.html#settings');
+  await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
+  const previous = await exportedState(page);
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'mmg.backup.rollback.v1') throw new DOMException('Quota exceeded', 'QuotaExceededError');
+      return original.call(this, key, value);
+    };
+  });
+  page.once('dialog', dialog => dialog.accept());
+  await chooseBackup(page);
+  await expect(page.locator('#toast')).toContainText('Импорт отменён');
+  expect(await exportedState(page)).toEqual(previous);
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
+  expect(await exportedState(page)).toEqual(previous);
+});

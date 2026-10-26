@@ -13,6 +13,8 @@ export function reportSuggestions(text) {
     })).sort((a,b)=>b.name.length-a.name.length);
     if(!matches.length)continue;
     const {marker,name,index}=matches[0], definition=LAB_MARKERS.find(item=>item[0]===marker);
+    // A calculated value must never be suggested as a measured assay.
+    if(marker==='freeTestosterone' && /(?:calculated|computed|расч[её]тн\p{L}*)/iu.test(line))continue;
     const tail=line.slice(index+name.length).trim();
     const value=/^[\s:]*([0-9]+(?:[.,][0-9]+)?)\s+/.exec(tail);
     if(!value)continue;

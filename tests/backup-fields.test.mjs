@@ -56,6 +56,9 @@ test('domain-specific collections require their validators and reject partial nu
   assert.equal(validateBackupField('nutritionLog', '[]', { cleanNutritionDays: (rows) => rows }), '[]');
   assert.equal(validateBackupField('exercisePreferences', '{}', { cleanExercisePreferences: () => ({}) }), '{}');
   assert.equal(validateBackupField('calculatorHistory', '[]', { cleanCalculatorResults: () => [] }), '[]');
+  for (const [name, adapter] of [['customExercises','cleanCustomExercises'], ['equipmentProfiles','cleanEquipmentProfiles'], ['calculatorHistory','cleanCalculatorResults']]) {
+    assert.equal(validateBackupField(name, '[{"id":"valid"},{}]', { [adapter]: rows => rows.slice(0, 1) }), null);
+  }
 });
 
 test('backup plan adaptation and expired run sessions use injected app context', () => {

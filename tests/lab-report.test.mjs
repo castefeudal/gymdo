@@ -7,6 +7,7 @@ test('report suggestions require exact values and known units, never coerce ineq
  assert.equal(reportSuggestions('Testosterone <0.1 nmol/L\nTestosterone 5 unknown').length,0);
  assert.equal(reportSuggestions('Testosterone: <0.1 nmol/L\nGlucose 5 unknown; reference mmol/L\nALTITUDE 5 U/L').length,0);
  assert.equal(reportSuggestions('Free testosterone 15 pg/mL')[0].marker,'freeTestosterone');
+ assert.equal(reportSuggestions('Calculated free testosterone 15 pg/mL\nРасчётный свободный тестостерон 15 pg/mL').length,0);
  assert.equal(reportSuggestions('Testosterone 5 nmol/Lextra').length,0);
 });
 test('lab trend separates methods/laboratories and does not convert incompatible assays',()=>{

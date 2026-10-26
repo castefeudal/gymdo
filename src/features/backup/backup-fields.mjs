@@ -63,8 +63,9 @@ export function validateBackupField(name, raw, adapters = {}) {
     return clean.length === value.length ? stringify(clean) : null;
   }
   if (name === 'calculatorHistory') {
-    return Array.isArray(value) && typeof adapters.cleanCalculatorResults === 'function'
-      ? stringify(adapters.cleanCalculatorResults(value)) : null;
+    if (!Array.isArray(value) || typeof adapters.cleanCalculatorResults !== 'function') return null;
+    const clean = adapters.cleanCalculatorResults(value);
+    return Array.isArray(clean) && clean.length === value.length ? stringify(clean) : null;
   }
   if (name === 'tips') return stringify(Array.isArray(value) ? value.map(String).slice(0, 200) : []);
   if (name === 'recentSearch') return stringify(Array.isArray(value) ? value.map(String).filter(Boolean).slice(0, 8) : []);
@@ -74,8 +75,12 @@ export function validateBackupField(name, raw, adapters = {}) {
     return stringify(value);
   }
   if (name === 'kbju') return value && typeof value === 'object' && !Array.isArray(value) ? stringify(value) : null;
-  if (name === 'customExercises') return Array.isArray(value) && typeof adapters.cleanCustomExercises === 'function' ? stringify(adapters.cleanCustomExercises(value)) : null;
-  if (name === 'equipmentProfiles') return Array.isArray(value) && typeof adapters.cleanEquipmentProfiles === 'function' ? stringify(adapters.cleanEquipmentProfiles(value)) : null;
+  if (name === 'customExercises' || name === 'equipmentProfiles') {
+    const cleanFn = name === 'customExercises' ? adapters.cleanCustomExercises : adapters.cleanEquipmentProfiles;
+    if (!Array.isArray(value) || typeof cleanFn !== 'function') return null;
+    const clean = cleanFn(value);
+    return Array.isArray(clean) && clean.length === value.length ? stringify(clean) : null;
+  }
   if (name === 'exercisePreferences') {
     return value && typeof value === 'object' && !Array.isArray(value) && typeof adapters.cleanExercisePreferences === 'function'
       ? stringify(adapters.cleanExercisePreferences(value)) : null;

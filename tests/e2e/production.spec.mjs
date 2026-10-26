@@ -1408,6 +1408,30 @@ test('readability choice persists and progress supports multiple chart signals',
   await expect(page.locator('[data-progress-metric="sleep"]')).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('interface density persists independently from exercise grid density', async ({ page }) => {
+  await page.goto('/index.html#settings');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await page.locator('[data-v10-density="compact"]').click();
+  await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
+  await expect(page.locator('[data-v10-density="compact"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.goto('/index.html#library');
+  const gridDensity = page.locator('#density [data-density="roomy"]');
+  if (await gridDensity.isVisible()) await gridDensity.click();
+  else {
+    await page.evaluate(() => localStorage.setItem('mmg.density.v2', 'roomy'));
+    await page.reload();
+  }
+  await expect(page.locator('#grid')).toHaveAttribute('data-density', 'roomy');
+  await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
+  await expect(page.locator('#grid')).toHaveAttribute('data-density', 'roomy');
+  await page.goto('/index.html#settings');
+  await page.locator('#v7-language-actions [data-lang="en"]').click();
+  await expect(page.locator('#v10-density-title')).toHaveText('Interface density');
+  await expect(page.locator('[data-v10-density="compact"]')).toContainText('Compact');
+});
+
 
 test('library quick scenarios stay synchronized with filters', async ({ page }) => {
   await page.goto('/index.html#library');

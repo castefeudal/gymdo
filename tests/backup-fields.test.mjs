@@ -68,7 +68,9 @@ test('backup plan adaptation and expired run sessions use injected app context',
 
 test('settings backup preserves only bounded equipment load overrides', () => {
   const settings = validateBackupField('settings', JSON.stringify({
-    rir: true, rpe: false, reading: 'large', loadIncrements: { '0001': 1.25, '0002': 50 },
+    rir: true, rpe: false, reading: 'large', density: 'compact', loadIncrements: { '0001': 1.25, '0002': 50 },
   }), { cleanLoadIncrementOverrides: (value) => ({ '0001': Number(value['0001']) }) });
-  assert.deepEqual(parse(settings), { rir: true, rpe: false, reading: 'large', loadIncrements: { '0001': 1.25 } });
+  assert.deepEqual(parse(settings), { rir: true, rpe: false, reading: 'large', density: 'compact', loadIncrements: { '0001': 1.25 } });
+  const legacy = validateBackupField('settings', JSON.stringify({ reading: 'balanced' }));
+  assert.equal(parse(legacy).density, 'default');
 });

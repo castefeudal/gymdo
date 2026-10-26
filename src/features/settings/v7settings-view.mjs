@@ -13,6 +13,8 @@ export function renderV7SettingsView(context) {
     $('v7-data-title').textContent=v7c('data');
     if($('v10-reading-title'))$('v10-reading-title').textContent=S.lang==='en'?'Readability':'Читаемость';
     if($('v10-reading-text'))$('v10-reading-text').textContent=S.lang==='en'?'Choose interface scale without changing the information structure.':'Выбери размер интерфейса без потери структуры и информации.';
+    if($('v10-density-title'))$('v10-density-title').textContent=S.lang==='en'?'Interface density':'Плотность интерфейса';
+    if($('v10-density-text'))$('v10-density-text').textContent=S.lang==='en'?'Adjust spacing while keeping text and controls easy to read and use.':'Настрой отступы под себя, сохранив размер текста и кнопок.';
     $('v7-log-text').textContent=S.lang==='en'?'RIR/RPE stay hidden unless you explicitly enable them.':'RIR/RPE скрыты, пока вы явно их не включите.';
     $('v7-coach-text').textContent=S.lang==='en'?'Show contextual explanations and guidance.':'Показывать контекстные объяснения и рекомендации.';
     $('v7-data-text').textContent=v7c('settingsDataText');
@@ -30,8 +32,18 @@ export function renderV7SettingsView(context) {
       ];
       $('v10-reading-actions').innerHTML=reading.map(function(x){var active=S.settings.reading===x[0];return'<button class="reading-choice" type="button" data-v10-reading="'+x[0]+'" aria-pressed="'+String(active)+'"><span><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><i aria-hidden="true">'+(active?'✓':'')+'</i></button>';}).join('');
     }
-    $('v7-logging-actions').innerHTML='<button class="v7-setting-toggle" type="button" data-v7-setting="rir" aria-pressed="'+String(!!S.settings.rir)+'"><span>'+esc(v7c('rir'))+'</span><b>'+(S.settings.rir?'ON':'OFF')+'</b></button><button class="v7-setting-toggle" type="button" data-v7-setting="rpe" aria-pressed="'+String(!!S.settings.rpe)+'"><span>'+esc(v7c('rpe'))+'</span><b>'+(S.settings.rpe?'ON':'OFF')+'</b></button>';
-    $('v7-coach-actions').innerHTML='<button class="v7-setting-toggle" type="button" data-v7-coach aria-pressed="'+String(!!S.coachOn)+'"><span>'+esc(v7c('coachOn'))+'</span><b>'+(S.coachOn?'ON':'OFF')+'</b></button>';
+    if($('v10-density-actions')){
+      var density=[
+        ['compact',S.lang==='en'?'Compact':'Компактно',S.lang==='en'?'Less empty space':'Меньше пустого пространства'],
+        ['default',S.lang==='en'?'Balanced':'Обычно',S.lang==='en'?'Comfortable everyday rhythm':'Комфортный ритм на каждый день'],
+        ['roomy',S.lang==='en'?'Spacious':'Свободно',S.lang==='en'?'More space between sections':'Больше воздуха между разделами']
+      ];
+      $('v10-density-actions').setAttribute('aria-label',S.lang==='en'?'Interface density':'Плотность интерфейса');
+      $('v10-density-actions').innerHTML=density.map(function(x){var active=S.settings.density===x[0];return'<button class="reading-choice density-choice" type="button" data-v10-density="'+x[0]+'" aria-pressed="'+String(active)+'"><span><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><i aria-hidden="true">'+(active?'✓':'')+'</i></button>';}).join('');
+    }
+    var status=function(on){return S.lang==='en'?(on?'On':'Off'):(on?'Вкл.':'Выкл.');};
+    $('v7-logging-actions').innerHTML='<button class="v7-setting-toggle" type="button" data-v7-setting="rir" aria-pressed="'+String(!!S.settings.rir)+'"><span>'+esc(v7c('rir'))+'</span><b>'+status(!!S.settings.rir)+'</b></button><button class="v7-setting-toggle" type="button" data-v7-setting="rpe" aria-pressed="'+String(!!S.settings.rpe)+'"><span>'+esc(v7c('rpe'))+'</span><b>'+status(!!S.settings.rpe)+'</b></button>';
+    $('v7-coach-actions').innerHTML='<button class="v7-setting-toggle" type="button" data-v7-coach aria-pressed="'+String(!!S.coachOn)+'"><span>'+esc(v7c('coachOn'))+'</span><b>'+status(!!S.coachOn)+'</b></button>';
     $('v7-data-actions').innerHTML='<button class="btn btn-solid btn-sm" type="button" data-v7-data="export">'+esc(v7c('export'))+'</button><button class="btn btn-solid btn-sm" type="button" data-v7-data="import">'+esc(v7c('import'))+'</button><button class="btn btn-quiet btn-sm btn-danger" type="button" data-v7-data="clear">'+esc(v7c('clear'))+'</button>';
     if($('v7-diagnostics-title'))$('v7-diagnostics-title').textContent=S.lang==='en'?'On-device app diagnostics':'Диагностика приложения на этом устройстве';
     if($('v7-diagnostics-intro'))$('v7-diagnostics-intro').textContent=S.lang==='en'?'Local technical state for troubleshooting. Nothing here is sent anywhere.':'Техническое состояние для локальной проверки. Эти сведения никуда не отправляются.';

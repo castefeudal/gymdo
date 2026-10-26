@@ -8,7 +8,7 @@ test('app state has one versioned shape with production defaults', () => {
   assert.equal(state.lang, 'ru');
   assert.equal(state.theme, 'obsidian');
   assert.equal(state.coachOn, true);
-  assert.deepEqual(state.settings, { rir: false, rpe: false, reading: 'balanced', loadIncrements: {} });
+  assert.deepEqual(state.settings, { rir: false, rpe: false, reading: 'balanced', density: 'default', loadIncrements: {} });
   for (const collection of ['favorites', 'exercisePreferences', 'workout', 'history', 'diary', 'planLimits', 'recentSearches', 'recentExercises']) {
     assert.ok(state[collection] != null, `${collection} is initialized`);
   }

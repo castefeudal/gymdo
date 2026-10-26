@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { transform } from 'esbuild';
 
-const BUILD_VERSION = '2026.10-r75.1-gif-and-nav-polish';
+const BUILD_VERSION = '2026.10-r75.2-interface-density';
 const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
 const initialModules=[...runtimeMetrics.initialFiles,...runtimeMetrics.bootFiles.filter(file=>file.includes('/load-modules-'))].filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
@@ -111,6 +111,8 @@ const index = `<!doctype html>
       if (settings && ['balanced','comfortable','large'].indexOf(settings.reading) !== -1) {
         document.documentElement.setAttribute('data-reading', settings.reading);
       }
+      var density = settings && ['compact','default','roomy'].indexOf(settings.density) !== -1 ? settings.density : 'default';
+      document.documentElement.setAttribute('data-density', density);
     } catch (_) {}
   })();
   </script>

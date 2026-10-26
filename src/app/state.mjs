@@ -39,6 +39,6 @@ export function createInitialState() {
     recentSearches: [],
     recentExercises: [],
     runSession: null,
-    settings: { rir: false, rpe: false, reading: 'balanced', loadIncrements: {} },
+    settings: { rir: false, rpe: false, reading: 'balanced', density: 'default', loadIncrements: {} },
   };
 }

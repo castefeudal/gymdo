@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r75.1-gif-and-nav-polish';
+const VERSION = '2026.10-r75.2-interface-density';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;

@@ -214,6 +214,7 @@ test('flagship 10 surface includes weekly pulse, contextual actions, workout bal
     assert.match(html, /id="v10-context-actions"/);
     assert.match(html, /id="v10-workout-balance"/);
     assert.match(html, /id="v10-reading-actions"/);
+    assert.match(html, /id="v10-density-actions"/);
   }
   assert.match(app, /function renderV10HomePulse\(\)/);
   assert.match(app, /function renderV10ContextAction\(route\)/);
@@ -224,6 +225,7 @@ test('flagship 10 surface includes weekly pulse, contextual actions, workout bal
   assert.match(await read('styles/source/today.css'), /v10-home-pulse/);
   assert.match(css, /html\[data-reading="comfortable"\]/);
   assert.match(css, /html\[data-reading="large"\]/);
+  assert.match(css, /html\[data-density="compact"\]/);
 });
 
 test('programme survives reloads and edits are written back to saved state', async () => {
@@ -256,11 +258,13 @@ test('progress view can switch between weight waist and sleep', async () => {
   assert.match(app, /progressMetric = metric\.dataset\.progressMetric/);
 });
 
-test('first paint restores readability preference before flagship stylesheet', async () => {
+test('first paint restores readability and density preferences before flagship stylesheet', async () => {
   const index = (await read('index.html')) + (await read('ui.html'));
   const hydration = index.search(/localStorage\.getItem\(['"]mmg\.settings\.v1['"]\)/);
   const stylesheet = index.indexOf('app.css?v=');
   assert.ok(hydration >= 0 && stylesheet > hydration, 'reading preference must hydrate before stylesheet paint');
+  const density = index.indexOf('data-density', hydration);
+  assert.ok(density > hydration && stylesheet > density, 'density preference must hydrate before stylesheet paint');
   assert.match(index, /data-app-version=["']?2026\.\d{2}-r\d+(?:\.\d+)?-[a-z0-9-]+/);
 });
 

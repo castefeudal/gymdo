@@ -51,7 +51,7 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     const filtered = rows.filter(row => !host.querySelector('[data-lab-result-filter]').value || row.marker === host.querySelector('[data-lab-result-filter]').value);
     host.querySelector('[data-lab-result-list]').innerHTML = filtered.length ? filtered.map(row => {
       const marker = LAB_MARKERS.find(marker => marker[0] === row.marker);
-      const comparable = rows.find(previous => previous.id !== row.id && previous.marker === row.marker && `${previous.date}${previous.time}` < `${row.date}${row.time}` && previous.laboratory === row.laboratory && previous.method === row.method && (previous.unit === row.unit || (labCanonicalValue(previous) != null && labCanonicalValue(row) != null)));
+      const comparable = row.laboratory.trim() && row.method.trim() && rows.find(previous => previous.id !== row.id && previous.marker === row.marker && `${previous.date}${previous.time}` < `${row.date}${row.time}` && previous.laboratory === row.laboratory && previous.method === row.method && (previous.unit === row.unit || (labCanonicalValue(previous) != null && labCanonicalValue(row) != null)));
       const delta = comparable ? (comparable.unit === row.unit ? row.value - comparable.value : (labCanonicalValue(row) - labCanonicalValue(comparable)) / (row.unit === marker[3][0] ? 1 : marker[4])) : null;
       const labels = { unknown: text('Нет полного интервала', 'No complete interval'), low: text('Ниже интервала', 'Below interval'), high: text('Выше интервала', 'Above interval'), within: text('Внутри интервала', 'Within interval') };
       const sessions = (typeof history==='function'?history():history).filter(session => session.date?.slice(0, 10) === row.date).length;

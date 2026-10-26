@@ -1,19 +1,23 @@
 import { LAB_MARKERS } from './results-model.mjs';
-const aliases = { testosterone:['общий тестостерон','total testosterone','testosterone','тестостерон'], shbg:['shbg','гспг'], albumin:['albumin','альбумин'], lh:['lh','лг'], fsh:['fsh','фсг'], estradiol:['estradiol','эстрадиол'], prolactin:['prolactin','пролактин'], tsh:['tsh','ттг'], ft4:['free t4','свободный т4'], hemoglobin:['hemoglobin','haemoglobin','гемоглобин'], hematocrit:['hematocrit','гематокрит'], rbc:['rbc','эритроциты'], wbc:['wbc','лейкоциты'], platelets:['platelets','тромбоциты'], glucose:['glucose','глюкоза'], hba1c:['hba1c'], cholesterol:['total cholesterol','холестерин общий','общий холестерин'], ldl:['ldl','лпнп'], hdl:['hdl','лпвп'], triglycerides:['triglycerides','триглицериды'], alt:['alt','алт'], ast:['ast','аст'], creatinine:['creatinine','креатинин'], egfr:['egfr','скф'] };
+const aliases = { freeTestosterone:['free testosterone','свободный тестостерон'], testosterone:['общий тестостерон','total testosterone','testosterone','тестостерон'], shbg:['shbg','гспг'], albumin:['albumin','альбумин'], lh:['lh','лг'], fsh:['fsh','фсг'], estradiol:['estradiol','эстрадиол'], prolactin:['prolactin','пролактин'], tsh:['tsh','ттг'], ft4:['free t4','свободный т4'], hemoglobin:['hemoglobin','haemoglobin','гемоглобин'], hematocrit:['hematocrit','гематокрит'], rbc:['rbc','эритроциты'], wbc:['wbc','лейкоциты'], platelets:['platelets','тромбоциты'], glucose:['glucose','глюкоза'], hba1c:['hba1c'], cholesterol:['total cholesterol','холестерин общий','общий холестерин'], ldl:['ldl','лпнп'], hdl:['hdl','лпвп'], triglycerides:['triglycerides','триглицериды'], alt:['alt','алт'], ast:['ast','аст'], creatinine:['creatinine','креатинин'], egfr:['egfr','скф'] };
 // Suggestions are deliberately conservative: comparators and missing units are
 // left in the raw text, never silently coerced into exact measured values.
 export function reportSuggestions(text) {
   const found=[];
   for(const line of text.split(/\n/)) {
     const lower=line.toLocaleLowerCase();
-    const matches=Object.entries(aliases).flatMap(([marker,names])=>names.filter(name=>lower.includes(name)).map(name=>({marker,name}))).sort((a,b)=>b.name.length-a.name.length);
+    const matches=Object.entries(aliases).flatMap(([marker,names])=>names.flatMap(name=>{
+      const index=lower.indexOf(name);
+      if(index<0 || /[\p{L}\p{N}]/u.test(lower[index-1]||'') || /[\p{L}\p{N}]/u.test(lower[index+name.length]||''))return [];
+      return [{marker,name,index}];
+    })).sort((a,b)=>b.name.length-a.name.length);
     if(!matches.length)continue;
-    const {marker,name}=matches[0], definition=LAB_MARKERS.find(item=>item[0]===marker);
-    const tail=line.slice(lower.indexOf(name)+name.length).trim();
-    if(/^[<>≤≥]/.test(tail))continue;
-    const value=/^[\s:]*([0-9]+(?:[.,][0-9]+)?)\s/.exec(tail+' ');
+    const {marker,name,index}=matches[0], definition=LAB_MARKERS.find(item=>item[0]===marker);
+    const tail=line.slice(index+name.length).trim();
+    const value=/^[\s:]*([0-9]+(?:[.,][0-9]+)?)\s+/.exec(tail);
     if(!value)continue;
-    const unit=definition[3].find(unit=>tail.toLowerCase().includes(unit.toLowerCase()));
+    const remainder=tail.slice(value[0].length);
+    const unit=definition[3].find(unit=>remainder.slice(0,unit.length).toLowerCase()===unit.toLowerCase() && !/[\p{L}\p{N}/²]/u.test(remainder[unit.length]||''));
     if(!unit)continue;
     found.push({marker,value:Number(value[1].replace(',','.')),unit,source:line.slice(0,500)});
   }

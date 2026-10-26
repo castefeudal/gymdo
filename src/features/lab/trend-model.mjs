@@ -3,7 +3,8 @@ export function labTrend(rows,marker){
   const groups=new Map();
   for(const row of rows.filter(row=>row.marker===marker)){
     const value=labCanonicalValue(row),unit=value==null?row.unit:'canonical';
-    const key=JSON.stringify([row.laboratory,row.method,unit]);
+    // Missing provenance cannot establish that two assays are comparable.
+    const key=JSON.stringify([row.laboratory,row.method,unit,(!row.laboratory?.trim()||!row.method?.trim())?row.id:null]);
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push({...row,plotValue:value??row.value});
   }

@@ -48,3 +48,23 @@
 5. Master-prompt items requiring real human participation (task-based usability with three participant profiles and manual screen-reader/WCAG validation) remain open and cannot be claimed from automation. Do not claim full Definition of Done until those reviews and the performance target are resolved or accurately reported.
 
 Do not claim a completed production release until those gates are evidenced.
+
+## Pause checkpoint — 2026-10-27, latest session
+
+- User asked to pause and continue later. Do not merge, publish, or close this work until resumed.
+- Working tree is on `codex/gym-product-completion`, HEAD `28a22eae2b734abf8e96f4e3bcc05d51b74da1ec`, tracking the same remote SHA; all implementation, tests, generated assets, reviewed snapshots, and documentation changes are committed and pushed. The paragraph in this pause checkpoint itself is local-only and intentionally uncommitted, so updating it does not restart the active PR workflow.
+- Open draft PR #3: https://github.com/castefeudal/gymdo/pull/3.
+- Latest exact-HEAD PR Quality run: `40497627307`, https://github.com/castefeudal/gymdo/actions/runs/40497627307; completed successfully across foundation, Linux visual, Chromium desktop/mobile, Firefox, and WebKit.
+- Full baseline-refresh Quality run `40494626097` passed all jobs on `27c4af498cb1594a27ab58e102170b4a348057d7`. Its artifact was accepted only after success; exactly 18 affected Labs Linux snapshots were copied. The new head adds only docs/schema-compatibility test and those 18 baselines to the implementation already covered by the complete baseline run.
+- Local evidence on the current implementation: `npm run quality` passed 192/192; local visual matrix passed 218/218; targeted import/Labs E2E passed 36/36 across Chromium desktop/mobile, Firefox and WebKit.
+- Next: make PR #3 ready; merge (explicitly authorized in the user's earlier request); wait for the Pages deployment; verify public `release.json` equals the exact merge SHA and run `scripts/check-live.mjs` with the full SHA. Then measure Lighthouse on production separately and update this checkpoint.
+- Still open after release: mobile Lighthouse candidate LCP 3.647–4.069 s exceeds the 2.5 s target; field CWV/INP was not measured. Three-profile human usability research and manual screen-reader/WCAG 2.2 AA validation have not been conducted. Do not claim full Definition of Done or invent results.
+
+## Resume and production release — 2026-10-28
+
+- User resumed and authorized merging/publishing. Draft PR #3 was marked ready and merged: https://github.com/castefeudal/gymdo/pull/3. Merge commit is `ac6ef83971a90de9fcf25695fa644f1d15c1970d`.
+- Exact-merge Quality run `40594577467` passed foundation, visual, Chromium desktop/mobile, Firefox, and WebKit.
+- Pages deployment `40595202567` completed successfully. Public `release.json` reported the exact merge SHA.
+- `scripts/check-live.mjs` passed: 37 published artifacts matched Git blobs; all 480 route/theme/language/browser combinations passed, along with generated-report OCR and installed offline boot. Results are in `artifacts/live-r75-1/results.json` (local ignored artifact).
+- Production Lighthouse: 18 runs (3 per form factor and route) are in the local ignored `artifacts/lighthouse-production-ac6ef839/`; summary and interpretation are in `docs/evidence/lighthouse-production-2026-10-28.md`. Mobile Performance medians were 93/89/93 (Today/Library/Labs), desktop 100/99/100. Mobile LCP medians 2.875/3.092/2.844 s remain above 2.5 s.
+- Product change is merged and live. Full prompt Definition of Done remains open: three-profile human usability research, manual WCAG 2.2 AA/screen-reader review, and mobile LCP (plus mobile Library Performance) target. Automated CI/live checks do not establish those human or performance criteria.

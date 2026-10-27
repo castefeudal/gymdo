@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { getCalculatorEvidenceId, getLabEvidence, getLocalizedLabEvidence, loadLabEvidenceRegistry, validateCalculatorEvidenceMap } from '../src/features/lab/evidence-registry.mjs';
 
 const calculatorIds = [
@@ -32,4 +33,14 @@ test('evidence loader exposes Russian copy and rejects unknown identifiers', () 
   assert.equal(getLabEvidence('unknown'), null);
   assert.equal(getCalculatorEvidenceId('not-a-calculator'), null);
   assert.equal(validateCalculatorEvidenceMap([...calculatorIds, 'not-a-calculator']), false);
+});
+
+test('CKD-EPI 2021 implementation has an exact primary equation and official implementation reference', async () => {
+  const source = JSON.parse(await readFile(new URL('../data/evidence/calculators.json', import.meta.url), 'utf8'));
+  const model = source.models.find(({ id }) => id === 'ckd-epi-2021-creatinine');
+  assert.equal(model.formulaVersion, 'CKD-EPI-2021-adult-creatinine');
+  assert.equal(model.doi, '10.1056/NEJMoa2102953');
+  assert.match(model.implementationReference, /^https:\/\/www\.niddk\.nih\.gov\//);
+  assert.match(model.limitations, /18\+/);
+  assert.match(model.limitations, /single result/i);
 });

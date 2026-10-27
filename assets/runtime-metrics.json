@@ -7,7 +7,7 @@
     "assets/runtime/chunk-NMLJROAV.js",
     "assets/runtime/chunk-RLO3Y2M4.js"
   ],
-  "initialBytes": 448555,
+  "initialBytes": 450249,
   "bootFiles": [
     "assets/runtime/application.js",
     "assets/runtime/calculator-history-EXXTNB5I.js",
@@ -19,7 +19,7 @@
     "assets/runtime/decision-engine-PXY5OBCC.js",
     "assets/runtime/history-repository-XZLWYEQW.js",
     "assets/runtime/i18n-VB76NCGC.js",
-    "assets/runtime/load-modules-COA6BLIM.js",
+    "assets/runtime/load-modules-TDZRKIUC.js",
     "assets/runtime/mesocycle-ETCYIBMK.js",
     "assets/runtime/nutrition-analytics-OBDU5YCR.js",
     "assets/runtime/pr-engine-EHEKVMRG.js",
@@ -29,6 +29,6 @@
     "assets/runtime/weight-trend-UMPM5GLM.js",
     "assets/runtime/workout-groups-LBZAVUAE.js"
   ],
-  "bootBytes": 479897,
-  "totalBytes": 519991
+  "bootBytes": 481591,
+  "totalBytes": 526375
 }

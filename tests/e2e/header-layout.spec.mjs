@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 test.use({serviceWorkers:'block'});
 test('header controls fit intermediate widths and mobile More retains tools and labs',async({page})=>{
+ test.setTimeout(120_000);
  await page.setViewportSize({width:1920,height:900});await page.goto('/index.html#home');
  await expect(page.locator('#mmg-boot')).toHaveCount(0);await page.evaluate(()=>document.fonts.ready);
  for(const reading of ['balanced','large'])for(const language of ['ru','en']){
@@ -10,7 +11,9 @@ test('header controls fit intermediate widths and mobile More retains tools and 
   await expect(page.locator('html')).toHaveAttribute('lang',language);await expect(page.locator('html')).toHaveAttribute('data-reading',reading);
   for(const width of [901,960,1024,1100,1152,1200,1280,1366,1400,1440,1600,1750,1920]){
    await page.setViewportSize({width,height:900});
-   await page.evaluate(()=>{scrollTo(0,0);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+   // Viewport changes are synchronous; forcing layout below is enough. Waiting on
+   // animation frames can hang in background WebKit windows during the full matrix.
+   await page.evaluate(()=>scrollTo(0,0));
    const geometry=await page.evaluate(()=>{
     const header=document.querySelector('.topbar').getBoundingClientRect();
     const selectors='.topbar .brand,.topbar #lang-switch,.topbar #theme-toggle,.topbar #cmdk-open,.topbar #nav-burger,.v7-primary-nav>.v7-nav-link,.v7-primary-nav>.nav-group>button';

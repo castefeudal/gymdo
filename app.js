@@ -5739,6 +5739,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
   K.rollbackBackup = 'mmg.backup.rollback.v1';
+  K.importJournal = 'mmg.backup.import-journal.v1';
 
   /* Search transliteration is additive: original RU/EN names remain the source of truth. */
   function translitRu(value){
@@ -5963,6 +5964,24 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     });
     return failed;
   }
+  async function restoreImportJournal(journal){
+    if(!journal||journal.phase!=='prepared'||!journal.before||!journal.before.data||!Array.isArray(journal.touched))return false;
+    var data=journal.before.data,touched=journal.touched.filter(function(name){return DATA_KEYS.indexOf(name)!==-1;});
+    touched.forEach(function(name){var key=K[name];if(!key)return;var raw=data[name];delete memoryStore[key];if(storageOk){try{if(typeof raw==='string')window.localStorage.setItem(key,raw);else window.localStorage.removeItem(key);}catch(e){throw new Error('Could not restore local backup field '+name);}}if(typeof raw==='string')memoryStore[key]=raw;});
+    var current=await historyRepository.readUserState(),restores=[];
+    touched.forEach(function(name){var key=K[name];if(key&&indexedAppStateKeys[key]){if(typeof data[name]==='string'){current[key]=data[name];restores.push(historyRepository.writeUserState(key,data[name]));}else{delete current[key];restores.push(historyRepository.deleteUserState(key));}}});
+    if(touched.indexOf('history')!==-1){databaseHistory=data.history?jsonValue(data.history):[];restores.push(historyRepository.replaceAll(databaseHistory));}
+    if(touched.indexOf('nutritionLog')!==-1){databaseNutritionDays=data.nutritionLog?cleanNutritionDays(jsonValue(data.nutritionLog)):[];restores.push(historyRepository.replaceNutritionDays(databaseNutritionDays));}
+    if(touched.indexOf('diary')!==-1){databaseMeasurements=data.diary?cleanMeasurementsFn(jsonValue(data.diary)):[];restores.push(historyRepository.replaceMeasurements(databaseMeasurements));}
+    if(touched.indexOf('customExercises')!==-1){databaseCustomExercises=data.customExercises?cleanCustomExercises(jsonValue(data.customExercises)):[];restores.push(historyRepository.replaceCustomExercises(databaseCustomExercises));}
+    if(touched.indexOf('equipmentProfiles')!==-1){databaseEquipmentProfiles=data.equipmentProfiles?cleanEquipmentProfiles(jsonValue(data.equipmentProfiles)):[];restores.push(historyRepository.replaceEquipmentProfiles(databaseEquipmentProfiles));}
+    if(touched.indexOf('exercisePreferences')!==-1){databaseExercisePreferences=data.exercisePreferences?cleanIdbExercisePreferences(jsonValue(data.exercisePreferences)):{};restores.push(writePreferenceSnapshot(databaseExercisePreferences));}
+    if(touched.indexOf('plan')!==-1){databaseProgram=typeof data.plan==='string'?data.plan:null;restores.push(databaseProgram?historyRepository.writeProgram(databaseProgram):historyRepository.clearProgram());}
+    await Promise.all(restores);
+    databaseAppState=current;
+    try{window.localStorage.removeItem(K.importJournal);}catch(_journalCleanupError){}delete memoryStore[K.importJournal];
+    return true;
+  }
   importAll = async function(raw){
     if(!DATA_READY&&!await ensureData()){showToast(S.lang==='en'?'Exercise data is unavailable. Import was not applied; retry when the catalog is available.':'Каталог упражнений недоступен. Импорт не применён; повтори после загрузки каталога.', 'error');return false;}
     var report=analyzeBackup(raw);
@@ -5973,7 +5992,12 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if(!report.changed.length){showToast(S.lang==='en'?'Backup is valid; nothing to change.':'Копия корректна; изменений нет.');return true;}
     if(!window.confirm(backupPreviewText(report)))return false;
     var rollback=exportAll();
-    try { if(!storageOk || !store.set(K.rollbackBackup,rollback) || window.localStorage.getItem(K.rollbackBackup)!==rollback) throw Error(); }
+    try {
+      if(!storageOk || !store.set(K.rollbackBackup,rollback) || window.localStorage.getItem(K.rollbackBackup)!==rollback) throw Error();
+      var journal={version:1,phase:'prepared',before:JSON.parse(rollback),touched:Object.keys(report.staged),startedAt:Date.now()};
+      var journalRaw=JSON.stringify(journal);
+      if(!store.set(K.importJournal,journalRaw)||window.localStorage.getItem(K.importJournal)!==journalRaw)throw Error();
+    }
     catch(e) { showToast(S.lang==='en'?'No rollback copy. Import cancelled.':'Нет копии для отката. Импорт отменён.'); return false; }
     var failed=writeBackupValues(report.staged);
     if(failed.length){
@@ -6009,32 +6033,23 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
         }
         if (!preferencesMatch(persistedPreferences)) throw new Error('Imported exercise preferences could not be verified');
       }
+      var committed=JSON.parse(window.localStorage.getItem(K.importJournal)||'null');
+      if(!committed||committed.phase!=='prepared')throw new Error('Import journal is unavailable');
+      committed.phase='committed';
+      var committedRaw=JSON.stringify(committed);
+      window.localStorage.setItem(K.importJournal,committedRaw);
+      if(window.localStorage.getItem(K.importJournal)!==committedRaw)throw new Error('Import commit marker could not be verified');
       if (Array.isArray(importedHistory)) databaseHistory = importedHistory;
       if (Array.isArray(importedNutritionDays)) databaseNutritionDays = importedNutritionDays;
       if (Array.isArray(importedCustomExercises)) databaseCustomExercises = cleanCustomExercises(importedCustomExercises);
       if (Array.isArray(importedEquipmentProfiles)) databaseEquipmentProfiles = cleanEquipmentProfiles(importedEquipmentProfiles);
       if (importedExercisePreferences) { databaseExercisePreferences = importedExercisePreferences; S.exercisePreferences = importedExercisePreferences; }
       showToast(t('ioRestored',{n:Object.keys(report.staged).length}));
+      try{window.localStorage.removeItem(K.importJournal);}catch(_journalCleanupError){}delete memoryStore[K.importJournal];
       window.setTimeout(function(){window.location.reload();},650);
       return true;
     }).catch(async function () {
-      var previous = analyzeBackup(rollback);
-      if (previous.ok) {
-        writeBackupValues(previous.staged);
-        var restores = [];
-        restores.push(flushAppStateWrites());
-        if (historyRepository && previous.staged.history) restores.push(historyRepository.replaceAll(jsonValue(previous.staged.history)));
-        if (historyRepository && previous.staged.nutritionLog) restores.push(historyRepository.replaceNutritionDays(cleanNutritionDays(jsonValue(previous.staged.nutritionLog))));
-        if (historyRepository && previous.staged.customExercises) restores.push(historyRepository.replaceCustomExercises(jsonValue(previous.staged.customExercises)));
-        if (historyRepository && previous.staged.equipmentProfiles) restores.push(historyRepository.replaceEquipmentProfiles(jsonValue(previous.staged.equipmentProfiles)));
-        if (historyRepository && previous.staged.exercisePreferences) restores.push(writePreferenceSnapshot(cleanIdbExercisePreferences(jsonValue(previous.staged.exercisePreferences))));
-        await Promise.all(restores).then(function () {
-          if (previous.staged.customExercises) databaseCustomExercises = cleanCustomExercises(jsonValue(previous.staged.customExercises));
-          if (previous.staged.nutritionLog) databaseNutritionDays = cleanNutritionDays(jsonValue(previous.staged.nutritionLog));
-          if (previous.staged.equipmentProfiles) databaseEquipmentProfiles = cleanEquipmentProfiles(jsonValue(previous.staged.equipmentProfiles));
-          if (previous.staged.exercisePreferences) { databaseExercisePreferences = cleanIdbExercisePreferences(jsonValue(previous.staged.exercisePreferences)); S.exercisePreferences = databaseExercisePreferences; }
-        }).catch(function () {});
-      }
+      try { await restoreImportJournal(JSON.parse(window.localStorage.getItem(K.importJournal)||'null')); } catch (_rollbackError) { storageWarnings.push({key:K.importJournal,type:'recovery-pending',at:Date.now()}); }
       showToast(S.lang==='en'?'Import failed. Check your data and backup before continuing.':'Ошибка импорта. Проверь данные и резервную копию.');
       return false;
     });
@@ -6466,6 +6481,9 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       databaseCustomExercises = cleanCustomExercises(store.json(K.customExercises, []));
       databaseEquipmentProfiles = cleanEquipmentProfiles(store.json(K.equipmentProfiles, []));
       historyRepository = await persistence.createHistoryRepository();
+      var pendingImportJournal=store.json(K.importJournal,null);
+      if(pendingImportJournal&&pendingImportJournal.phase==='prepared')await restoreImportJournal(pendingImportJournal);
+      else if(pendingImportJournal&&pendingImportJournal.phase==='committed'){store.remove(K.importJournal);}
       databaseNutritionDays = await historyRepository.migrateLegacyNutritionDays(store.json(K.nutritionLog, []));
       databaseHistory = await historyRepository.migrateLegacy(store.json(K.history, []));
       databaseCustomExercises = await historyRepository.migrateLegacyCustomExercises(databaseCustomExercises);

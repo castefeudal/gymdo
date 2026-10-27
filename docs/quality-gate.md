@@ -9,7 +9,7 @@ The visual matrix has 218 cases across six viewport sizes, all themes and overla
 
 Windows and Linux baselines are separate because font rasterization differs. Update local expectations deliberately with npx playwright test visual.spec.mjs --project=desktop --update-snapshots. The manual Quality input refresh_visual_baselines=true generates Linux expectations alongside the browser behavior/Axe matrix and uploads them for review; accept the artifact only after the entire workflow succeeds. This mode cannot deploy. Download, review and commit its artifact, then run normal Quality comparisons. Missing baselines fail ordinary CI.
 
-If port 4173 is occupied, set MMG_E2E_PORT to a free port. Each browser context has isolated storage. Backup schema is version 11; earlier backups remain readable. No data reset is required.
+If port 4173 is occupied, set MMG_E2E_PORT to a free port. Each browser context has isolated storage. Backup schema is version 12; earlier backups remain readable, and interrupted imports restore their pre-import snapshot on cold start. No data reset is required.
 
 CI runs the four browser projects and visual matrix as separate jobs after the foundation gate. Pages still waits for the overall Quality conclusion and deploys its exact main push SHA.
 

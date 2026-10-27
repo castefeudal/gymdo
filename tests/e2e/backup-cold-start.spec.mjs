@@ -77,3 +77,50 @@ test('a failed rollback snapshot cancels import without changing stored data', a
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
   expect(await exportedState(page)).toEqual(previous);
 });
+
+test('an interrupted cross-store import is rolled back before startup reads user state', async ({ page }) => {
+  await page.goto('/index.html#settings');
+  await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
+  await page.locator('#data-export').click();
+  const before = JSON.parse(await page.locator('#data-io').inputValue());
+  const originalWorkout = before.data.workout;
+  const interruptedWorkout = JSON.stringify([{ id: '0002', sets: 4, reps: '6', weight: '80' }]);
+  await page.evaluate(async ({ originalWorkout, interruptedWorkout, before }) => {
+    localStorage.setItem('mmg.backup.import-journal.v1', JSON.stringify({ version: 1, phase: 'prepared', before, touched: ['workout'], startedAt: Date.now() }));
+    localStorage.setItem('mmg.workout.v2', interruptedWorkout);
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('markov-made-gym');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction('userState', 'readwrite');
+      tx.objectStore('userState').put({ key: 'mmg.workout.v2', value: interruptedWorkout });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    db.close();
+  }, { originalWorkout, interruptedWorkout, before });
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
+  await page.locator('#data-export').click();
+  const restored = JSON.parse(await page.locator('#data-io').inputValue());
+  expect(restored.data.workout ?? null).toBe(originalWorkout ?? null);
+  expect(await page.evaluate(() => localStorage.getItem('mmg.backup.import-journal.v1'))).toBeNull();
+  const indexedValue = await page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('markov-made-gym');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const value = await new Promise((resolve, reject) => {
+      const request = db.transaction('userState', 'readonly').objectStore('userState').get('mmg.workout.v2');
+      request.onsuccess = () => resolve(request.result?.value || null);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return value;
+  });
+  expect(indexedValue).toBe(originalWorkout ?? null);
+});

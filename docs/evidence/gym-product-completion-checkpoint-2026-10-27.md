@@ -11,8 +11,8 @@
 - Repository: `D:\MARKOVMADEOS\gymdo`; remote: `https://github.com/castefeudal/gymdo`.
 - Base branch/commit: `main` at `c53a793b4005a2a7e49dc94fbb145b5ee21c2e83`.
 - Working branch: `codex/gym-product-completion`.
-- Changes in this evidence file and source/build/test changes are local and not yet committed or pushed.
-- No PR for this work exists yet.
+- Candidate commit: `27c4af498cb1594a27ab58e102170b4a348057d7` (`feat: add crash-safe backups and CKD-EPI estimate`); pushed to `origin/codex/gym-product-completion`.
+- Draft PR #3: https://github.com/castefeudal/gymdo/pull/3. Follow-up documentation/schema-test/Linux-baseline changes are being prepared after the first CI result.
 - GitHub Quality run `40485591960` passed on the unmodified base commit, including foundation, Chromium desktop/mobile, Firefox, WebKit, and all 218 Linux visual checks. This proves the baseline, not the current candidate.
 - At the prior checkpoint the latest verified Pages `release.json` was `a7855f06b3276fdb709f70f911b582ea8bea03df`. Recheck the public SHA after merge; do not infer deployment from CI or a merge alone.
 
@@ -36,14 +36,15 @@
 - Food-diary, header-layout, and route Axe checks passed 26/26 in Firefox and WebKit after test wait fixes.
 - A combined 36-case lab/backup run had 29 passes and 7 WebKit page-setup/boot timeouts while browsers were run concurrently. A fresh WebKit-only run with one worker passed all 9/9 lab and backup scenarios; desktop/mobile/Firefox had passed their relevant tests in the combined run. Full PR CI remains the release gate.
 - A prior full local E2E run before the final fixes had 492 passed, 4 expected skips, and 10 failures: six reviewed Windows Settings snapshots (now fixed); Firefox/WebKit timeouts in food import, Axe and header layout (targeted browser suites now pass). The full behavior suite has not yet been rerun on the final candidate.
+- Targeted import/Labs E2E rerun: 27/27 on Chromium desktop/mobile and Firefox, plus 9/9 on WebKit.
 - `git -c core.whitespace=cr-at-eol diff --check` was used because the Windows checkout has `core.autocrlf=true`; rerun after final edits.
 
 ## Remaining release gates
 
-1. Finish/review the working diff and run the targeted laboratory + interrupted-backup suite after the final test assertion fix.
-2. Measure candidate Lighthouse (three runs per device and key route) with `scripts/measure-production.ps1`; preserve that as laboratory data and do not call it field Core Web Vitals. After publication, run it against production as a separate measurement.
-3. Commit and push `codex/gym-product-completion`, open/update the PR, run the complete Quality matrix on the candidate, and correct all failures. The Linux Labs baselines still need a reviewed refresh: use the Quality `refresh_visual_baselines` workflow, download the artifact only after the complete workflow succeeds, copy just the reviewed Labs PNGs, then run ordinary comparison Quality.
-4. Only merge after full candidate gates pass. Then verify completed Pages deployment, public `release.json` equals the exact merge SHA, and `scripts/check-live.mjs` passes for that SHA.
-5. Master-prompt items requiring real human participation (task-based usability with three participant profiles and manual screen-reader/WCAG validation) cannot be claimed from automation. Record objective remaining gaps rather than inventing participant results.
+1. Completed candidate validation: `npm run quality` passes 192/192 unit tests; targeted backup/Labs E2E passes 36/36 across Chromium desktop/mobile, Firefox and WebKit. Full branch Quality with `refresh_visual_baselines=true` passed as run `40494626097`; it produced the Linux artifacts. The initial PR Quality run `40495583851` passed foundation and all four behavior jobs but visual comparison failed on exactly the 18 Labs route snapshots. Those 18 reviewed Linux Labs PNGs are refreshed locally and `npm run visual -- --workers=3` passes 218/218. The ordinary PR Quality rerun must confirm the refreshed set.
+2. Backup schema is 12 and imports earlier versions; `docs/domain-model.md`, `docs/quality-gate.md`, and the compatibility test have been brought up to date. Atomic cross-store cold-start restore is covered in E2E.
+3. Lighthouse candidate medians remain lab data: mobile Performance 81–86 and LCP 3.647–4.069 s miss the prompt's 2.5 s LCP target; desktop Performance 98–99 and LCP 0.864–0.995 s. INP was not measured, and TBT is not INP. Production Lighthouse must be measured after publication.
+4. Finish and push the reviewed snapshot/documentation commit, confirm every ordinary PR Quality job is green, then merge. Verify completed Pages deployment, public `release.json` equals the exact merge SHA, and `scripts/check-live.mjs` passes for that full SHA.
+5. Master-prompt items requiring real human participation (task-based usability with three participant profiles and manual screen-reader/WCAG validation) remain open and cannot be claimed from automation. Do not claim full Definition of Done until those reviews and the performance target are resolved or accurately reported.
 
 Do not claim a completed production release until those gates are evidenced.

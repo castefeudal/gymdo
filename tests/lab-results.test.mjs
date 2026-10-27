@@ -30,9 +30,10 @@ test('race-free CKD-EPI 2021 adult creatinine equation matches reference vectors
     assert.equal(estimateCkdEpi2021(...args), null);
   }
 });
-test('schema 11 keeps older backups readable and protects new data from old readers', () => {
-  const envelope = { kind: 'mmg-backup', schemaVersion: 11, data: {} };
-  assert.equal(backupEnvelopeError(envelope, 10), 'future');
-  assert.equal(backupEnvelopeError({ ...envelope, schemaVersion: 10 }, 11), null);
-  assert.equal(backupEnvelopeError(envelope, 11), null);
+test('schema 12 keeps older backups readable and protects new data from old readers', () => {
+  const envelope = { kind: 'mmg-backup', schemaVersion: 12, data: {} };
+  assert.equal(backupEnvelopeError(envelope, 11), 'future');
+  assert.equal(backupEnvelopeError({ ...envelope, schemaVersion: 11 }, 12), null);
+  assert.equal(backupEnvelopeError({ ...envelope, schemaVersion: 10 }, 12), null);
+  assert.equal(backupEnvelopeError(envelope, 12), null);
 });

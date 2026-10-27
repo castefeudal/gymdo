@@ -75,10 +75,20 @@ test('an available application update cannot cover active workout controls', asy
   await choosing;
 });
 
-test('keyboard navigation focuses the visible title of the destination', async ({ page }) => {
+test('keyboard navigation focuses the visible title of the destination', async ({ page, isMobile }) => {
   await page.goto('/index.html#home');
   await expect(page.locator('html')).toHaveAttribute('data-app-ready', 'true');
-  const link = page.locator('nav a[href="#library"]:visible').first();
+  let link;
+  if (isMobile) {
+    link = page.locator('#mobile-app-nav a[data-mobile-dest="library"]');
+  } else {
+    const training = page.locator('#nav-links [data-navgroup="training"] > button');
+    await training.focus();
+    await page.keyboard.press('Enter');
+    await expect(training).toHaveAttribute('aria-expanded', 'true');
+    link = page.locator('#navmenu-training a[href="#library"]');
+  }
+  await expect(link).toBeVisible();
   await link.focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'library');

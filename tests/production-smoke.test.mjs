@@ -54,13 +54,14 @@ test('active exercise views always request GIF animation and service worker leav
   assert.match(sw, /Exercise GIFs are intentionally not intercepted/);
 });
 
-test('GIF previews follow touch visibility, mouse/keyboard focus, and reduced-motion preference', async () => {
+test('GIF previews autoplay whenever cards enter view without a manual playback control', async () => {
   const previews = await read('src/features/exercise/preview-motion.mjs');
   assert.match(previews, /IntersectionObserver/);
-  assert.match(previews, /event\.pointerType === 'touch'/);
-  assert.match(previews, /reducedMotion\.matches/);
-  assert.match(previews, /focusin/);
-  assert.match(previews, /focusout/);
+  assert.match(previews, /entry\.isIntersecting && entry\.intersectionRatio >= 0\.18/);
+  assert.match(previews, /observer\.observe\(card\)/);
+  assert.doesNotMatch(previews, /pointerover|pointerout|focusin|focusout|reducedMotion/);
+  const shell = await read('src/views/shell.html');
+  assert.doesNotMatch(shell, /id="modal-media-play"/);
 });
 
 test('PWA update lifecycle is controlled and shell assets are network-first', async () => {

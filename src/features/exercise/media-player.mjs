@@ -16,7 +16,6 @@ export function createExerciseMediaPlayer({ frame, image, text, onFallback }) {
     extras?.remove();
     extras = video = null;
     image.hidden = false;
-    frame.querySelector('#modal-media-play').hidden = false;
   }
   async function open(exercise, still) {
     stop();
@@ -57,7 +56,6 @@ export function createExerciseMediaPlayer({ frame, image, text, onFallback }) {
     video.addEventListener('error', fallback, { once: true });
     image.hidden = true;
     image.parentElement.append(video);
-    frame.querySelector('#modal-media-play').hidden = true;
     extras = document.createElement('div');
     extras.className = 'exercise-video-options';
     const replay = document.createElement('button');

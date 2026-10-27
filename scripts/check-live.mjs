@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 
 const base=process.env.MMG_LIVE_URL||'https://castefeudal.github.io/gymdo/';
 const expected=process.env.MMG_LIVE_COMMIT;
-const version='2026.10-r75.2-interface-density';
+const version='2026.10-r75.3-navigation-icons';
 const release=await (await fetch(new URL('release.json?verify='+Date.now(),base),{cache:'no-store'})).json();
 if(expected&&release.commit!==expected)throw Error(`Release mismatch: ${release.commit} != ${expected}`);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');

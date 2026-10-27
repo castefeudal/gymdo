@@ -1,6 +1,4 @@
-export function createExercisePreviewController({ grid, findExercise, stillSource, motionSource, reducedMotion }) {
-  const touchViewport = window.matchMedia('(hover: none), (pointer: coarse)');
-  const hoverUnavailable = window.matchMedia('(hover: none)');
+export function createExercisePreviewController({ grid, findExercise, stillSource, motionSource }) {
   const observedCards = new Set();
   let observer;
 
@@ -9,7 +7,7 @@ export function createExercisePreviewController({ grid, findExercise, stillSourc
     const image = card && card.querySelector('img');
     if (!exercise || exercise.custom || !image) return;
     if (playing) {
-      if (reducedMotion.matches || image.dataset.mediaFailed === 'final' || image.dataset.mediaFailed === 'inline') return;
+      if (image.dataset.mediaFailed === 'final' || image.dataset.mediaFailed === 'inline') return;
       image.dataset.still = stillSource(exercise);
       image.dataset.motion = '1';
       image.dataset.mediaFailed = '';
@@ -21,27 +19,11 @@ export function createExercisePreviewController({ grid, findExercise, stillSourc
     }
   }
 
-  grid.addEventListener('pointerover', event => {
-    if (event.pointerType === 'touch' || hoverUnavailable.matches) return;
-    const card = event.target.closest('.card');
-    if (card && !card.contains(event.relatedTarget)) preview(card, true);
-  });
-  grid.addEventListener('pointerout', event => {
-    if (event.pointerType === 'touch' || hoverUnavailable.matches) return;
-    const card = event.target.closest('.card');
-    if (card && !card.contains(event.relatedTarget)) preview(card, false);
-  });
-  grid.addEventListener('focusin', event => {
-    const card = event.target.closest('.card');
-    if (card) preview(card, true);
-  });
-  grid.addEventListener('focusout', event => {
-    const card = event.target.closest('.card');
-    if (card && !card.contains(event.relatedTarget)) preview(card, false);
-  });
-
   function observeVisibleCards() {
-    if (!('IntersectionObserver' in window) || (!touchViewport.matches && navigator.maxTouchPoints < 1)) return;
+    if (!('IntersectionObserver' in window)) {
+      grid.querySelectorAll('.card[data-id]').forEach(card => preview(card, true));
+      return;
+    }
     if (!observer) {
       observer = new IntersectionObserver(entries => {
         entries.forEach(entry => preview(entry.target, entry.isIntersecting && entry.intersectionRatio >= 0.18));

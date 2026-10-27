@@ -22,7 +22,7 @@ test('instruction loading opens an immediate closable dialog and never reopens a
   await done;await page.evaluate(()=>new Promise(requestAnimationFrame));await expect(page.locator('#modal')).toHaveAttribute('data-open','false');
 });
 
-test('reduced motion starts with a still and permits explicit playback', async ({ page }) => {
+test('exercise detail GIF autoplays and has no redundant play or pause control', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/index.html#library');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
@@ -31,12 +31,27 @@ test('reduced motion starts with a still and permits explicit playback', async (
   await expect(page.locator('#modal')).toBeVisible();
   await expect(page.locator('#modal-scroll')).toBeVisible();
   const image = page.locator('#modal-img');
-  const still = await image.getAttribute('data-still');
-  await expect(image).toHaveAttribute('src', still);
-  await page.locator('#modal-media-play').click();
   await expect(image).toHaveAttribute('src', /videos\/.*\.gif/);
-  await page.locator('#modal-media-play').click();
-  await expect(image).toHaveAttribute('src', still);
+  await expect(page.locator('#modal-media-play')).toHaveCount(0);
+});
+
+test('exercise technique tabs hide while scrolling down and return while scrolling up or at the top', async ({ page }) => {
+  await page.goto('/index.html#library');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await page.locator('#grid [data-open]').first().click();
+  const scroll = page.locator('#modal-scroll');
+  const tabs = page.locator('#modal-tabs');
+  await expect(tabs).toBeVisible();
+  await scroll.evaluate(element => { element.style.scrollBehavior = 'auto'; element.scrollTop = 420; });
+  await expect(tabs).toHaveClass(/is-scroll-hidden/);
+  await expect(tabs).toHaveJSProperty('inert', true);
+  await scroll.evaluate(element => { element.scrollTop = 180; });
+  await expect(tabs).not.toHaveClass(/is-scroll-hidden/);
+  await expect(tabs).toHaveJSProperty('inert', false);
+  await scroll.evaluate(element => { element.scrollTop = 420; });
+  await expect(tabs).toHaveClass(/is-scroll-hidden/);
+  await scroll.evaluate(element => { element.scrollTop = 0; });
+  await expect(tabs).not.toHaveClass(/is-scroll-hidden/);
 });
 
 test('licensed video is lazy, exposes speed, falls back and closes safely', async ({ page, browserName }) => {

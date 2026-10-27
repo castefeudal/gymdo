@@ -524,7 +524,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   var MEDIA_INLINE_FALLBACK = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420"><rect width="640" height="420" fill="#101318"/><g fill="none" stroke="#6f7782" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".74"><circle cx="320" cy="120" r="34"/><path d="M320 154v92M268 202l52-32 52 32M286 344l34-98 34 98M250 244h140"/></g><path d="M70 360h500" stroke="#d8a431" stroke-width="4" opacity=".55"/><text x="320" y="395" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" letter-spacing="4" fill="#8d949e">MARKOV MADE GYM</text></svg>');
   var MEDIA_REVISION = '20260927-media4';
   function exStill(ex) { return ex.custom ? (ex.image || MEDIA_PLACEHOLDER) : 'images/' + ex.slug + '.jpg'; }
-  function exMotion(ex, play) { return ex.custom || (!play && REDUCED_MOTION.matches) ? exStill(ex) : 'videos/' + ex.slug + '.gif?v=' + MEDIA_REVISION; }
+  function exMotion(ex) { return ex.custom ? exStill(ex) : 'videos/' + ex.slug + '.gif?v=' + MEDIA_REVISION; }
   function mediaFallback(img) {
     if (!img || img.dataset.mediaFailed === 'inline') return;
     if (img.dataset.mediaFailed === 'final') { img.dataset.mediaFailed='inline'; img.src=MEDIA_INLINE_FALLBACK; img.classList.add('media-fallback','media-fallback-inline'); img.removeAttribute('data-motion'); return; }
@@ -1171,37 +1171,13 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     return renderExerciseTechniqueView({ $, C, L, detailAlertCard, detailCueCard, detailKindLabel, detailLevelLabel, detailStepLabel, detailText, esc, exCardZone, exerciseTechniqueModel, factRow, labelEq, labelMu, labelZone, qsa, setModalTabActive, t }, ex);
   }
 
-  function syncModalMediaPlayback() {
-    var button = $('modal-media-play'), img = $('modal-img');
-    if (!button || !img) return;
-    var playing = img.getAttribute('src') !== img.dataset.still && !!img.getAttribute('src');
-    button.setAttribute('aria-pressed', String(playing));
-    button.setAttribute('aria-label', playing ? detailText('Пауза демонстрации', 'Pause demonstration') : detailText('Воспроизвести демонстрацию', 'Play demonstration'));
-    var pause = button.querySelector('.media-ico-pause');
-    var play = button.querySelector('.media-ico-play');
-    if (pause) pause.hidden = !playing;
-    if (play) play.hidden = playing;
-  }
-
   var exerciseMediaPlayer;
   function openExerciseVideo(ex) {
     if (!exerciseMediaPlayer) exerciseMediaPlayer = createExerciseMediaPlayer({
       frame: $('modal-media'), image: $('modal-img'), text: detailText,
-      onFallback: function () { if (S.activeId) { $('modal-img').src = exMotion(BY_ID[S.activeId]); syncModalMediaPlayback(); } }
+      onFallback: function () { if (S.activeId) $('modal-img').src = exMotion(BY_ID[S.activeId]); }
     });
     exerciseMediaPlayer.open(ex, exStill(ex));
-  }
-
-  function toggleModalMediaPlayback() {
-    var img = $('modal-img');
-    if (!img || !S.activeId) return;
-    var ex = BY_ID[S.activeId];
-    if (!ex) return;
-    var still = img.dataset.still || exStill(ex);
-    var playing = img.getAttribute('src') !== still && !!img.getAttribute('src');
-    img.dataset.paused = playing ? '1' : '';
-    img.src = playing ? still : exMotion(ex, true);
-    syncModalMediaPlayback();
   }
 
   function syncModalMediaExpandLabel() {
@@ -1297,8 +1273,6 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       if (frame) frame.classList.add('is-ready');
     }, { once: true });
     img.src = exMotion(ex);
-    img.dataset.paused = '';
-    syncModalMediaPlayback();
 
     renderExerciseTechnique(ex);
     openExerciseVideo(ex);
@@ -1313,6 +1287,11 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (!silent) {
       var scroll = $('modal-scroll');
       if (scroll) scroll.scrollTop = 0;
+      var tabs = $('modal-tabs');
+      if (tabs) {
+        tabs.classList.remove('is-scroll-hidden');
+        tabs.inert = false;
+      }
       if(!openedWhileLoading)openOverlay($('modal'), $('modal-close'));
       track('exercise_open', { id: ex.id });
     }
@@ -4832,7 +4811,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   }
 
   function bindLibrary() {
-    syncExercisePreviewCards = createExercisePreviewController({ grid: $('grid'), findExercise: function (id) { return BY_ID[id]; }, stillSource: exStill, motionSource: exMotion, reducedMotion: REDUCED_MOTION }).observeVisibleCards;
+    syncExercisePreviewCards = createExercisePreviewController({ grid: $('grid'), findExercise: function (id) { return BY_ID[id]; }, stillSource: exStill, motionSource: exMotion }).observeVisibleCards;
     syncExercisePreviewCards();
     $('grid').addEventListener('click', function (e) {
       var trigger = e.target.closest('[data-pref-toggle]');
@@ -5028,8 +5007,6 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     });
 
     $('modal-media-expand').addEventListener('click', toggleModalMedia);
-    var mediaPlay = $('modal-media-play');
-    if (mediaPlay) mediaPlay.addEventListener('click', toggleModalMediaPlayback);
     $('modal-tabs').addEventListener('click', function (e) {
       var button = e.target.closest('[data-modal-jump]');
       if (!button) return;
@@ -5039,12 +5016,21 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       target.scrollIntoView({ behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth', block: 'start' });
     });
 
-    var scroll = $('modal-scroll'), tabRaf = 0;
+    var scroll = $('modal-scroll'), tabs = $('modal-tabs'), tabRaf = 0, lastScrollTop = scroll ? scroll.scrollTop : 0;
     if (scroll) {
       scroll.addEventListener('scroll', function () {
         if (tabRaf) return;
         tabRaf = requestAnimationFrame(function () {
           tabRaf = 0;
+          var top = scroll.scrollTop;
+          var delta = top - lastScrollTop;
+          var hideTabs = top > 20 && delta > 2;
+          var showTabs = top <= 20 || delta < -2;
+          if (tabs && (hideTabs || showTabs)) {
+            tabs.classList.toggle('is-scroll-hidden', hideTabs);
+            tabs.inert = hideTabs;
+          }
+          lastScrollTop = top;
           updateModalTabFromScroll();
         });
       }, { passive: true });
@@ -5280,6 +5266,17 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     qs('[data-close-cmdk]').addEventListener('click', function () { closeOverlay($('cmdk')); });
   }
 
+  function syncPrimaryNav(route) {
+    var groups = { training: ['workout', 'library', 'program'], progress: ['progress', 'labs'], more: ['knowledge', 'method', 'settings', 'about', 'how', 'faq', 'contact', 'more'] };
+    qsa('#nav-links a').forEach(function (link) {
+      var active = link.getAttribute('href') === '#' + route;
+      if (active) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+    });
+    qsa('#nav-links .nav-group').forEach(function (group) {
+      group.dataset.active = String((groups[group.dataset.navgroup] || []).indexOf(route) !== -1);
+    });
+  }
+
   function bindObservers() {
     // Активный раздел в навигации
     var navMap = Object.create(null);
@@ -5291,10 +5288,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
         entries.forEach(function (entry) {
           var link = navMap[entry.target.id];
           if (!link) return;
-          if (entry.isIntersecting) {
-            qsa('#nav-links a').forEach(function (a) { a.removeAttribute('aria-current'); });
-            link.setAttribute('aria-current', 'true');
-          }
+          if (entry.isIntersecting) syncPrimaryNav(entry.target.id);
         });
       }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
       sectionNodes.forEach(function (node) { navObserver.observe(node); });
@@ -5734,7 +5728,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.10-r75.2-interface-density';
+  var APP_VERSION = '2026.10-r75.3-navigation-icons';
   var BACKUP_SCHEMA = 12;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
@@ -6296,9 +6290,31 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var swVersion=host.querySelector('[data-diagnostic-sw-version]');
     if(swVersion&&window.caches)window.caches.keys().then(function(keys){var prefix='mmg-gym-shell-',found=keys.filter(function(key){return key.indexOf(prefix)===0;}).sort().pop();if(document.contains(swVersion))swVersion.textContent=found?found.slice(prefix.length):(S.lang==='en'?'Active; cache version unavailable':'Активен; версия кэша недоступна');}).catch(function(){if(document.contains(swVersion))swVersion.textContent=S.lang==='en'?'Cache Storage unavailable':'Cache Storage недоступен';});
   }
-  function renderV7Nav(){qsa('[data-labs-nav]').forEach(function(el){el.textContent=v7c('labs');});qsa('[data-v7-nav]').forEach(function(el){el.textContent=v7c(el.dataset.v7Nav);});var moreSub={tools:S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные',program:S.lang==='en'?'Weekly structure and the next workout':'Структура недели и следующая тренировка',nutrition:S.lang==='en'?'Calories, macros and feedback':'Калории, макросы и обратная связь',knowledge:S.lang==='en'?'Practical contextual guides':'Практические разборы по контексту',method:S.lang==='en'?'Decision framework':'Логика принятия решений',settings:S.lang==='en'?'Interface, logging and data':'Интерфейс, логирование и данные',about:S.lang==='en'?'Author and system boundaries':'Автор и границы системы'};qsa('[data-v7-more]').forEach(function(el){el.textContent=v7c(el.dataset.v7More);});qsa('[data-v7-more-sub]').forEach(function(el){el.textContent=moreSub[el.dataset.v7MoreSub]||'';});var mt=qs('[data-v7-mobile-title]');if(mt)mt.textContent=v7c('moreTitle');}
+  function renderV7Nav(){
+    qsa('[data-nav-icon]').forEach(function(el){el.innerHTML=premiumIcon(el.dataset.navIcon);});
+    qsa('[data-labs-nav]').forEach(function(el){el.textContent=v7c('labs');});
+    qsa('[data-v7-nav]').forEach(function(el){el.textContent=v7c(el.dataset.v7Nav);});
+    var moreSub={
+      workout:S.lang==='en'?'Build or resume a session':'Собери или продолжи занятие',
+      library:S.lang==='en'?'Find a movement and check technique':'Найди движение и проверь технику',
+      program:S.lang==='en'?'Weekly structure and the next workout':'Структура недели и старт следующей тренировки',
+      progress:S.lang==='en'?'Weight, training and trends':'Вес, тренировки и динамика',
+      labs:S.lang==='en'?'Lab results and calculations':'Результаты и лабораторные расчёты',
+      tools:S.lang==='en'?'Strength, nutrition, body, cardio and my data':'Сила, питание, состав тела, кардио и мои данные',
+      knowledge:S.lang==='en'?'Practical contextual guides':'Практические разборы по контексту',
+      method:S.lang==='en'?'How the system makes decisions':'Как система принимает решения',
+      settings:S.lang==='en'?'Interface, logging and data':'Интерфейс, логирование и данные',
+      about:S.lang==='en'?'Author, principles and system boundaries':'Автор, принципы и границы системы',
+      how:S.lang==='en'?'Navigation and first steps':'Навигация и первые шаги',
+      faq:S.lang==='en'?'Answers about features and data':'Ответы о функциях и данных',
+      contact:S.lang==='en'?'Ask a question or discuss a goal':'Задать вопрос или обсудить задачу'
+    };
+    qsa('[data-v7-more]').forEach(function(el){el.textContent=v7c(el.dataset.v7More);});
+    qsa('[data-v7-more-sub]').forEach(function(el){el.textContent=moreSub[el.dataset.v7MoreSub]||'';});
+    var mt=qs('[data-v7-mobile-title]');if(mt)mt.textContent=v7c('moreTitle');
+  }
   function v7FocusRoute(route){var el=$('v8-context-title')||$(route+'-title');if(el){el.setAttribute('tabindex','-1');el.focus({preventScroll:true});}window.scrollTo(0,0);}
-  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(ecoRoute!==route||ecoLang!==S.lang){ecoRoute=route;ecoLang=S.lang;renderEco(false);if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();}if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);qsa('.v7-primary-nav>.v7-nav-link').forEach(function(a){var on=a.getAttribute('href')==='#'+route;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');});var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
+  function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(ecoRoute!==route||ecoLang!==S.lang){ecoRoute=route;ecoLang=S.lang;renderEco(false);if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();}if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);syncPrimaryNav(route);var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
   function navigateV7(route,focus){route=routeIsKnown&&routeIsKnown(route)?route:'home';if(location.hash!=='#'+route)location.hash=route;else{applyV7Route(focus!==false);}}
   function syncV7Floating(){var route=v7RouteFromHash(),bar=$('mfb');if(bar){var show=MOBILE_MQ.matches&&route==='library';bar.setAttribute('data-open',String(show));}var sticky=$('mobile-rest-timer');if(sticky)sticky.classList.toggle('is-raised',!!(bar&&bar.getAttribute('data-open')==='true'));}
   function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
@@ -6369,6 +6385,8 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     route=route||v7RouteFromHash();var returning=v7Returning();document.body.dataset.v8Returning='true';document.body.dataset.v8Ready='true';
     var meta=v8RouteMeta(route),k=$('v8-context-kicker'),t8=$('v8-context-title'),m8=$('v8-context-meta'),lt=$('v8-context-local-text');
     if(k)k.textContent=meta.k;if(t8)t8.textContent=meta.t;if(m8)m8.textContent=meta.m;if(lt)lt.textContent=S.lang==='en'?'Saved on this device':'Сохранено на устройстве';
+    var routeIcons={home:'home',system:'home',start:'home',workout:'workout',library:'search',nutrition:'nutrition',progress:'progress',tools:'mixed',labs:'health',program:'program',knowledge:'knowledge',method:'technique',settings:'settings',about:'home',how:'technique',faq:'knowledge',contact:'health',more:'menu',muscles:'muscle'};
+    var contextIcon=$('v8-context-icon');if(contextIcon)contextIcon.innerHTML=premiumIcon(routeIcons[route]||'mixed');
     renderV10ContextAction(route);
     qsa('[data-v8-rail]').forEach(function(a){var on=a.dataset.v8Rail===route||(route!=='home'&&route!=='library'&&route!=='workout'&&route!=='progress'&&a.dataset.v8Rail==='more');if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     if(animate&&!REDUCED_MOTION.matches){var target=route==='home'&&returning?$('home'):(route==='home'?qs('.hero'):$(route));if(target){target.classList.remove('v8-route-enter');requestAnimationFrame(function(){target.classList.add('v8-route-enter');setTimeout(function(){target.classList.remove('v8-route-enter');},280);});}}

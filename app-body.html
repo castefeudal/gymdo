@@ -22,21 +22,34 @@
     </a>
 
     <nav class="nav-links v7-primary-nav" id="nav-links" aria-label="Основные разделы">
-      <a class="v7-nav-link" href="#home" data-v7-nav="home">Сегодня</a>
-      <a class="v7-nav-link" href="#workout" data-v7-nav="workout">Тренировки</a>
-      <a class="v7-nav-link" href="#library" data-v7-nav="library">Упражнения</a>
-      <a class="v7-nav-link" href="#nutrition" data-v7-nav="nutrition">Питание</a>
-      <a class="v7-nav-link" href="#progress" data-v7-nav="progress">Прогресс</a>
-      <a class="v7-nav-link" href="#tools" data-v7-nav="tools">Инструменты</a>
-      <a class="v7-nav-link" href="#labs" data-labs-nav>Анализы</a>
+      <a class="v7-nav-link" href="#home"><span class="nav-icon" data-nav-icon="home" aria-hidden="true"></span><span data-v7-nav="home">Сегодня</span></a>
+      <div class="nav-group" data-navgroup="training" data-open="false" data-active="false">
+        <button type="button" aria-expanded="false" aria-controls="navmenu-training"><span class="nav-icon" data-nav-icon="workout" aria-hidden="true"></span><span data-v7-nav="workout">Тренировки</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-menu" id="navmenu-training">
+          <a href="#workout"><span class="nav-menu-icon" data-nav-icon="workout" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-nav="workout">Тренировки</b><span data-v7-more-sub="workout">Собери или продолжи занятие</span></span></a>
+          <a href="#library"><span class="nav-menu-icon" data-nav-icon="search" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-nav="library">Упражнения</b><span data-v7-more-sub="library">Найди движение и проверь технику</span></span></a>
+          <a href="#program"><span class="nav-menu-icon" data-nav-icon="program" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="program">Программа</b><span data-v7-more-sub="program">Структура недели и старт следующей тренировки</span></span></a>
+        </div>
+      </div>
+      <a class="v7-nav-link" href="#nutrition"><span class="nav-icon" data-nav-icon="nutrition" aria-hidden="true"></span><span data-v7-nav="nutrition">Питание</span></a>
+      <div class="nav-group" data-navgroup="progress" data-open="false" data-active="false">
+        <button type="button" aria-expanded="false" aria-controls="navmenu-progress"><span class="nav-icon" data-nav-icon="progress" aria-hidden="true"></span><span data-v7-nav="progress">Прогресс</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav-menu" id="navmenu-progress">
+          <a href="#progress"><span class="nav-menu-icon" data-nav-icon="progress" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-nav="progress">Прогресс</b><span data-v7-more-sub="progress">Вес, тренировки и динамика</span></span></a>
+          <a href="#labs"><span class="nav-menu-icon" data-nav-icon="health" aria-hidden="true"></span><span class="nav-menu-copy"><b data-labs-nav>Анализы</b><span data-v7-more-sub="labs">Результаты и лабораторные расчёты</span></span></a>
+        </div>
+      </div>
+      <a class="v7-nav-link" href="#tools"><span class="nav-icon" data-nav-icon="mixed" aria-hidden="true"></span><span data-v7-nav="tools">Инструменты</span></a>
       <div class="nav-group" data-navgroup="more" data-open="false">
-        <button type="button" aria-expanded="false" aria-controls="navmenu-more"><span data-v7-nav="more">Ещё</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button type="button" aria-expanded="false" aria-controls="navmenu-more"><span class="nav-icon" data-nav-icon="menu" aria-hidden="true"></span><span data-v7-nav="more">Ещё</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav-menu" id="navmenu-more">
-          <a href="#program"><b data-v7-more="program">Программа</b><span data-v7-more-sub="program">Структура недели и старт следующей тренировки</span></a>
-          <a href="#knowledge"><b data-v7-more="knowledge">База знаний</b><span data-v7-more-sub="knowledge">Практические разборы по контексту</span></a>
-          <a href="#method"><b data-v7-more="method">Метод</b><span data-v7-more-sub="method">Как система принимает решения</span></a>
-          <a href="#settings"><b data-v7-more="settings">Настройки</b><span data-v7-more-sub="settings">Интерфейс, логирование и данные</span></a>
-          <a href="#about"><b data-v7-more="about">Павел Марков</b><span data-v7-more-sub="about">Автор, принципы и границы системы</span></a>
+          <a href="#knowledge"><span class="nav-menu-icon" data-nav-icon="knowledge" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="knowledge">База знаний</b><span data-v7-more-sub="knowledge">Практические разборы по контексту</span></span></a>
+          <a href="#method"><span class="nav-menu-icon" data-nav-icon="technique" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="method">Метод</b><span data-v7-more-sub="method">Как система принимает решения</span></span></a>
+          <a href="#settings"><span class="nav-menu-icon" data-nav-icon="settings" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="settings">Настройки</b><span data-v7-more-sub="settings">Интерфейс, логирование и данные</span></span></a>
+          <a href="#about"><span class="nav-menu-icon" data-nav-icon="home" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="about">Павел Марков</b><span data-v7-more-sub="about">Автор, принципы и границы системы</span></span></a>
+          <a href="#how"><span class="nav-menu-icon" data-nav-icon="technique" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="how">Как пользоваться</b><span data-v7-more-sub="how">Навигация и первые шаги</span></span></a>
+          <a href="#faq"><span class="nav-menu-icon" data-nav-icon="knowledge" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="faq">Вопросы</b><span data-v7-more-sub="faq">Ответы о функциях и данных</span></span></a>
+          <a href="#contact"><span class="nav-menu-icon" data-nav-icon="health" aria-hidden="true"></span><span class="nav-menu-copy"><b data-v7-more="contact">Связаться</b><span data-v7-more-sub="contact">Задать вопрос или обсудить задачу</span></span></a>
         </div>
       </div>
     </nav>
@@ -67,16 +80,21 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
   </button>
   <div class="v7-mobile-menu-head"><p class="eyebrow">MARKOV MADE OS</p><h2 data-v7-mobile-title>Разделы системы</h2></div>
-  <a class="mnav-link" href="#home"><span data-v7-nav="home">Сегодня</span><span>→</span></a>
-  <a class="mnav-link" href="#library"><span data-v7-nav="library">Библиотека</span><span>→</span></a>
-  <a class="mnav-link" href="#workout"><span data-v7-nav="workout">Тренировка</span><span>→</span></a>
-  <a class="mnav-link" href="#progress"><span data-v7-nav="progress">Прогресс</span><span>→</span></a>
-  <a class="mnav-link" href="#program"><span data-v7-more="program">Программа</span><span>→</span></a>
-  <a class="mnav-link" href="#nutrition"><span data-v7-more="nutrition">Питание</span><span>→</span></a>
-  <a class="mnav-link" href="#knowledge"><span data-v7-more="knowledge">База знаний</span><span>→</span></a>
-  <a class="mnav-link" href="#method"><span data-v7-more="method">Метод</span><span>→</span></a>
-  <a class="mnav-link" href="#settings"><span data-v7-more="settings">Настройки</span><span>→</span></a>
-  <a class="mnav-link" href="#about"><span data-v7-more="about">Павел Марков</span><span>→</span></a>
+  <a class="mnav-link" href="#home"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="home" aria-hidden="true"></span><span data-v7-nav="home">Сегодня</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#workout"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="workout" aria-hidden="true"></span><span data-v7-nav="workout">Тренировки</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#library"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="search" aria-hidden="true"></span><span data-v7-nav="library">Упражнения</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#nutrition"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="nutrition" aria-hidden="true"></span><span data-v7-nav="nutrition">Питание</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#progress"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="progress" aria-hidden="true"></span><span data-v7-nav="progress">Прогресс</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#tools"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="mixed" aria-hidden="true"></span><span data-v7-nav="tools">Инструменты</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#labs"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="health" aria-hidden="true"></span><span data-labs-nav>Анализы</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#program"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="program" aria-hidden="true"></span><span data-v7-more="program">Программа</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#knowledge"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="knowledge" aria-hidden="true"></span><span data-v7-more="knowledge">База знаний</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#method"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="technique" aria-hidden="true"></span><span data-v7-more="method">Метод</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#settings"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="settings" aria-hidden="true"></span><span data-v7-more="settings">Настройки</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#about"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="home" aria-hidden="true"></span><span data-v7-more="about">Павел Марков</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#how"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="technique" aria-hidden="true"></span><span data-v7-more="how">Как пользоваться</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#faq"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="knowledge" aria-hidden="true"></span><span data-v7-more="faq">Вопросы</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
+  <a class="mnav-link" href="#contact"><span class="mnav-label"><span class="mnav-icon" data-nav-icon="health" aria-hidden="true"></span><span data-v7-more="contact">Связаться</span></span><span class="mnav-arrow" aria-hidden="true">→</span></a>
   <div class="mnav-prefs">
     <div class="seg" id="lang-switch-m" role="group" aria-label="Язык интерфейса" data-i18n-aria="aria.lang">
       <button type="button" data-lang="ru" aria-pressed="true">RU</button>
@@ -94,6 +112,7 @@
   <div class="v8-context-inner">
     <div class="v8-context-copy">
       <span class="v8-context-kicker" id="v8-context-kicker">MARKOV MADE</span>
+      <span class="v8-context-icon" id="v8-context-icon" aria-hidden="true"></span>
       <h1 class="v8-context-title" id="v8-context-title">—</h1>
       <small class="v8-context-meta" id="v8-context-meta">—</small>
     </div>
@@ -1341,10 +1360,6 @@
           <div class="modal-media-chrome">
             <span class="modal-media-status" id="modal-media-status">Демонстрация · полный кадр</span>
             <div class="modal-media-controls">
-              <button class="media-btn" id="modal-media-play" type="button" aria-pressed="true" aria-label="Пауза демонстрации">
-                <svg class="media-ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
-                <svg class="media-ico-play" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M8 5.5v13l11-6.5Z"/></svg>
-              </button>
               <button class="media-btn" id="modal-media-expand" type="button" aria-label="Развернуть демонстрацию упражнения" aria-pressed="false">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
                 <span id="modal-media-expand-label">Развернуть</span>

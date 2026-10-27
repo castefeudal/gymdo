@@ -23,7 +23,7 @@ test('food catalog, servings, recipe, edit, history and analytics survive reload
  const restored=await page.context().browser().newPage();
  try{
   await restored.goto(new URL('/index.html#settings',page.url()).href);await expect(restored.locator('#mmg-boot')).toHaveCount(0);
-  restored.once('dialog',dialog=>dialog.accept());const choosing=restored.waitForEvent('filechooser');await restored.locator('#data-import').click();const chooser=await choosing;const navigation=restored.waitForNavigation();await chooser.setFiles({name:'food-backup.json',mimeType:'application/json',buffer:Buffer.from(raw)});await navigation;
+  restored.once('dialog',dialog=>dialog.accept());const choosing=restored.waitForEvent('filechooser');await restored.locator('#data-import').click();const chooser=await choosing;await chooser.setFiles({name:'food-backup.json',mimeType:'application/json',buffer:Buffer.from(raw)});await expect(restored.locator('#toast')).toContainText(/Восстановлено разделов|Sections restored/);
   await restored.evaluate(()=>location.hash='nutrition');await expect(restored.locator('#food-diary .food-entry')).toHaveCount(1);await expect(restored.locator('#food-diary .food-entry')).toContainText('370');
  }finally{await restored.close();}
 });

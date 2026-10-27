@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cleanLabResults, labCanonicalValue, labPosition } from '../src/features/lab/results-model.mjs';
+import { estimateCkdEpi2021 } from '../src/features/lab/egfr-view.mjs';
 import { validateBackupField, backupEnvelopeError } from '../src/features/backup/backup-fields.mjs';
 const row = { id: 'one', marker: 'testosterone', date: '2026-10-25', value: 500, unit: 'ng/dL', low: 250, high: 800 };
 test('laboratory results preserve original units and classify only supplied intervals', () => {
@@ -18,6 +19,16 @@ test('malformed laboratory backups fail atomically', () => {
     assert.equal(validateBackupField('labResults', JSON.stringify([row, { ...invalid, id: 'two' }])), null);
   }
   assert.equal(JSON.parse(validateBackupField('labResults', JSON.stringify([row])))[0].value, 500);
+});
+test('race-free CKD-EPI 2021 adult creatinine equation matches reference vectors and rejects unsupported inputs', () => {
+  const male = estimateCkdEpi2021(1, 'mg/dL', 50, 'male');
+  const female = estimateCkdEpi2021(1, 'mg/dL', 50, 'female');
+  assert.ok(Math.abs(male - 91.7) < 0.1);
+  assert.ok(Math.abs(female - 68.6) < 0.1);
+  assert.ok(Math.abs(estimateCkdEpi2021(88.4, 'µmol/L', 50, 'male') - male) < 1e-10);
+  for (const args of [[1, 'mg/dL', 17, 'male'], [1, 'mg/dL', 50, 'unknown'], [0, 'mg/dL', 50, 'male'], [1, 'mmol/L', 50, 'male']]) {
+    assert.equal(estimateCkdEpi2021(...args), null);
+  }
 });
 test('schema 11 keeps older backups readable and protects new data from old readers', () => {
   const envelope = { kind: 'mmg-backup', schemaVersion: 11, data: {} };

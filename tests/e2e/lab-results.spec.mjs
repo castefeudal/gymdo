@@ -19,6 +19,26 @@ test('comparable results display absolute and relative change', async ({ page })
   await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page.locator('.lab-result-entry').first()).toContainText('+2 nmol/L (+20%)');
 });
+
+test('CKD-EPI 2021 eGFR estimate uses adult inputs, states limits and is not saved', async ({ page }) => {
+  await page.goto('/index.html#labs');
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  const panel=page.locator('.lab-egfr');
+  await panel.locator('summary').click();
+  const form=panel.locator('[data-egfr-estimator]');
+  await form.locator('[name=age]').fill('50');
+  await form.locator('[name=creatinine]').fill('1');
+  await form.locator('[name=unit]').selectOption('mg/dL');
+  await form.locator('[name=sex]').selectOption('male');
+  await form.locator('button[type=submit]').click();
+  await expect(panel.locator('[data-egfr-output]')).toContainText('91.7');
+  await expect(panel).toContainText(/Оценка, не измерение и не диагноз|not a measurement or diagnosis/);
+  await expect(panel).toContainText('NIDDK');
+  await page.reload();
+  await panel.locator('summary').click();
+  await expect(panel.locator('[name=age]')).toHaveValue('');
+  await expect(panel.locator('[data-egfr-output]')).toBeEmpty();
+});
 test('laboratory measurements survive reload and support edit and history comparison', async ({ page }) => {
   await page.goto('/index.html#labs');
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
@@ -55,9 +75,8 @@ test('laboratory measurements survive reload and support edit and history compar
     const choosing = restored.waitForEvent('filechooser');
     await restored.locator('#data-import').click();
     const chooser = await choosing;
-    const navigation = restored.waitForNavigation();
     await chooser.setFiles({ name: 'laboratory-backup.json', mimeType: 'application/json', buffer: Buffer.from(raw) });
-    await navigation;
+    await expect(restored.locator('#toast')).toContainText(/Восстановлено разделов|Sections restored/);
     await restored.evaluate(() => { location.hash = 'labs'; });
     await expect(restored.locator('.lab-result-value')).toContainText('22');
   } finally { await restored.close(); }

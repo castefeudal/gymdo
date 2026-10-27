@@ -11,6 +11,7 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
   const name = marker => marker[lang === 'en' ? 2 : 1];
   const field = (key, label, type = 'text', extra = '') => `<label>${label}<input class="input" name="${key}" type="${type}" ${extra}></label>`;
   host.innerHTML = `<div class="container"><div class="section-head"><p class="eyebrow">${text('Локальный журнал здоровья', 'Local health journal')}</p><h2>${text('Анализы', 'Lab results')}</h2><p class="lede">${text('Результаты из бланка, сравнение и контекст.', 'Your reports, comparisons and context.')}</p></div>
+    <details class="panel lab-egfr"><summary>${text('Оценить СКФ по CKD-EPI 2021','Estimate eGFR with CKD-EPI 2021')}</summary><div data-egfr-content><p class="small">${text('Калькулятор загрузится при открытии.','The calculator loads when opened.')}</p></div></details>
     <div class="lab-results-layout"><form class="panel lab-result-form"><h2>${text('Новое измерение', 'New measurement')}</h2><input name="id" type="hidden">
     <label>${text('Показатель', 'Marker')}<select name="marker" class="input">${LAB_MARKERS.map(marker => `<option value="${marker[0]}">${name(marker)}</option>`).join('')}</select></label>
     <div class="lab-result-pair">${field('value', text('Результат', 'Result'), 'number', 'required min="0" step="any"')}<label>${text('Единица', 'Unit')}<select name="unit" class="input"></select></label></div>
@@ -25,7 +26,9 @@ export function renderLabWorkspace({ host, read, write, lang, esc, today, histor
     <p>${text('Пролактин и HbA1c не конвертируются. Расчётный свободный тестостерон не измерен.', 'Prolactin and HbA1c are not converted. Calculated free testosterone is not measured.')}</p>
     <p>${text('HbA1c зависит от эритроцитов и метода. Диагноз обычно требует подтверждения.','HbA1c depends on red cells and assay. Diagnosis usually requires confirmation.')}</p><a href="https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926/2-Diagnosis-and-Classification-of-Diabetes" target="_blank" rel="noopener noreferrer">ADA · 2026</a>
     <p>${text('Одно снижение СКФ не подтверждает хроническую болезнь почек.','One low eGFR does not establish chronic kidney disease.')}</p><a href="https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf" target="_blank" rel="noopener noreferrer">KDIGO · 2024</a><br><a href="https://www.mayocliniclabs.com/order-tests/si-unit-conversion.html" target="_blank" rel="noopener noreferrer">Mayo · SI</a><br><a href="https://www.niddk.nih.gov/health-information/diagnostic-tests/a1c-test" target="_blank" rel="noopener noreferrer">NIDDK · A1C</a></details></div></div></div>`;
-  const form = host.querySelector('form');
+  const form = host.querySelector('.lab-result-form');
+  const egfrPanel=host.querySelector('.lab-egfr');let egfrMounted=false;
+  egfrPanel.addEventListener('toggle',async()=>{if(!egfrPanel.open||egfrMounted)return;egfrMounted=true;try{const {mountEgfrEstimator}=await import('./egfr-view.mjs');mountEgfrEstimator({host:egfrPanel,lang});}catch(_error){egfrPanel.querySelector('[data-egfr-content]').textContent=text('Не удалось загрузить калькулятор. Обнови страницу и повтори.','Could not load the calculator. Reload and try again.');}});
   const status = host.querySelector('[data-lab-result-status]');
   const controls = form.elements;
   function units() {

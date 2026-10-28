@@ -24,10 +24,10 @@ test('More dropdown keeps icons clear of labels and remains reachable in short v
         menu: { left: menuBox.left, right: menuBox.right, top: menuBox.top, bottom: menuBox.bottom, height: menuBox.height, scrollHeight: node.scrollHeight, overflowY: getComputedStyle(node).overflowY },
         items: [...node.querySelectorAll(':scope > a')].map(anchor => {
           const box = anchor.getBoundingClientRect();
-          const title = anchor.querySelector('b').getBoundingClientRect();
-          const description = anchor.querySelector('span').getBoundingClientRect();
-          const icon = getComputedStyle(anchor, '::before');
-          return { left: box.left, right: box.right, titleLeft: title.left, titleRight: title.right, titleScroll: anchor.querySelector('b').scrollWidth, titleWidth: anchor.querySelector('b').clientWidth, descriptionLeft: description.left, iconRight: box.left + parseFloat(icon.left) + parseFloat(icon.width) };
+          const title = anchor.querySelector('.nav-menu-copy > b').getBoundingClientRect();
+          const description = anchor.querySelector('.nav-menu-copy > span').getBoundingClientRect();
+          const icon = anchor.querySelector('.nav-menu-icon').getBoundingClientRect();
+          return { left: box.left, right: box.right, titleLeft: title.left, titleRight: title.right, titleScroll: anchor.querySelector('b').scrollWidth, titleWidth: anchor.querySelector('b').clientWidth, descriptionLeft: description.left, iconRight: icon.right };
         }),
       };
     });

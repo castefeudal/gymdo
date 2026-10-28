@@ -471,7 +471,10 @@ export const CORE_TRANSLATIONS = Object.freeze(Object.assign(
     "v7.nutritionKeep": { ru: "Не меняй калории автоматически: сначала проверь соблюдение и накопи устойчивый тренд.", en: "Do not change calories automatically: verify adherence and collect a stable trend first." },
     "v7.weekComplete": { ru: "Неделя выполнена — сверить прогресс", en: "Week complete — review progress" },
     "v7.weekCompleteWhy": { ru: "Все дни программы на этой неделе завершены. Следующий полезный шаг — короткая обратная связь, а не ещё одна тренировка.", en: "Every programme day for this week is complete. The next useful action is feedback, not another session." },
-    "v7.tools": { ru: "Инструменты", en: "Tools" }
+    "v7.tools": { ru: "Инструменты", en: "Tools" },
+    "v7.how": { ru: "Как пользоваться", en: "How to use" },
+    "v7.faq": { ru: "Вопросы", en: "FAQ" },
+    "v7.contact": { ru: "Связаться", en: "Contact" }
   },
   {
     'nutritionWeek.noTarget': { ru: 'Сначала рассчитай ориентир калорий выше, затем записывай рацион по дням.', en: 'Calculate a calorie target above, then log daily intake to see the weekly picture.' },

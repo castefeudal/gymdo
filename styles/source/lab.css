@@ -354,6 +354,52 @@
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
+/* @sequence 12330 */
+.lab-cat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* @sequence 12331 */
+.lab-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--accent);
+}
+/* @sequence 12332 */
+.lab-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 10px;
+}
+/* @sequence 12333 */
+.lab-card-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border: 1px solid color-mix(in srgb,var(--accent) 25%,var(--border-subtle));
+  border-radius: 13px;
+  background: color-mix(in srgb,var(--accent) 8%,var(--bg-inset));
+}
+/* @sequence 12334 */
+.lab-card-icon .lab-icon {
+  width: 22px;
+  height: 22px;
+}
+/* @sequence 12335 */
+.lab-card-head .eyebrow {
+  margin: 0 0 3px;
+}
+/* @sequence 12336 */
+.lab-card-head h2 {
+  overflow-wrap: anywhere;
+}
 /* @sequence 2818 */
 #tools small {
   font-size: var(--type-min-caption);

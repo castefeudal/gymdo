@@ -795,6 +795,16 @@
   border-radius: 12px;
   backdrop-filter: none;
   scrollbar-width: none;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease);
+}
+/* Keep technique navigation out of the way while reading down the page. */
+/* @sequence 8104 */
+.modal-tabs.is-scroll-hidden {
+  transform: translateY(calc(-100% - 12px));
+  opacity: 0;
+  pointer-events: none;
 }
 /* @sequence 2270 */
 .modal-tabs::-webkit-scrollbar {
@@ -1838,11 +1848,6 @@ html[data-theme="ivory"] .modal-media-expand {
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-/* @sequence 8012 */
-#modal-media-play .media-ico-play svg,#modal-media-play .media-ico-play{
-  fill: currentColor;
-  stroke: none;
 }
 /* @sequence 8013 */
 #modal .modal-media-status{

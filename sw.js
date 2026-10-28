@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r75.2-interface-density';
+const VERSION = '2026.10-r75.3-navigation-icons';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;

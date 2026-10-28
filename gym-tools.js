@@ -43,15 +43,37 @@ let lastLanguage = document.documentElement.lang;
 let activeCalculationId = '';
 let pendingCalculatorResults = [];
 
+const iconPaths = {
+  strength: '<path d="M3 10v4m3-7v10m12-10v10m3-7v4M6 12h12"/>',
+  training: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8m2 1h3m-9 6 1.5 1.5L12 14m2 1h3"/>',
+  nutrition: '<path d="M12 21c4-4 6-8 6-12a6 6 0 0 0-12 0c0 4 2 8 6 12Z"/><path d="M9 10c1.5 1.2 4.5 1.2 6 0"/>',
+  body: '<circle cx="12" cy="5" r="2.5"/><path d="M8 10h8l2 5h-3l-1 6h-4l-1-6H6l2-5Z"/>',
+  cardio: '<path d="M20 8.5c0 5-8 10-8 10s-8-5-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1Z"/><path d="M4 12h4l2-3 3 6 2-3h5"/>',
+  planning: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 9h16m-11 4h2m3 0h2m-7 3h2"/>',
+  convert: '<path d="M4 7h14m0 0-3-3m3 3-3 3M20 17H6m0 0 3-3m-3 3 3 3"/>',
+  personal: '<circle cx="12" cy="8" r="3.2"/><path d="M5 20c.5-3.6 3.1-5.5 7-5.5s6.5 1.9 7 5.5"/>',
+  target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>',
+  trend: '<path d="M4 18 9 13l3 3 8-9m-5 0h5v5"/>',
+  speed: '<path d="M4 16a8 8 0 1 1 16 0"/><path d="m12 15 4-5m-9 8h10"/>',
+};
+const categoryIcons = {
+  strength: 'strength', training: 'training', nutrition: 'nutrition', body: 'body',
+  cardio: 'cardio', planning: 'planning', converters: 'convert', personal: 'personal',
+};
+const toolIcons = { 'lab-volume': 'trend', 'lab-muscles': 'body', 'lab-adaptive': 'trend', 'lab-calculation-history': 'planning' };
+function icon(name, className = 'lab-icon') {
+  return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${iconPaths[name] || iconPaths.training}</svg>`;
+}
+
 const categories = [
-  ['strength', 'Сила', 'Strength'],
-  ['training', 'Тренировки', 'Training'],
-  ['nutrition', 'Питание', 'Nutrition'],
-  ['body', 'Состав тела', 'Body composition'],
-  ['cardio', 'Кардио', 'Cardio'],
-  ['planning', 'Планирование', 'Planning'],
-  ['converters', 'Конвертеры', 'Converters'],
-  ['personal', 'Мои данные', 'My data'],
+  ['strength', 'Сила', 'Strength', 'strength'],
+  ['training', 'Тренировки', 'Training', 'training'],
+  ['nutrition', 'Питание', 'Nutrition', 'nutrition'],
+  ['body', 'Состав тела', 'Body composition', 'body'],
+  ['cardio', 'Кардио', 'Cardio', 'cardio'],
+  ['planning', 'Планирование', 'Planning', 'planning'],
+  ['converters', 'Конвертеры', 'Converters', 'convert'],
+  ['personal', 'Мои данные', 'My data', 'personal'],
 ];
 
 function field(id, label, initial, attrs = '', type = 'input') {
@@ -64,8 +86,7 @@ function card({ id, cat, kicker, title, description, form = '', body = '', keywo
   const evidence = evidenceId ? getLocalizedLabEvidence(evidenceId, en() ? 'en' : 'ru') : null;
   const methodPanel = evidence ? `<details class="lab-evidence" data-evidence-id="${esc(evidenceId)}"><summary>${t('Метод и источники', 'Method and sources')}</summary><div class="tiny"><p><b>${t('Метод:', 'Method:')}</b> ${esc(evidence.formula)}</p><p><b>${t('Версия формулы:', 'Formula version:')}</b> ${esc(evidence.version)} · <b>${t('Уровень данных:', 'Evidence level:')}</b> ${esc(evidence.evidenceLevel)}</p><p><b>${t('Ограничения:', 'Limitations:')}</b> ${esc(evidence.limitations)}</p>${evidence.references.length ? `<ul>${evidence.references.map((reference) => `<li><a href="${esc(reference.url)}" target="_blank" rel="noopener noreferrer">${esc(reference.title)}</a> · ${esc(reference.organisation)} · ${esc(reference.year)} · ${esc(reference.kind)}</li>`).join('')}</ul>` : `<p>${t('Внешний источник не заявляется: это прозрачное арифметическое преобразование или локальная сводка.', 'No external source is claimed: this is a transparent arithmetic operation or a local-data summary.')}</p>`}<p>${t('Последняя проверка:', 'Last reviewed:')} ${esc(evidence.lastReviewed)}</p></div></details>` : '';
   return `<article class="lab-card" data-lab-card data-category="${cat}" data-search="${esc((title + ' ' + description + ' ' + keywords).toLowerCase())}">
-    <p class="eyebrow">${kicker}</p>
-    <h2>${title}</h2>
+    <div class="lab-card-head"><span class="lab-card-icon" aria-hidden="true">${icon(toolIcons[id] || categoryIcons[cat], 'lab-icon')}</span><div><p class="eyebrow">${kicker}</p><h2>${title}</h2></div></div>
     <p class="tiny">${description}</p>
     ${form}
     ${body}
@@ -123,7 +144,7 @@ function renderShell() {
     </div>
     <div class="lab-layout">
       <aside class="lab-sidebar" aria-label="${t('Категории Lab', 'Lab categories')}">
-        ${categories.map(([id, ru, english]) => `<button class="lab-cat" type="button" data-lab-category="${id}" aria-pressed="${id === category}">${en() ? english : ru}</button>`).join('')}
+        ${categories.map(([id, ru, english, iconName]) => `<button class="lab-cat" type="button" data-lab-category="${id}" aria-pressed="${id === category}">${icon(iconName, 'lab-icon lab-cat-icon')}<span>${en() ? english : ru}</span></button>`).join('')}
       </aside>
       <div class="lab-main">
         <div class="lab-grid" id="lab-grid">

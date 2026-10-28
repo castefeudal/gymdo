@@ -178,18 +178,6 @@ h4 {
 .muted {
   color: var(--text-secondary);
 }
-/* @sequence 130 */
-.small {
-  color: var(--text-secondary);
-}
-/* @sequence 131 */
-.tiny {
-  color: var(--text-muted);
-}
-/* @sequence 132 */
-.num {
-  font-feature-settings: "tnum" 1;
-}
 /* @sequence 133 */
 .eyebrow {
   display: inline-flex;
@@ -269,10 +257,6 @@ h4 {
   --btn-fg: var(--text-primary);
   --btn-bd: var(--border-subtle);
 }
-/* @sequence 145 */
-.btn-sm {
-  padding: 8px 14px;
-}
 /* @sequence 146 */
 .btn-wide {
   width: 100%;
@@ -293,10 +277,6 @@ h4 {
   border: 1px solid var(--border-subtle);
   cursor: pointer;
   transition: color var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),background var(--dur-1) var(--ease);
-}
-/* @sequence 149 */
-.icon-btn:hover {
-  border-color: var(--accent);
 }
 /* @sequence 150 */
 .icon-btn svg {
@@ -436,10 +416,6 @@ h4 {
 /* @sequence 171 */
 .seg button:hover {
   color: var(--text-primary);
-}
-/* @sequence 172 */
-.seg button[aria-pressed="true"] {
-  color: var(--accent-ink);
 }
 /* @sequence 173 */
 .tag {
@@ -2165,14 +2141,6 @@ body::before {
   background-image: linear-gradient(color-mix(in srgb,var(--border-subtle) 22%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--border-subtle) 18%,transparent) 1px,transparent 1px);
   mask-image: linear-gradient(180deg,#000,transparent 46%);
 }
-/* @sequence 737 */
-.container {
-  padding-inline: clamp(18px,3.6vw,52px);
-}
-/* @sequence 738 */
-.section-alt {
-  border-color: color-mix(in srgb,var(--border-subtle) 80%,transparent);
-}
 /* @sequence 739 */
 .section-head {
   align-items: flex-end;
@@ -2192,10 +2160,6 @@ body::before {
   max-width: 68ch;
   font-size: clamp(.95rem,.9rem + .2vw,1.08rem);
 }
-/* @sequence 743 */
-.eyebrow {
-  font-size: 14px;
-}
 /* @sequence 744 */
 .eyebrow::before {
   height: 7px;
@@ -2214,19 +2178,6 @@ body::before {
 .btn-solid {
   --btn-bg: color-mix(in srgb,var(--bg-elevated) 92%,transparent);
   backdrop-filter: none;
-}
-/* @sequence 749 */
-.icon-btn {
-  background: color-mix(in srgb,var(--bg-surface) 55%,transparent);
-}
-/* @sequence 750 */
-.input,.select,.textarea {
-  min-height: 50px;
-  border-color: color-mix(in srgb,var(--border-strong) 58%,transparent);
-}
-/* @sequence 751 */
-.input:focus-visible,.select:focus-visible,.textarea:focus-visible {
-  outline: none;
 }
 /* @sequence 752 */
 .chip,.pill {
@@ -2329,15 +2280,6 @@ body::before {
   height: 40px;
   border-radius: 12px;
 }
-/* @sequence 813 */
-.body-region {
-  outline: none;
-}
-/* @sequence 814 */
-.body-region>* {
-  stroke: color-mix(in srgb,var(--border-strong) 88%,transparent);
-  transition: fill var(--dur-2) var(--ease),stroke var(--dur-2) var(--ease),filter var(--dur-2) var(--ease);
-}
 /* @sequence 815 */
 .body-region:hover>*,.body-region:focus-visible>* {
   fill: color-mix(in srgb,var(--accent) 22%,transparent);
@@ -2349,11 +2291,6 @@ body::before {
   fill: color-mix(in srgb,var(--accent) 66%,transparent);
   stroke: var(--accent-hi);
   filter: drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 35%,transparent));
-}
-/* @sequence 859 */
-.fav-btn {
-  top: 10px;
-  background: rgba(8,9,11,.7);
 }
 /* @sequence 866 */
 .premium-mini-ico {
@@ -2415,14 +2352,6 @@ body::before {
 /* @sequence 924 */
 .method {
   gap: 42px;
-}
-/* @sequence 926 */
-.method-tab {
-  padding: 14px 16px;
-}
-/* @sequence 927 */
-.method-panel {
-  padding: clamp(24px,3vw,42px);
 }
 /* @sequence 928 */
 .kb-list {
@@ -3423,12 +3352,6 @@ body {
   font-weight: 470;
   letter-spacing: 0;
 }
-/* @sequence 1467 */
-body::before {
-  background-image: linear-gradient(color-mix(in srgb,var(--border-subtle) 26%,transparent) 1px,transparent 1px),
-    linear-gradient(90deg,color-mix(in srgb,var(--border-subtle) 22%,transparent) 1px,transparent 1px);
-  mask-image: linear-gradient(180deg,#000 0,transparent 34%);
-}
 /* @sequence 1468 */
 .container {
   width: 100%;
@@ -3451,10 +3374,6 @@ h1,h2 {
 /* @sequence 1472 */
 .section {
   padding-block: clamp(40px,4.8vw,76px);
-}
-/* @sequence 1473 */
-.section-alt {
-  border-color: var(--border-subtle);
 }
 /* @sequence 1474 */
 .eyebrow {
@@ -3511,10 +3430,6 @@ body [hidden] {
 /* @sequence 1484 */
 .btn-primary:hover {
   border-color: var(--accent-hover);
-}
-/* @sequence 1485 */
-.btn-solid {
-  border-color: var(--border-strong);
 }
 /* @sequence 1486 */
 .btn-quiet {
@@ -4977,4 +4892,116 @@ body[data-v8-returning="true"] .section {
 /* @sequence 12003 */
 html:not([data-app-ready="true"]) main,html:not([data-app-ready="true"]) footer{
   display: none;
+}
+/* ── Brand graphic system ───────────────────────────────────────────────
+   Section identity marks are single-tone SVGs applied as CSS masks, so one
+   file serves Obsidian, Soft and Ivory from a single token. The route token
+   lives on <body> because the context bar is the only head a returning user
+   still sees, so it is a host alongside the full page and section heads.
+   Each mark is sized from its host's height and stays inside the host box:
+   a mark that hangs below a head is painted over by the next card. */
+/* @sequence 12400 */
+.section-head,.v7-page-head,.v8-context-inner,.empty {
+  position: relative;
+  isolation: isolate;
+}
+/* @sequence 12401 */
+.section-head::after,.v7-page-head::after,.v8-context-inner::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  translate: 0 -50%;
+  height: 100%;
+  max-height: 120px;
+  aspect-ratio: 5/2;
+  max-width: 46%;
+  z-index: -1;
+  background: var(--text-muted);
+  opacity: var(--art-opacity);
+  pointer-events: none;
+  -webkit-mask: var(--art,none) center/100% 100% no-repeat;
+  mask: var(--art,none) center/100% 100% no-repeat;
+}
+/* @sequence 12402 */
+.v8-context-inner::after {
+  left: 50%;
+  right: auto;
+  translate: -50% -50%;
+}
+/* @sequence 12403 */
+body[data-v7-route="library"] { --art: var(--art-library) }
+/* @sequence 12404 */
+body[data-v7-route="workout"] { --art: var(--art-workout) }
+/* @sequence 12405 */
+body[data-v7-route="program"] { --art: var(--art-program) }
+/* @sequence 12406 */
+body[data-v7-route="nutrition"] { --art: var(--art-nutrition) }
+/* @sequence 12407 */
+body[data-v7-route="progress"] { --art: var(--art-progress) }
+/* @sequence 12408 */
+body[data-v7-route="tools"] { --art: var(--art-tools) }
+/* @sequence 12409 */
+body[data-v7-route="labs"] { --art: var(--art-labs) }
+/* @sequence 12410 */
+body[data-v7-route="settings"],body[data-v7-route="more"] { --art: var(--art-settings) }
+/* @sequence 12412 */
+body[data-v7-route="home"] { --art: var(--art-today) }
+/* The context bar has no free middle on a phone, so the mark yields to the
+   photographic layer there instead of sitting behind the title. */
+/* @sequence 12413 */
+@media (max-width:900px) {
+  .v8-context-inner::after {
+    display: none;
+  }
+}
+/* @sequence 12411 */
+.empty::before {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 132px;
+  aspect-ratio: 5/3;
+  z-index: -1;
+  background: var(--text-muted);
+  opacity: var(--art-opacity);
+  pointer-events: none;
+  -webkit-mask: var(--art-empty) center/100% 100% no-repeat;
+  mask: var(--art-empty) center/100% 100% no-repeat;
+}
+/* @sequence 12460 */
+.media-credit {
+  margin: 0;
+  padding: 7px 12px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: var(--type-min-caption);
+  letter-spacing: .03em;
+}
+/* @sequence 12461 */
+.media-credit a {
+  color: inherit;
+  text-decoration: none;
+}
+/* @sequence 12462 */
+.media-rights {
+  max-width: 62ch;
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: var(--type-min-caption);
+  line-height: 1.5;
+}
+/* @sequence 12463 */
+.media-rights a {
+  color: var(--accent);
+}
+/* @sequence 12464 */
+@media (min-width:560px) {
+  .empty {
+    padding-inline-end: 168px;
+  }
 }

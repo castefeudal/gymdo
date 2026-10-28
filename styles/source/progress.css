@@ -40,11 +40,6 @@
 /* @sequence 1146 */
 .intel-metrics {
 }
-/* @sequence 1147 */
-.intel-metric {
-  border-radius: 11px;
-  border: 1px solid var(--border-subtle);
-}
 /* @sequence 1148 */
 .intel-metric span {
   display: block;
@@ -446,11 +441,6 @@
   gap: var(--space-7);
   align-items: start;
 }
-/* @sequence 649 */
-.prog-chart {
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-}
 /* @sequence 650 */
 .prog-chart svg {
   width: 100%;
@@ -475,10 +465,6 @@
 .prog-axis {
   font-size: 14px;
   font-family: var(--font-ui);
-}
-/* @sequence 655 */
-.prog-deltas {
-  margin-top: var(--space-4);
 }
 /* @sequence 656 */
 .prog-log {
@@ -514,34 +500,15 @@
     gap: var(--space-5);
   }
 }
-/* @sequence 920 */
-.prog-chart {
-  padding: 18px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
-}
 /* @sequence 921 */
 .prog-dot {
   r: 2.8;
-}
-/* @sequence 922 */
-.prog-row {
-  border-radius: 10px;
-}
-/* @sequence 1142 */
-.progress-intel {
-  gap: 14px;
-  border-radius: 17px;
-  border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--border-subtle));
 }
 /* @sequence 1143 */
 .progress-intel-head {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-}
-/* @sequence 1144 */
-.progress-intel-head h3 {
-  font-size: clamp(1.15rem,1rem + .5vw,1.55rem);
 }
 /* @sequence 1145 */
 .progress-intel-head p {
@@ -557,10 +524,6 @@
 /* @sequence 1339 */
 #method,#knowledge,#progress {
   padding-block: clamp(54px,6vw,92px);
-}
-/* @sequence 1421 */
-#progress .prog-layout {
-  gap: 24px;
 }
 /* @sequence 1423 */
 @media (max-width:1100px) {

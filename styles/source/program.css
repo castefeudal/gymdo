@@ -2,11 +2,6 @@
 .plan-week {
   flex-direction: column;
 }
-/* @sequence 330 */
-.plan-day {
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-}
 /* @sequence 331 */
 .plan-day-head {
   display: flex;
@@ -152,19 +147,6 @@
 /* @sequence 702 */
 .plan-adv[open] summary::after {
   content: "–";
-}
-/* @sequence 917 */
-.plan-day {
-  padding: 18px;
-  box-shadow: var(--shadow-card);
-}
-/* @sequence 918 */
-.plan-day-head {
-  border-bottom: 1px solid var(--border-subtle);
-}
-/* @sequence 919 */
-.plan-ex {
-  padding: 10px 0;
 }
 /* @sequence 1115 */
 #plan-form.is-wizard {
@@ -858,4 +840,27 @@ body[data-v7-route="program"] #program {
 /* @sequence 2831 */
 .v7-wizard-intro .num {
   font-size: var(--type-min-caption);
+}
+/* @sequence 12450 */
+.v10-plan-hero {
+  position: relative;
+  isolation: isolate;
+  padding: 22px 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+/* @sequence 12451 */
+.v10-plan-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(46%,320px);
+  z-index: -1;
+  background: url(assets/visual/program-hypertrophy-720.webp) right center/cover no-repeat;
+  -webkit-mask: linear-gradient(90deg,transparent,#000 86%);
+  mask: linear-gradient(90deg,transparent,#000 86%);
+  opacity: .72;
+  pointer-events: none;
 }

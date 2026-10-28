@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r75.4-live-check';
+const VERSION = '2026.10-r76.0-visual-layer';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -27,6 +27,22 @@ const PRECACHE = [
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
+  './assets/visual/nutrition-plate-1120.webp',
+  './assets/visual/onboarding-grip-960.webp',
+  './assets/visual/plate-mark.svg',
+  './assets/visual/program-hypertrophy-720.webp',
+  './assets/visual/section-labs.svg',
+  './assets/visual/section-library.svg',
+  './assets/visual/section-nutrition.svg',
+  './assets/visual/section-program.svg',
+  './assets/visual/section-progress.svg',
+  './assets/visual/section-settings.svg',
+  './assets/visual/section-today.svg',
+  './assets/visual/section-tools.svg',
+  './assets/visual/section-workout.svg',
+  './assets/visual/state-empty.svg',
+  './assets/visual/today-hero-1280.webp',
+  './assets/visual/today-hero-640.webp',
 ];
 const MEDIA_LIMIT = 180;
 

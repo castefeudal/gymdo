@@ -35,10 +35,6 @@
   border: 1px solid var(--border-subtle);
   overflow: hidden;
 }
-/* @sequence 209 */
-.hero-stats div {
-  padding: var(--space-4) var(--space-3);
-}
 /* @sequence 210 */
 .hero-stats b {
   display: block;
@@ -183,10 +179,6 @@
   font-weight: 400;
   color: var(--text-secondary);
 }
-/* @sequence 519 */
-.console {
-  gap: var(--space-4);
-}
 /* @sequence 524 */
 .console-row {
   display: grid;
@@ -239,10 +231,6 @@
   border: 1px solid var(--border-strong);
   border-radius: 50%;
   background: transparent;
-}
-/* @sequence 531 */
-.console-opt[aria-pressed="true"] {
-  border-color: var(--accent);
 }
 /* @sequence 532 */
 .console-opt[aria-pressed="true"]::after {
@@ -322,11 +310,6 @@
   border: 1px solid color-mix(in srgb,var(--border-strong) 30%,transparent);
   box-shadow: inset 0 0 120px color-mix(in srgb,var(--accent) 4%,transparent);
 }
-/* @sequence 772 */
-.hero h1 {
-  font-size: clamp(2.65rem,3.5vw + .6rem,5.25rem);
-  letter-spacing: -.045em;
-}
 /* @sequence 773 */
 .hero h1 span:first-child {
   color: var(--text-primary);
@@ -334,10 +317,6 @@
 /* @sequence 774 */
 .hero h1 span:last-child {
   color: var(--accent);
-}
-/* @sequence 775 */
-.hero-lede {
-  font-size: clamp(1rem,.94rem + .35vw,1.24rem);
 }
 /* @sequence 779 */
 .hero-presets .chip {
@@ -374,14 +353,6 @@
 /* @sequence 784 */
 .hero-panel>* {
   position: relative;
-}
-/* @sequence 785 */
-.hero-panel-logo {
-  height: 112px;
-}
-/* @sequence 786 */
-.console-opts {
-  grid-template-columns: repeat(2,minmax(0,1fr));
 }
 /* @sequence 787 */
 .console-opt {
@@ -615,18 +586,6 @@
     max-width: 590px;
     justify-self: end;
   }
-}
-/* @sequence 1342 */
-.hero-panel {
-  gap: 16px;
-}
-/* @sequence 1343 */
-.hero-panel-head {
-  gap: 16px;
-}
-/* @sequence 1344 */
-.hero-panel-logo {
-  height: 76px;
 }
 /* @sequence 1345 */
 .hero-panel-summary {
@@ -867,13 +826,6 @@
   display: grid;
   gap: clamp(22px,2.8vw,38px);
   max-width: 1200px;
-}
-/* @sequence 1575 */
-.v7-home-grid {
-  gap: 16px;
-  align-items: stretch;
-  display: grid;
-  grid-template-columns: minmax(0,1fr);
 }
 /* @sequence 1587 */
 .v7-home-context {
@@ -1169,24 +1121,11 @@
   border: 1px solid var(--border-subtle);
   box-shadow: none;
 }
-/* @sequence 2866 */
-.v7-command b {
-  font-size: 16px;
-}
 /* @sequence 2867 */
 .v7-next-card h2 {
   font-size: clamp(26px,3vw,40px);
   font-weight: 700;
   letter-spacing: -.025em;
-}
-/* @sequence 2868 */
-.v7-page-head {
-  margin-bottom: 24px;
-}
-/* @sequence 2869 */
-.v7-page-head h1 {
-  font-size: 32px;
-  font-weight: 700;
 }
 /* @sequence 2870 */
 .v10-pulse-metrics {
@@ -1793,5 +1732,66 @@ body[data-v7-route="home"] .v10-context-actions{
   .v7-home-context{
     grid-auto-rows: minmax(104px,auto);
     height: auto;
+  }
+}
+/* ── Author photographic layer ──────────────────────────────────────────
+   The hero plate carries the brand image; interface text never sits on it. */
+/* @sequence 12440 */
+.next-roster {
+  position: relative;
+  isolation: isolate;
+  padding-top: 140px;
+}
+/* @sequence 12441 */
+.next-roster::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 132px;
+  z-index: -1;
+  background: url(assets/visual/today-hero-1280.webp) right top/cover no-repeat;
+  -webkit-mask: linear-gradient(180deg,#000 44%,transparent);
+  mask: linear-gradient(180deg,#000 44%,transparent);
+  pointer-events: none;
+}
+/* @sequence 12442 */
+@media (max-width:760px) {
+  .next-roster {
+    padding-top: 116px;
+  }
+  .next-roster::before {
+    height: 108px;
+    background-image: url(assets/visual/today-hero-640.webp);
+  }
+}
+/* @sequence 12443 */
+.hero-main {
+  position: relative;
+  isolation: isolate;
+}
+/* @sequence 12444 */
+.hero-main::after {
+  content: "";
+  position: absolute;
+  right: -10%;
+  top: 0;
+  bottom: 0;
+  width: 52%;
+  z-index: -1;
+  background: url(assets/visual/onboarding-grip-960.webp) right center/cover no-repeat;
+  -webkit-mask: linear-gradient(90deg,transparent,#000 74%);
+  mask: linear-gradient(90deg,transparent,#000 74%);
+  opacity: .6;
+  pointer-events: none;
+}
+/* @sequence 12445 */
+@media (max-width:900px) {
+  .hero-main::after {
+    inset: auto 0 0 0;
+    width: auto;
+    height: 180px;
+    -webkit-mask: linear-gradient(180deg,transparent,#000 78%);
+    mask: linear-gradient(180deg,transparent,#000 78%);
+    opacity: .42;
   }
 }

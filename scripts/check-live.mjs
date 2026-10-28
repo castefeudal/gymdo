@@ -7,7 +7,7 @@ const base=process.env.MMG_LIVE_URL||'https://castefeudal.github.io/gymdo/';
 const expected=process.argv[2]||process.env.MMG_LIVE_COMMIT;
 if(!/^[a-f0-9]{40}$/i.test(expected||''))throw Error('Usage: node scripts/check-live.mjs <full 40-character commit SHA>');
 const liveExpect=expect.configure({timeout:30000});
-const version='2026.10-r75.4-live-check';
+const version='2026.10-r76.0-visual-layer';
 const release=await (await fetch(new URL('release.json?verify='+Date.now(),base),{cache:'no-store'})).json();
 if(expected&&release.commit!==expected)throw Error(`Release mismatch: ${release.commit} != ${expected}`);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');

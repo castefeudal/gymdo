@@ -5728,7 +5728,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.10-r75.4-live-check';
+  var APP_VERSION = '2026.10-r76.0-visual-layer';
   var BACKUP_SCHEMA = 12;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';

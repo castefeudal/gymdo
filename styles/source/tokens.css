@@ -88,6 +88,20 @@
   --z-sheet: 130;
   --z-modal: 140;
   --z-run: 150;
+  --art-today: url(assets/visual/section-today.svg);
+  --art-workout: url(assets/visual/section-workout.svg);
+  --art-library: url(assets/visual/section-library.svg);
+  --art-program: url(assets/visual/section-program.svg);
+  --art-nutrition: url(assets/visual/section-nutrition.svg);
+  --art-progress: url(assets/visual/section-progress.svg);
+  --art-labs: url(assets/visual/section-labs.svg);
+  --art-tools: url(assets/visual/section-tools.svg);
+  --art-settings: url(assets/visual/section-settings.svg);
+  --art-empty: url(assets/visual/state-empty.svg);
+  --art-plate: url(assets/visual/plate-mark.svg);
+  /* One watermark strength per theme: --text-muted is a mid-grey on Obsidian,
+     so the same opacity that reads on Ivory disappears on the dark canvas. */
+  --art-opacity: .2;
 }
 /* @sequence 1 */
 html[data-theme="obsidian"] {
@@ -103,6 +117,7 @@ html[data-theme="obsidian"] {
   --text-primary: #f4f7f5;
   --text-secondary: #b8c4cf;
   --text-muted: #93a1ad;
+  --art-opacity: .34;
   --accent: #bef47d;
   --accent-hover: #d3ff9f;
   --accent-soft: rgba(190,244,125,.10);
@@ -115,7 +130,7 @@ html[data-theme="obsidian"] {
   --critical: #f08a8a;
   --media-bg: #0b1117;
   --surface-media: #080d12;
-  --media-plate: #eff3f5;
+  --media-plate: linear-gradient(168deg,#f8fafb,#dde5ea);
   --surface-grid: rgba(226,238,232,.03);
   --preview-canvas: #0b1117;
   --preview-surface: #131b24;
@@ -156,7 +171,7 @@ html[data-theme="soft"] {
   --critical: #a3343b;
   --media-bg: #e4e9ed;
   --surface-media: #e7ebef;
-  --media-plate: #ffffff;
+  --media-plate: linear-gradient(168deg,#ffffff,#e7edf1);
   --surface-grid: rgba(16,32,44,.035);
   --preview-canvas: #e8ecef;
   --preview-surface: #ffffff;
@@ -197,7 +212,7 @@ html[data-theme="ivory"] {
   --critical: #a3343b;
   --media-bg: #e9e5db;
   --surface-media: #ece8de;
-  --media-plate: #ffffff;
+  --media-plate: linear-gradient(168deg,#fffdf8,#e9e3d6);
   --surface-grid: rgba(34,30,20,.03);
   --preview-canvas: #eeebe3;
   --preview-surface: #ffffff;

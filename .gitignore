@@ -10,3 +10,8 @@ artifacts/
 
 # Claude Code local settings (do not publish)
 .claude/
+
+# The visual-evidence matrix is regenerable with scripts/visual-evidence.mjs and is
+# ~117 MB per release. Only the screens cited by a release record are committed,
+# with `git add -f` on those paths.
+docs/evidence/*/*.png

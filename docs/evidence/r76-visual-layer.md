@@ -114,6 +114,21 @@ runner rasterization drift plus the small `--media-plate` change on `library`, a
 deliberately not accepted so this PR's visual delta stays attributable to the layer.
 Ordinary Quality comparison against the accepted Linux baselines is green.
 
+## Publication
+
+PR #7 merged into `main` as `2222f8669b5d5d7b6eb3f7a9b3a7716c6d3d850a` at
+2026-10-28T22:01:50Z. The push-triggered Quality run `40776738931` on that commit
+finished with all six jobs `success`, `visual` included, which released Pages
+deployment run `40777395281`. The live site is the merged commit, proved from the
+published bytes rather than from CI status: `release.json` returns commit
+`2222f866…` with `publishedAt` 2026-10-28T22:06:56.497Z; the deployed `sw.js` carries
+`const VERSION = '2026.10-r76.0-visual-layer'`; `assets/visual/today-hero-1280.webp`
+answers 200 as `image/webp` in 31,988 bytes; and `node scripts/check-live.mjs` on the
+full merge SHA passed — 37 published artifacts hash-matched their `git show HEAD:`
+blobs, and all 480 route/theme/language/viewport combinations across chromium, mobile,
+firefox, webkit and webkit-mobile walked with the backup round-trip, exercise
+instructions, real OCR and an installed offline boot.
+
 ## Not claimed
 
 No independent design review, formal WCAG certification, or field INP/p75. The

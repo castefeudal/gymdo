@@ -4,8 +4,10 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 
 const base=process.env.MMG_LIVE_URL||'https://castefeudal.github.io/gymdo/';
-const expected=process.env.MMG_LIVE_COMMIT;
-const version='2026.10-r75.3-navigation-icons';
+const expected=process.argv[2]||process.env.MMG_LIVE_COMMIT;
+if(!/^[a-f0-9]{40}$/i.test(expected||''))throw Error('Usage: node scripts/check-live.mjs <full 40-character commit SHA>');
+const liveExpect=expect.configure({timeout:30000});
+const version='2026.10-r75.4-live-check';
 const release=await (await fetch(new URL('release.json?verify='+Date.now(),base),{cache:'no-store'})).json();
 if(expected&&release.commit!==expected)throw Error(`Release mismatch: ${release.commit} != ${expected}`);
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -31,18 +33,18 @@ for(const [name,engine,width] of configurations){
     const page=await context.newPage(),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('index.html?lang='+lang+'#home',base).href);
-    await expect(page.locator('html')).toHaveAttribute('data-app-ready','true');
-    await expect(page.locator('#mmg-boot')).toHaveCount(0);
+    await liveExpect(page.locator('html')).toHaveAttribute('data-app-ready','true');
+    await liveExpect(page.locator('#mmg-boot')).toHaveCount(0);
     expect(await page.evaluate(()=>window.mmgDiagnostics.version)).toBe(version);
     await page.evaluate(()=>document.fonts.ready);
     for(const route of routes){
      await page.evaluate(route=>location.hash=route,route);
-     await expect(page.locator('html')).toHaveAttribute('data-route-ready',route);
-     if(route==='nutrition')await expect(page.locator('[data-food-add]')).toBeVisible();
-     if(route==='labs')await expect(page.locator('.lab-result-form')).toBeVisible();
-     if(route==='tools')await expect(page.locator('[data-lab-form]').first()).toBeVisible();
-     if(route==='library')await expect(page.locator('#grid .card').first()).toBeVisible();
-     if(route==='method')await expect(page.locator('#method-nav [role=tab]').first()).toBeVisible();
+     await liveExpect(page.locator('html')).toHaveAttribute('data-route-ready',route);
+     if(route==='nutrition')await liveExpect(page.locator('[data-food-add]')).toBeVisible();
+     if(route==='labs')await liveExpect(page.locator('.lab-result-form')).toBeVisible();
+     if(route==='tools')await liveExpect(page.locator('[data-lab-form]').first()).toBeVisible();
+     if(route==='library')await liveExpect(page.locator('#grid .card').first()).toBeVisible();
+     if(route==='method')await liveExpect(page.locator('#method-nav [role=tab]').first()).toBeVisible();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
      expect(overflow,`${name}/${theme}/${lang}/${route}`).toBeLessThanOrEqual(1);
      results.push({name,theme,lang,route,width,overflow});
@@ -64,8 +66,8 @@ for(const [name,engine,width] of configurations){
      await writeFile('artifacts/live-r75-failure/search.json',JSON.stringify({name,theme,lang,state,error:String(error)},null,2));
      throw error;
     }
-    await expect(page.locator('#modal-scroll')).toBeVisible();
-    await expect(page.locator('#modal')).toHaveAttribute('aria-busy','false');
+    await liveExpect(page.locator('#modal-scroll')).toBeVisible();
+    await liveExpect(page.locator('#modal')).toHaveAttribute('aria-busy','false');
     await page.locator('#modal-close').click();
     if(name==='chromium'&&theme==='obsidian'&&lang==='ru'){
      await page.evaluate(()=>location.hash='labs');await page.locator('.lab-import summary').click();
@@ -73,13 +75,13 @@ for(const [name,engine,width] of configurations){
      await page.locator('[data-report-ocr]').check();
      await page.locator('[data-report-file]').setInputFiles({name:'synthetic-local-scan.png',mimeType:'image/png',buffer:Buffer.from(bytes,'base64')});
      await page.locator('[data-report-read]').click();
-     await expect(page.locator('[data-report-text]')).toHaveValue(/testosterone.*13[.,]1/i,{timeout:120000});
-     await expect(page.locator('[data-report-use]')).toHaveCount(1);
+     await liveExpect(page.locator('[data-report-text]')).toHaveValue(/testosterone.*13[.,]1/i,{timeout:120000});
+     await liveExpect(page.locator('[data-report-use]')).toHaveCount(1);
      await page.evaluate(()=>navigator.serviceWorker.ready);
-     await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+     await liveExpect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
      await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});
-     await expect(page.locator('html')).toHaveAttribute('data-app-ready','true');
-     await expect(page.locator('.lab-result-form')).toBeVisible();
+     await liveExpect(page.locator('html')).toHaveAttribute('data-app-ready','true');
+     await liveExpect(page.locator('.lab-result-form')).toBeVisible();
      await context.setOffline(false);
     }
     expect(errors,`${name}/${theme}/${lang}: runtime errors`).toEqual([]);

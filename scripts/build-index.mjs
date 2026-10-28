@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { transform } from 'esbuild';
 
-const BUILD_VERSION = '2026.10-r75.4-live-check';
+const BUILD_VERSION = '2026.10-r76.0-visual-layer';
 const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
 const initialModules=[...runtimeMetrics.initialFiles,...runtimeMetrics.bootFiles.filter(file=>file.includes('/load-modules-'))].filter(file=>!file.endsWith('/application.js'));
 const structuredData = {

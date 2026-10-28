@@ -358,3 +358,22 @@ body[data-v7-route="nutrition"] #nutrition {
     grid-column: auto;
   }
 }
+/* @sequence 12452 */
+#nutrition .tool-out {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+/* @sequence 12453 */
+#nutrition .tool-out::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(40%,300px);
+  z-index: -1;
+  background: url(assets/visual/nutrition-plate-1120.webp) right center/cover no-repeat;
+  -webkit-mask: linear-gradient(90deg,transparent,#000 88%);
+  mask: linear-gradient(90deg,transparent,#000 88%);
+  opacity: .55;
+  pointer-events: none;
+}

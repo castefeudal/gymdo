@@ -29,3 +29,16 @@ Visual comparison covers 360×800, 390×844, 430×932, 768×1024, 1440×900 and 
 Axe checks serious/critical violations. E2E checks keyboard focus containment/return, overflow and persistence. Respect prefers-reduced-motion; motion must never carry essential information.
 
 Progress axis labels are checked in screen pixels after SVG scaling (at least 14px), including a desktop-to-phone resize. Sparse observations show a collection action before supplementary metrics instead of a premature plan adjustment.
+
+## Graphic and photographic identity
+
+The product owns two author layers on top of the token system. Both are catalogued in `docs/visual-assets-inventory.md`.
+
+**Photographs** (`assets/visual/*.webp`) mark the four screens where a physical setting carries meaning: the TODAY roster plate, the first-run hero, the programme summary and the nutrition result. A photograph is never an `<img>` competing with data. The host declares `isolation: isolate` and the image is painted at `z-index:-1` under a gradient mask, so text, controls and real values always sit on the surface, never on the picture. Mobile receives a same-frame half-size variant through a media query rather than a re-crop.
+
+**Line art** (`assets/visual/*.svg`) carries section identity and system state. Each file is single-tone and paints with `stroke="currentColor"`, which lets it work as a CSS `mask-image`: one artwork serves Obsidian, Soft and Ivory from one token, with no theme variants and no duplicated paths. Route marks are bound by `body[data-v7-route="…"] { --art: … }` and painted by `.section-head::after` / `.v7-page-head::after` / `.v8-context-inner::after` — the context bar is the host that actually reaches a returning user, who never sees a large page head. A mark is sized from its host's height so it can never overflow into the card below, and its strength is one token (`--art-opacity`), not a per-theme artwork. The geometric `plate-mark.svg` M sits inside the library media plate, and `state-empty.svg` — an unloaded barbell — marks an empty collection.
+
+`--media-plate` is a graded surface rather than a flat fill, so third-party 180×180 demonstrations read as a lit plate in a case instead of a white rectangle pasted on the card. The Gym visual artwork itself is never resampled or upscaled; its attribution is surfaced in the modal media chrome and on the «Ещё» screen.
+
+Add to these layers by extending the existing token and mask pattern. Do not introduce a second illustration style, a decorative background grid, or a graphic that has no host component.
+

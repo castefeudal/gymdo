@@ -463,8 +463,19 @@
 }
 /* @sequence 15001 */
 @media (max-width: 680px) {
-  #coach-lib .cnote { margin-block: 8px; padding: 8px 12px; }
-  #coach-lib .cnote-kicker { margin-bottom: 2px; }
+  #coach-lib { display: none; }
+}
+/* @sequence 2900 */
+@media (max-width: 680px) {
+  .results-tools { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.45fr); gap: 6px; }
+  .search-box { grid-column: 1 / -1; min-width: 0; }
+  #mfb-open,#custom-exercise-open,.sort-select { min-height: 38px; }
+  #mfb-open { grid-column: 1; grid-row: 2; }
+  #custom-exercise-open { grid-column: 2; grid-row: 2; min-width: 0; padding-inline: 4px; font-size: 14px; white-space: nowrap; }
+  .sort-select { grid-column: 1; grid-row: 3; }
+  .v10-library-quick { flex-direction: row; align-items: center; gap: 0; }
+  .v10-library-quick > span { display: none; }
+  #coach-lib .cnote { margin: 2px 0 8px; padding: 4px 0; border: 0; }
 }
 /* @sequence 433 */
 @media (max-width:860px) {

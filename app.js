@@ -1604,8 +1604,15 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       return;
     }
     if (out.getAttribute('data-filled') === 'true') return;
-    out.innerHTML = '<div class="empty v8-empty-flat">' +
-      '<b>' + esc(t('planEmptyTitle')) + '</b><p>' + esc(t('planEmptyText')) + '</p></div>';
+    var days = Number($('p-days') && $('p-days').value) || 3;
+    var time = Number($('p-time') && $('p-time').value) || 70;
+    var goal = $('p-goal') && $('p-goal').selectedOptions[0] ? $('p-goal').selectedOptions[0].textContent : '';
+    var place = $('p-place') && $('p-place').selectedOptions[0] ? $('p-place').selectedOptions[0].textContent : '';
+    var dayPreview = Array.from({length:days},function(_,index){return '<span>'+(S.lang==='en'?'Day ':'День ')+(index+1)+'</span>';}).join('');
+    out.innerHTML = '<div class="plan-draft-preview"><p class="eyebrow v8-eyebrow-tight">'+esc(S.lang==='en'?'PLAN PREVIEW':'ПРЕДПРОСМОТР ПЛАНА')+'</p>'+
+      '<h3 class="v8-output-title">'+esc(goal)+' · '+days+'/7</h3><p class="small">'+esc(place)+' · '+esc(String(time))+(S.lang==='en'?' min':' мин')+' · '+esc(S.lang==='en'?'draft preview':'черновой просмотр')+'</p>'+
+      '<div class="plan-draft-days" aria-label="'+esc(S.lang==='en'?'Planned sessions':'Запланированные тренировки')+'">'+dayPreview+'</div>'+
+      '<p class="tiny">'+esc(S.lang==='en'?'Change the settings to shape the week. Build the plan when it looks right.':'Меняй параметры и смотри, как распределится неделя. Собери план, когда всё подходит.')+'</p></div>';
   }
 
   var lastPlan = null;
@@ -5234,6 +5241,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     bindNutritionLog();
     $('kbju-form').addEventListener('submit', function (e) { e.preventDefault(); calcKbju(); });
     $('plan-form').addEventListener('submit', function (e) { e.preventDefault(); if (DATA_READY) buildPlan(); else ensureData().then(buildPlan); });
+    $('plan-form').addEventListener('change', function () { if ($('plan-out').getAttribute('data-filled') !== 'true') renderPlanPlaceholder(); });
 
     $('plan-out').addEventListener('click', function (e) {
       var open = e.target.closest('[data-open]');

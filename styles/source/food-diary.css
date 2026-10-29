@@ -36,3 +36,29 @@
 @media(max-width:900px){.food-layout{grid-template-columns:1fr}.food-layout .panel{padding:20px}.food-toolbar{grid-template-columns:1fr 1fr}.food-toolbar>label:first-child{grid-column:1/-1}}
 /* @sequence 12218 */
 @media(max-width:359px){.food-pair{grid-template-columns:1fr}.food-layout .panel{padding:16px}}
+/* Product polish: keep first-entry guidance and food actions compact. */
+/* @sequence 13000 */
+#food-diary { margin-block: 16px 36px; scroll-margin-top: 112px; }
+/* @sequence 13001 */
+.food-layout { gap: 16px; }
+/* @sequence 13002 */
+.food-layout .panel { padding: clamp(16px,2vw,22px); margin-bottom: 16px; }
+/* @sequence 13003 */
+.food-toolbar { gap: 10px; margin-bottom: 12px; }
+/* @sequence 13004 */
+.food-item,.food-entry { padding-block: 12px; }
+/* @sequence 13005 */
+.food-actions { gap: 6px; margin-block: 8px; }
+/* @sequence 13006 */
+.food-actions .btn:disabled { opacity: .45; cursor: not-allowed; }
+/* @sequence 14000 */
+#food-diary .food-layout > div:first-child:has([data-food-catalog] .empty) [data-food-product] { order: -1; }
+/* @sequence 14001 */
+#food-diary .food-layout > div:first-child { display: flex; flex-direction: column; gap: 12px; }
+/* @sequence 14002 */
+#food-diary .food-layout > div:first-child .panel { margin: 0; }
+/* @sequence 13007 */
+@media (max-width: 760px) {
+  .food-layout { grid-template-columns: minmax(0,1fr); }
+  .food-toolbar { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}

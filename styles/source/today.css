@@ -1702,6 +1702,36 @@ p,.lede,.note,.v7-next-copy,.theme-choice-copy small {
 .v10-home-pulse:empty,.v7-command-row:empty{
   display: none;
 }
+
+/* Keep one primary next step and a compact weekly orientation. */
+/* @sequence 13040 */
+.v7-home-wrap > .v7-page-head { margin-bottom: 20px; }
+/* @sequence 13041 */
+.v7-home-wrap > .v7-page-head .lede { max-width: 54ch; }
+/* @sequence 13042 */
+.v7-home-grid { gap: 14px; }
+/* @sequence 13043 */
+.v7-home-context { gap: 8px; grid-template-rows: repeat(2,minmax(92px,auto)); }
+/* @sequence 13044 */
+.v7-context-card { min-height: 92px; padding: 12px 14px; gap: 2px; }
+/* @sequence 13045 */
+.ctx-figure { margin-top: 6px; font-size: 1.35rem; }
+/* @sequence 14011 */
+.v7-context-card.is-empty .ctx-figure { display: none; }
+/* @sequence 14012 */
+.v7-context-card.is-empty .ctx-note { margin-top: 5px; }
+/* @sequence 13046 */
+.v10-pulse-metrics { display: none; }
+/* @sequence 13047 */
+.v10-pulse-head { margin-bottom: 8px; }
+/* @sequence 13048 */
+.v10-home-pulse { margin-top: 12px; }
+/* @sequence 13049 */
+@media (max-width: 680px) {
+  .v7-home-context { grid-template-rows: auto; }
+  .v7-context-card { min-height: 78px; }
+  .v7-home-wrap > .v7-page-head { margin-bottom: 14px; }
+}
 /* @sequence 6046 */
 .v7-command-row{
   display: grid;

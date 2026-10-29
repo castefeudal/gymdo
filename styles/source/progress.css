@@ -591,6 +591,22 @@
   border-style: dashed;
   background: color-mix(in srgb,var(--bg-inset) 62%,transparent);
 }
+
+/* Reduce repeated framing and keep the check-in action prominent. */
+/* @sequence 13033 */
+#progress .section-head--structured { margin-bottom: 18px; }
+/* @sequence 13034 */
+#progress .section-brief-meta { display: none; }
+/* @sequence 13035 */
+#progress .section-brief { padding-block: 10px; }
+/* @sequence 13036 */
+#progress .prog-layout { gap: 16px; align-items: start; }
+/* @sequence 13037 */
+#progress .tool-out { min-height: 0; }
+/* @sequence 13038 */
+#progress .data-tools { gap: 6px; }
+/* @sequence 13039 */
+#progress .form-section-label { margin-top: 4px; }
 /* @sequence 1460 */
 @media (max-width:680px) {
   #prog-out[data-filled="false"] {

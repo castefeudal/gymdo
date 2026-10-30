@@ -439,7 +439,7 @@ export const CORE_TRANSLATIONS = Object.freeze(Object.assign(
     "v7.quickWorkoutS": { ru: "Собрать или продолжить", en: "Build or resume" },
     "v7.quickProgram": { ru: "Программа", en: "Programme" },
     "v7.quickProgramS": { ru: "Следующий тренировочный день", en: "Next training day" },
-    "v7.quickProgress": { ru: "Check-in", en: "Check-in" },
+    "v7.quickProgress": { ru: "Недельная сверка", en: "Check-in" },
     "v7.quickProgressS": { ru: "Вес, талия и восстановление", en: "Weight, waist and recovery" },
     "v7.appearance": { ru: "Оформление", en: "Appearance" },
     "v7.logging": { ru: "Логирование", en: "Logging" },

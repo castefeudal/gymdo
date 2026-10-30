@@ -494,6 +494,7 @@
                 <input class="input" id="search" type="search" placeholder="Название, мышца или оборудование…" data-i18n-ph="library.searchPh" autocomplete="off">
                 <button class="search-clear" id="search-clear" type="button" aria-label="Очистить поиск" data-i18n-aria="aria.searchClear">×</button>
               </div>
+              <button class="btn btn-solid btn-sm library-filter-trigger" id="mfb-open" type="button"><span data-i18n="mfb.filters">Фильтры</span><span class="mfb-count" id="mfb-count" hidden>0</span></button>
               <button class="btn btn-quiet btn-sm" id="custom-exercise-open" type="button" data-i18n="custom.create">Создать своё упражнение</button>
               <label class="sr-only" for="sort" data-i18n="library.sortLabel">Сортировка</label>
               <select class="select sort-select" id="sort">
@@ -1328,9 +1329,6 @@
 <div class="scrim" id="scrim" data-open="false" hidden></div>
 
 <div class="mobile-filter-bar" id="mfb" data-open="false">
-  <button class="btn btn-solid btn-sm" id="mfb-open" type="button">
-    <span data-i18n="mfb.filters">Фильтры</span><span class="mfb-count" id="mfb-count" hidden>0</span>
-  </button>
   <button class="btn btn-solid btn-sm" id="mfb-workout" type="button" hidden>
     <span data-i18n="mfb.workout">Тренировка</span><span class="mfb-count" id="mfb-wcount">0</span>
   </button>

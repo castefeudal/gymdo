@@ -864,3 +864,46 @@ body[data-v7-route="program"] #program {
   opacity: .72;
   pointer-events: none;
 }
+/* Compact the generated programme so the week reads before its commentary. */
+/* @sequence 13020 */
+.tool-layout:has(#plan-form) { align-items: start; gap: 16px; }
+/* @sequence 13021 */
+#plan-form { gap: 14px; }
+/* @sequence 13022 */
+#plan-form .plan-adv { margin-top: 4px; }
+/* @sequence 13023 */
+#plan-out { min-height: 0; align-self: start; }
+/* @sequence 13024 */
+#plan-out .empty { padding: 18px; text-align: left; }
+/* @sequence 14007 */
+.plan-draft-preview { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: var(--radius-card); background: linear-gradient(145deg,var(--bg-surface),var(--bg-inset)); }
+/* @sequence 14008 */
+.plan-draft-preview .v8-output-title,.plan-draft-preview p { margin: 0; }
+/* @sequence 14009 */
+.plan-draft-days { display: grid; grid-template-columns: repeat(auto-fit,minmax(70px,1fr)); gap: 6px; }
+/* @sequence 14010 */
+.plan-draft-days span { padding: 8px; border-radius: var(--radius-xs); background: var(--accent-soft); color: var(--text-primary); font-size: var(--step--2); font-weight: 700; text-align: center; }
+/* @sequence 13025 */
+#plan-out .plan-week { gap: 8px; }
+/* @sequence 13026 */
+#plan-out .plan-day { padding: 12px 14px; box-shadow: none; }
+/* @sequence 13027 */
+#plan-out .plan-day-head { margin-bottom: 6px; padding-bottom: 7px; }
+/* @sequence 13028 */
+#plan-out .plan-ex { padding: 7px 0; }
+/* @sequence 13029 */
+#plan-out .plan-ex-reason { display: none; }
+/* @sequence 13030 */
+#plan-out .v10-plan-guidance { gap: 8px; }
+/* @sequence 13031 */
+#plan-out .v10-plan-actions { position: sticky; bottom: 8px; z-index: 1; padding: 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-surface); }
+/* @sequence 13032 */
+@media (max-width: 860px) {
+  .tool-layout:has(#plan-form) { display: flex; flex-direction: column; }
+  #plan-out { order: -1; width: 100%; }
+}
+/* Keep the active plan settings readable on narrow screens. */
+/* @sequence 15003 */
+@media (max-width: 520px) {
+  .wizard-summary-item b { white-space: normal; overflow-wrap: anywhere; }
+}

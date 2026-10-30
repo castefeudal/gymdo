@@ -14,7 +14,7 @@ const PRECACHE = [
   './assets/runtime/chunk-RLO3Y2M4.js',
   './assets/runtime/decision-engine-PXY5OBCC.js',
   './assets/runtime/egfr-view-K4UEHPQF.js',
-  './assets/runtime/food-view-EEPC2VCG.js',
+  './assets/runtime/food-view-PPZRK5DV.js',
   './assets/runtime/history-repository-XZLWYEQW.js',
   './assets/runtime/i18n-VB76NCGC.js',
   './assets/runtime/load-modules-TDZRKIUC.js',

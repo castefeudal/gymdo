@@ -51,7 +51,7 @@ export function renderV7HomeView(context) {
     resume: en ? 'Resume' : 'Продолжить',
     planDay: en ? 'Start plan day' : 'Начать день плана',
     finishProfile: en ? 'Finish setup' : 'Завершить настройку',
-    checkin: en ? 'Weekly check-in' : 'Недельный check-in',
+    checkin: en ? 'Weekly check-in' : 'Замер и самочувствие',
     weighIn: en ? 'Log weight' : 'Записать вес',
     run: en ? 'Start workout' : 'Начать тренировку',
   };
@@ -107,6 +107,7 @@ export function renderV7HomeView(context) {
   const trend = v7TrendSummary() || {};
   const signal = (host, label, figure, note, route, action) => {
     if (!host) return;
+    host.classList.toggle('is-empty', figure === '—' || figure === '·');
     host.innerHTML = `<span class="ctx-label">${esc(label)}</span>
       <strong class="ctx-figure num">${esc(figure)}</strong>
       <small class="ctx-note">${esc(note)}</small>
@@ -121,7 +122,7 @@ export function renderV7HomeView(context) {
   const trendFigure = String(trend.v || '—').replace('-', '−').replace(/(\d)\.(\d)/, '$1,$2');
   signal($id('v7-home-progress'), v7c('trend'), trendFigure,
     trend.s || (en ? 'Not enough data yet' : 'Пока недостаточно данных'),
-    'progress', (S.diary || []).length ? '' : (en ? 'Log a check-in' : 'Сделать check-in'));
+    'progress', (S.diary || []).length ? '' : (en ? 'Log a check-in' : 'Записать данные'));
   signal($id('v7-home-nutrition'), v7c('kcal'), S.kbjuLast ? String(S.kbjuLast.target) : '—',
     S.kbjuLast ? (en ? 'kcal per day' : 'ккал в день') : (en ? 'Not calculated' : 'Не рассчитано'),
     'nutrition', S.kbjuLast ? '' : (en ? 'Open nutrition' : 'Открыть питание'));

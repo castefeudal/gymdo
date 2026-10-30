@@ -4,7 +4,8 @@ import {switchLocale} from './locale-support.mjs';
 test('food catalog, servings, recipe, edit, history and analytics survive reload',async({page})=>{
  await page.goto('/index.html#nutrition');await expect(page.locator('#mmg-boot')).toHaveCount(0);
  const root=page.locator('#food-diary');await expect(root.locator('[data-food-create]')).toHaveCount(1);
- await root.locator('[data-food-product] summary').click();
+ await expect(root.locator('[data-food-product]')).toHaveAttribute('open','');
+ await expect(root.locator('[data-food-add] [type=submit]')).toBeDisabled();
  const create=root.locator('[data-food-create]');
  for(const [name,value] of Object.entries({name:'Test label oats',calories:'370',protein:'13',fat:'7',carbs:'60',portion:'50',source:'User-entered test label'}))await create.locator(`[name="${name}"]`).fill(value);
  await create.locator('[type=submit]').click();await expect(root.locator('[data-food-status]')).toContainText('Сохранено');
@@ -29,11 +30,11 @@ test('food catalog, servings, recipe, edit, history and analytics survive reload
 });
 
 test('language changes preserve food drafts and keep a single active catalog handler',async({page})=>{
- await page.goto('/index.html#nutrition');const root=page.locator('#food-diary');await root.locator('[data-food-product] summary').click();
+ await page.goto('/index.html#nutrition');const root=page.locator('#food-diary');await expect(root.locator('[data-food-product]')).toHaveAttribute('open','');
  const form=root.locator('[data-food-create]');
  const fill=async name=>{for(const [key,value]of Object.entries({name,calories:'370',protein:'13',fat:'7',carbs:'60',portion:'50',source:'Original label'}))await form.locator(`[name="${key}"]`).fill(value);};
  await fill('Locale oats');await switchLocale(page,'en','nutrition');await expect(form.locator('[name=name]')).toHaveValue('Locale oats');await expect(form.locator('[name=source]')).toHaveValue('Original label');
- await form.locator('[type=submit]').click();await expect(root.locator('.food-item')).toHaveCount(1);
+ await form.locator('[type=submit]').click();await expect(root.locator('.food-item')).toHaveCount(1);await root.locator('[data-food-product] summary').click();
  await fill('Locale rice');await form.locator('[type=submit]').click();await expect(root.locator('.food-item')).toHaveCount(2);
  await switchLocale(page,'ru','nutrition');await switchLocale(page,'en','nutrition');
  await root.locator('[data-food-favorite]').first().click();await expect(root.locator('[data-food-favorite]').first()).toHaveAttribute('aria-pressed','true');

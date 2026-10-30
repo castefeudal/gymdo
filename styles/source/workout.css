@@ -3037,3 +3037,23 @@ body #settings .lede {
 body:has(#run[data-open="true"]) .mmg-update {
   display: none;
 }
+
+/* Workout actions stay reachable without competing with each other. */
+/* @sequence 13050 */
+#workout .section-head--structured { margin-bottom: 16px; }
+/* @sequence 13051 */
+#workout .section-brief-meta { display: none; }
+/* @sequence 13052 */
+#workout .section-brief { padding-block: 10px; }
+/* @sequence 13053 */
+.workout-layout { gap: 14px; }
+/* @sequence 13054 */
+.workout-side .btn-primary { min-height: 48px; }
+/* @sequence 13055 */
+.workout-list .set-row input,
+.workout-list .set-row button { min-height: 44px; }
+/* @sequence 13056 */
+@media (max-width: 680px) {
+  .workout-side { gap: 10px; }
+  .workout-side .btn-primary { position: sticky; bottom: calc(72px + var(--safe-b)); z-index: 2; box-shadow: var(--shadow-2); }
+}

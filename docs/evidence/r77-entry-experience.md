@@ -20,7 +20,7 @@ CSS is isolated under .entry and the entry lifecycle body classes. Source rules 
 
 ## Verification
 
-- npm run quality: PASS, including syntax, complete rebuild, resource budgets, and 192/192 unit/source tests.
+- npm run quality: PASS, including syntax, complete rebuild, resource budgets, and 193/193 unit/source tests.
 - Entry plus installed offline-shell tests: 21/21 PASS in desktop Chromium, mobile Chromium emulation, and Firefox.
 - Final responsive/reduced-motion matrix after the compact landscape refinement: 3/3 PASS across those projects. Widths: 320, 360, 375, 390, 430, 768, 1024, 1440, 1920, plus 844×390 landscape. Checks cover horizontal overflow, actual rectangle intersection, control size, text fit, and short-screen action visibility.
 - Existing production/session/offline and visual regression selection: 42/42 PASS. It includes IndexedDB, backups, custom exercises, equipment profiles, saved language, update controls, home/workout screenshots, and offline states. Existing screenshot baselines were not changed.
@@ -49,3 +49,7 @@ These are local automated browser/emulation results and screenshot review, not p
 The source changes are app.js, src/app/entry.mjs, src/features/entry/entry-screen.mjs, src/views/entry.html, src/views/shell.html, styles/source/entry.css, scripts/build-index.mjs, scripts/performance-budget.mjs, src/app/service-worker.js, tests/e2e/entry-screen.spec.mjs and tests/e2e/offline-shell.spec.mjs.
 
 Rebuilt outputs are app-body.html, ui.html, app.css, index.html, sw.js, assets/runtime/application.js and assets/runtime-metrics.json. This report and selected screenshots complete the review evidence.
+
+## Publication follow-up
+
+The first publish attempt was correctly blocked by the Linux generated-file check: the new LF view and historical CRLF views produced a mixed artifact. The view builder now normalizes to the historical CRLF output on both platforms, with a dedicated LF/CRLF/mixed-fixture regression test. The entry tests are included in the four-browser behavior CI job. The existing skip link remains before the entry component so it retains its keyboard and landmark semantics on internal routes. Live verification derives its expected version from the current build source.

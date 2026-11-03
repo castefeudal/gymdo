@@ -1,16 +1,18 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 
+// r77 entry adds ~1 KB gzipped CSS, ~1 KB markup and <1 KB runtime.
+// Keep explicit ceilings for this self-contained screen; no new dependencies.
 const budgets = [
   { file: 'app.js', raw: 446_000, gzip: 128_000 },
   // Compact catalogue, workout, and form layouts add source output while the
   // gzip limit remains the user-facing transfer guard.
-  { file: 'app.css', raw: 282_000, gzip: 50_500 },
-  { file: 'ui.html', raw: 124_000, gzip: 28_000 },
+  { file: 'app.css', raw: 288_000, gzip: 52_000 },
+  { file: 'ui.html', raw: 126_000, gzip: 29_000 },
   { file: 'index.html', raw: 10_000, gzip: 4_000 },
   // Allow the optional, dynamically loaded CKD-EPI clinical calculator while
   // keeping the separately enforced initial and complete-boot budgets intact.
-  { directory: 'assets/runtime', label: 'production JS (all chunks including food/PDF review)', raw: 529_000, gzip: 176_500 },
+  { directory: 'assets/runtime', label: 'production JS (all chunks including food/PDF review)', raw: 532_000, gzip: 178_000 },
   { file: 'gym-tools.js', raw: 52_000, gzip: 16_000 },
 ];
 
@@ -29,8 +31,8 @@ const metrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json'
 const initial=metrics.initialBytes<=480_000;
 console.log(`${initial?'PASS':'FAIL'} initial static JS graph: ${metrics.initialBytes}/480000 B; optional food/report views remain lazy`);
 if(!initial)failed=true;
-const boot=Number.isFinite(metrics.bootBytes)&&metrics.bootBytes<=484_000;
-console.log(`${boot?'PASS':'FAIL'} complete boot JS graph: ${metrics.bootBytes}/484000 B`);
+const boot=Number.isFinite(metrics.bootBytes)&&metrics.bootBytes<=486_000;
+console.log(`${boot?'PASS':'FAIL'} complete boot JS graph: ${metrics.bootBytes}/486000 B`);
 if(!boot)failed=true;
 for (const budget of budgets) {
   const label = budget.label || budget.file;

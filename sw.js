@@ -1,4 +1,4 @@
-const VERSION = '2026.10-r76.0-visual-layer';
+const VERSION = '2026.11-r77.0-entry';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;

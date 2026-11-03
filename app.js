@@ -8,6 +8,7 @@
             18 связывание · 14 инициализация
    ========================================================================= */
 import './bootstrap.js';
+import { mountEntryScreen } from './src/features/entry/entry-screen.mjs';
 import {createJournalWriter,captureJournalDraft,restoreJournalDraft} from './src/features/journals/view-lifecycle.mjs';
 import { cleanLabResults } from './src/features/lab/results-model.mjs';
 import { createExerciseMediaPlayer } from './src/features/exercise/media-player.mjs';
@@ -5736,7 +5737,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.10-r76.0-visual-layer';
+  var APP_VERSION = '2026.11-r77.0-entry';
   var BACKUP_SCHEMA = 12;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
@@ -6648,6 +6649,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
         return true;
       }
     });
+    mountEntryScreen({ language: function () { return S.lang; }, selectLanguage: function (lang) { S.lang = lang; applyLang(); } });
     window.dispatchEvent(new CustomEvent('mmg:ready', { detail: { exercises: DATA_READY ? EX.length : DATA_EXPECTED, content: !!contentLoaded, dataReady: DATA_READY } }));
 
     // Catalog loads on exercise routes/search; a new user's Today stays light.

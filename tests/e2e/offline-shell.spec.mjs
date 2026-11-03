@@ -32,5 +32,12 @@ test('compiled shell and unvisited routes reopen offline without authored bundle
     if (route === 'tools') await expect(page.locator('[data-lab-form]').first()).toBeVisible();
     if (route === 'library') await expect(page.locator('#grid .card').first()).toBeVisible();
   }
+  // The clean-address language entry is part of the installed shell too.
+  await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#mmg-boot')).toHaveCount(0);
+  await expect(page.locator('#entry-screen')).toBeVisible();
+  await page.locator('[data-entry-lang="en"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#entry-screen')).toBeHidden();
   expect(errors).toEqual([]);
 });

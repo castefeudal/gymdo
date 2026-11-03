@@ -1,5 +1,7 @@
 import '../../bootstrap.js';
 
+document.documentElement.dataset.entryRequested = String(!location.hash);
+
 // Keep the document small and fetch compatibility markup alongside the
 // module-preloaded application. All historical binding IDs mount before init.
 try {

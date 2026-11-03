@@ -52,6 +52,9 @@ test('entry responsive composition and reduced motion', async({page},testInfo)=>
    await page.setViewportSize({width:Math.round(width*width/actual.width),height:Math.round(height*height/actual.height)});
   }
   await page.evaluate(()=>document.fonts.ready);
+  // WebKit acknowledges a resize before all media-query grid layout settles.
+  // Retry the geometry assertions, rather than measuring the previous layout.
+  await expect(async()=>{
   const result=await page.evaluate(()=>{
    const entry=document.querySelector('.entry');
    const controls=[...entry.querySelectorAll('a,button')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent,width:r.width,height:r.height,left:r.left,right:r.right,bottom:r.bottom,fit:el.scrollWidth<=el.clientWidth+1};});
@@ -60,8 +63,9 @@ test('entry responsive composition and reduced motion', async({page},testInfo)=>
   });
   expect(result.overflow).toBeLessThanOrEqual(1);
   expect(result.overlap).toBe(false);
-  await expect.poll(()=>page.locator('#entry-screen').evaluate(el=>el.getAnimations({subtree:true}).length)).toBe(0);
+  expect(result.animations).toBe(0);
   for(const c of result.controls){expect(c.height,c.text).toBeGreaterThanOrEqual(44);expect(c.width,c.text).toBeGreaterThanOrEqual(44);expect(c.left).toBeGreaterThanOrEqual(0);expect(c.right).toBeLessThanOrEqual(width+1);expect(c.fit,c.text).toBe(true);if(width<=430||height<=500)expect(c.bottom,c.text).toBeLessThanOrEqual(height+1);}
+  }).toPass({timeout:10000});
   if(testInfo.project.name==='desktop')await page.screenshot({path:`artifacts/entry/${width}x${height}.png`,fullPage:true});
  }
 });

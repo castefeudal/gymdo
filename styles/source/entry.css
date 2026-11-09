@@ -198,7 +198,6 @@ body.entry-entered main { animation:entry-reveal .24s both; }
  z-index:-1;
  pointer-events:none;
  background:url(assets/visual/entry-atmos-1600.webp) center/cover no-repeat;
- mask-image:radial-gradient(120% 92% at 68% 38%,#000 26%,rgba(0,0,0,.4) 70%,transparent 100%);
  opacity:.9;
 }
 

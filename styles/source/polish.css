@@ -45,11 +45,10 @@ html[data-theme="obsidian"] body {
 /* @sequence 20011 */
 body::before {
   display: block;
-  opacity: .5;
+  opacity: .32;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
   mask-image: none;
-  mix-blend-mode: overlay;
 }
 /* @sequence 20012 */
 body::after {
@@ -59,9 +58,8 @@ body::after {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(34% 30% at 24% 30%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
-    radial-gradient(30% 28% at 78% 66%, color-mix(in srgb, var(--analytics) 10%, transparent), transparent 70%);
-  filter: blur(46px);
+    radial-gradient(40% 36% at 24% 30%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 78%),
+    radial-gradient(36% 34% at 78% 66%, color-mix(in srgb, var(--analytics) 9%, transparent), transparent 78%);
   animation: mmg-drift 30s var(--ease-em) infinite alternate;
 }
 /* @sequence 20013 */
@@ -72,13 +70,11 @@ body::after {
 /* @sequence 20014 */
 html[data-theme="soft"] body::before,
 html[data-theme="ivory"] body::before {
-  opacity: .28;
-  mix-blend-mode: multiply;
+  opacity: .16;
 }
 /* @sequence 20015 */
 html[data-theme="soft"] body::after,
 html[data-theme="ivory"] body::after {
-  filter: blur(60px);
   opacity: .55;
 }
 /* @sequence 20016 */

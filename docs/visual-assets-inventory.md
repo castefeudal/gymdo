@@ -20,6 +20,8 @@ repository because they are 8–20× the shipped weight and are never referenced
 | `onboarding-grip-960.webp` | 960×768, 53 KB | First-run hero (`.hero-main::after`) | Masked to a bottom band under 900 px | Proprietary, © 2026 Pavel Markov |
 | `program-hypertrophy-720.webp` | 720×480, 12 KB | Programme summary plate (`.v10-plan-hero::after`) | Right-edge plate, `cover` | Proprietary, © 2026 Pavel Markov |
 | `nutrition-plate-1120.webp` | 1120×640, 79 KB | Nutrition result plate (`#nutrition .tool-out::after`) | Right-edge plate, `cover` | Proprietary, © 2026 Pavel Markov |
+| `entry-atmos-1600.webp` | 1600×1000, 6.5 KB | Entry gate atmosphere — abstract bokeh light-field behind the metal sculpture (`.entry::before`) | ≥768 px viewports | Proprietary, © 2026 Pavel Markov |
+| `entry-atmos-800.webp` | 800×500, 2.4 KB | Same light-field, halved — served to ≤767 px viewports by `@media (max-width:767px)` | ≤767 px viewports | Proprietary, © 2026 Pavel Markov |
 
 Photographs are always painted behind interface content: each host element
 declares `isolation: isolate` and the image sits at `z-index: -1` under a

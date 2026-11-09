@@ -51,6 +51,8 @@ const PRECACHE = [
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
+  './assets/visual/entry-atmos-1600.webp',
+  './assets/visual/entry-atmos-800.webp',
   './assets/visual/nutrition-plate-1120.webp',
   './assets/visual/onboarding-grip-960.webp',
   './assets/visual/plate-mark.svg',

@@ -102,6 +102,11 @@
   /* One watermark strength per theme: --text-muted is a mid-grey on Obsidian,
      so the same opacity that reads on Ivory disappears on the dark canvas. */
   --art-opacity: .2;
+  /* Brand mark paint. Obsidian uses the metallic gradient defined inline in the
+     header SVG (#hmMetal/#hmLime); light themes fall back to solid inks so the
+     mark keeps contrast on paper backgrounds. */
+  --mark-left: url(#hM);
+  --mark-right: url(#hL);
 }
 /* @sequence 1 */
 html[data-theme="obsidian"] {
@@ -185,6 +190,8 @@ html[data-theme="soft"] {
   --surface-panel: var(--bg-surface);
   --surface-raised: var(--bg-elevated);
   --surface-control: var(--bg-inset);
+  --mark-left: #16212b;
+  --mark-right: #35700f;
 }
 /* @sequence 3 */
 html[data-theme="ivory"] {
@@ -226,4 +233,6 @@ html[data-theme="ivory"] {
   --surface-panel: var(--bg-surface);
   --surface-raised: var(--bg-elevated);
   --surface-control: var(--bg-inset);
+  --mark-left: #1b1e15;
+  --mark-right: #4c6a1e;
 }

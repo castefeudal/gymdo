@@ -15,8 +15,19 @@ const STEEL = '#8BBFD1';
 // Geometric M on a 64x64 grid: two mirrored halves split on the centre axis.
 const M_LEFT = 'M14 50V14h7.2L32 34.6V45L20.6 28.4V50Z';
 const M_RIGHT = 'M50 50V14h-7.2L32 34.6V45l11.4-16.6V50Z';
+const M_EDGE = 'M14 50V14h7.2L32 34.6';
 
-const mark = ({ paper = PAPER, lime = LIME, steel = null } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MARKOV MADE GYM"><title>MARKOV MADE GYM</title><path d="${M_LEFT}" fill="${steel || paper}"/><path d="${M_RIGHT}" fill="${lime}"/>${steel ? `<path d="M32 34.6V45L20.6 28.4" fill="${paper}"/>` : ''}</svg>`;
+// Brushed-metal + lime paint servers. `p` namespaces the gradient ids so several
+// marks can share one document (raster pages) without collisions.
+const metalDefs = (p) => `<defs><linearGradient id="${p}m" x1="0" y1="0" x2=".42" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".24" stop-color="#c6d1d7"/><stop offset=".47" stop-color="#78858e"/><stop offset=".64" stop-color="#e9efef"/><stop offset=".84" stop-color="#8d9aa2"/><stop offset="1" stop-color="#59656d"/></linearGradient><linearGradient id="${p}l" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="#e8ffb9"/><stop offset=".5" stop-color="${LIME}"/><stop offset="1" stop-color="#7cab41"/></linearGradient><linearGradient id="${p}s" x1="0" y1="0" x2=".42" y2="1"><stop offset="0" stop-color="#eaf6fa"/><stop offset=".5" stop-color="${STEEL}"/><stop offset="1" stop-color="#4d7f92"/></linearGradient></defs>`;
+const metalM = (p, { steel = false, edge = true } = {}) => `<path d="${M_LEFT}" fill="url(#${p}${steel ? 's' : 'm'})"/><path d="${M_RIGHT}" fill="url(#${p}l)"/>${edge ? `<path d="${M_EDGE}" fill="none" stroke="#ffffff" stroke-width="1.3" stroke-opacity=".5"/>` : ''}`;
+
+const mark = ({ paper = PAPER, lime = LIME, steel = null, metallic = true } = {}) => {
+  const body = metallic
+    ? `${metalDefs('mk')}${metalM('mk', { steel: !!steel })}`
+    : `<path d="${M_LEFT}" fill="${steel || paper}"/><path d="${M_RIGHT}" fill="${lime}"/>${steel ? `<path d="M32 34.6V45L20.6 28.4" fill="${paper}"/>` : ''}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MARKOV MADE GYM"><title>MARKOV MADE GYM</title>${body}</svg>`;
+};
 
 const plate = (size = 512) => {
   const r = size * 0.225;
@@ -25,28 +36,29 @@ const plate = (size = 512) => {
   const scale = inner / 64;
   const stroke = Math.max(1, size * 0.006);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141C26"/><stop offset="1" stop-color="${INK}"/></linearGradient></defs>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141C26"/><stop offset="1" stop-color="${INK}"/></linearGradient><radialGradient id="glow" cx=".72" cy=".18" r=".9"><stop offset="0" stop-color="${LIME}" stop-opacity=".16"/><stop offset=".55" stop-color="${LIME}" stop-opacity="0"/></radialGradient>${metalDefs('p').replace('<defs>', '').replace('</defs>', '')}</defs>
   <rect width="${size}" height="${size}" rx="${r}" fill="url(#g)"/>
+  <rect width="${size}" height="${size}" rx="${r}" fill="url(#glow)"/>
   <rect x="${stroke / 2}" y="${stroke / 2}" width="${size - stroke}" height="${size - stroke}" rx="${r - stroke / 2}" fill="none" stroke="rgba(244,247,245,.14)" stroke-width="${stroke}"/>
-  <g transform="translate(${off} ${off}) scale(${scale})"><path d="${M_LEFT}" fill="${PAPER}"/><path d="${M_RIGHT}" fill="${LIME}"/></g>
+  <g transform="translate(${off} ${off}) scale(${scale})">${metalM('p')}</g>
 </svg>`;
 };
 
-const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="${INK}"/><g transform="translate(6.4 6.4) scale(0.8)"><path d="${M_LEFT}" fill="${PAPER}"/><path d="${M_RIGHT}" fill="${LIME}"/></g></svg>`;
+const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">${metalDefs('f')}<rect width="64" height="64" rx="14" fill="${INK}"/><g transform="translate(6.4 6.4) scale(0.8)">${metalM('f')}</g></svg>`;
 
-const lockup = ({ paper = PAPER, sub = STEEL } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 88" width="420" height="88" role="img" aria-label="MARKOV MADE GYM">
-  <g transform="translate(8 20) scale(0.75)"><path d="${M_LEFT}" fill="${paper}"/><path d="${M_RIGHT}" fill="${LIME}"/></g>
+const lockup = ({ paper = PAPER, sub = STEEL, metallic = true } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 88" width="420" height="88" role="img" aria-label="MARKOV MADE GYM">
+  ${metallic ? metalDefs('k') : ''}<g transform="translate(8 20) scale(0.75)">${metallic ? metalM('k') : `<path d="${M_LEFT}" fill="${paper}"/><path d="${M_RIGHT}" fill="${LIME}"/>`}</g>
   <text x="84" y="45" fill="${paper}" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="30" font-weight="760" letter-spacing="-0.6">MARKOV MADE</text>
   <text x="84" y="72" fill="${sub}" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="620" letter-spacing="7.4">GYM</text>
 </svg>`;
 
 await writeFile(`${dir}/mark.svg`, mark());
 await writeFile(`${dir}/mark-on-dark.svg`, mark());
-await writeFile(`${dir}/mark-on-light.svg`, mark({ paper: '#111A22', lime: '#3F7A18' }));
+await writeFile(`${dir}/mark-on-light.svg`, mark({ paper: '#111A22', lime: '#3F7A18', metallic: false }));
 await writeFile(`${dir}/mark-analytics.svg`, mark({ steel: STEEL }));
 await writeFile(`${dir}/lockup.svg`, lockup());
 await writeFile(`${dir}/lockup-dark.svg`, lockup());
-await writeFile(`${dir}/lockup-light.svg`, lockup({ paper: '#111A22', sub: '#4C6070' }));
+await writeFile(`${dir}/lockup-light.svg`, lockup({ paper: '#111A22', sub: '#4C6070', metallic: false }));
 await writeFile(`${dir}/favicon.svg`, favicon);
 await writeFile(`${dir}/icon-512.svg`, plate(512));
 
@@ -81,7 +93,7 @@ const og = `<!doctype html><html><head><meta charset="utf-8"><style>
   .bar i{display:block;width:44px;height:6px;border-radius:3px;background:${LIME}}
   .bar i:nth-child(2){opacity:.55}.bar i:nth-child(3){opacity:.28}
 </style></head><body><div class="wrap"><div class="grid"></div>
-  <div class="row"><svg class="mark" viewBox="0 0 64 64"><path d="${M_LEFT}" fill="${PAPER}"/><path d="${M_RIGHT}" fill="${LIME}"/></svg>
+  <div class="row"><svg class="mark" viewBox="0 0 64 64">${metalDefs('o').replace('<defs>', '').replace('</defs>', '')}${metalM('o')}</svg>
     <div class="name">MARKOV MADE<span>GYM</span></div></div>
   <h1>Тренировки, питание<br>и анализы — <em>в одном</em><br>браузерном приложении</h1>
   <p>1 324 упражнения, Run Mode, прогрессия и анализы.<br>Без аккаунта — данные остаются на устройстве.</p>

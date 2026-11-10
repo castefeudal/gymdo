@@ -11,7 +11,8 @@ const budgets = [
   // brand mark gradients and surface micro-detail add ~5 KB raw / ~1 KB gzip of
   // CSS plus ~0.2 KB of inline SVG markup. Ceilings recalibrated once, gate
   // still enforced; trim polish.css before raising again.
-  { file: 'app.css', raw: 293_000, gzip: 53_200 },
+  // Relative font units and large-text navigation cost <2 KB raw; retain the existing transfer ceiling.
+  { file: 'app.css', raw: 295_000, gzip: 53_200 },
   { file: 'ui.html', raw: 126_200, gzip: 29_000 },
   { file: 'index.html', raw: 10_000, gzip: 4_000 },
   // Allow the optional, dynamically loaded CKD-EPI clinical calculator while

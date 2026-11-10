@@ -11,8 +11,8 @@ export function renderV7SettingsView(context) {
     $('v7-log-title').textContent=v7c('logging');
     $('v7-coach-title').textContent=v7c('coach');
     $('v7-data-title').textContent=v7c('data');
-    if($('v10-reading-title'))$('v10-reading-title').textContent=S.lang==='en'?'Readability':'Читаемость';
-    if($('v10-reading-text'))$('v10-reading-text').textContent=S.lang==='en'?'Choose interface scale without changing the information structure.':'Выбери размер интерфейса без потери структуры и информации.';
+    if($('v10-reading-title'))$('v10-reading-title').textContent=S.lang==='en'?'Text size':'Размер текста';
+    if($('v10-reading-text'))$('v10-reading-text').textContent=S.lang==='en'?'Applies to every section on this device and is saved automatically.':'Для всех разделов на этом устройстве. Выбор сохраняется автоматически.';
     if($('v10-density-title'))$('v10-density-title').textContent=S.lang==='en'?'Interface density':'Плотность интерфейса';
     if($('v10-density-text'))$('v10-density-text').textContent=S.lang==='en'?'Adjust spacing while keeping text and controls easy to read and use.':'Настрой отступы под себя, сохранив размер текста и кнопок.';
     $('v7-log-text').textContent=S.lang==='en'?'RIR/RPE stay hidden unless you explicitly enable them.':'RIR/RPE скрыты, пока вы явно их не включите.';
@@ -25,12 +25,14 @@ export function renderV7SettingsView(context) {
     ];
     $('v7-theme-actions').innerHTML=themes.map(function(x){var active=S.theme===x[0];return'<button class="theme-choice" type="button" data-v7-theme="'+x[0]+'" aria-pressed="'+String(active)+'"><span class="theme-choice-swatch" data-theme-preview="'+x[0]+'" aria-hidden="true"><i></i></span><span class="theme-choice-copy"><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><span class="theme-choice-check" aria-hidden="true">'+(active?'✓':'')+'</span></button>';}).join('');
     if($('v10-reading-actions')){
+      $('v10-reading-actions').setAttribute('role','group');
+      $('v10-reading-actions').setAttribute('aria-labelledby','v10-reading-title');
       var reading=[
-        ['balanced',S.lang==='en'?'Balanced':'Сбалансировано',S.lang==='en'?'Flagship default':'Оптимальный баланс плотности и чтения'],
-        ['comfortable',S.lang==='en'?'Comfort':'Комфорт',S.lang==='en'?'Slightly larger text and controls':'Крупнее текст и элементы управления'],
-        ['large',S.lang==='en'?'Large':'Крупно',S.lang==='en'?'Maximum readability':'Максимум читаемости']
+        ['small',S.lang==='en'?'Small':'Мелко',S.lang==='en'?'Compact text · 87.5%':'Компактный текст · 87,5%'],
+        ['balanced',S.lang==='en'?'Medium':'Средне',S.lang==='en'?'Default size · 100%':'Обычный размер · 100%'],
+        ['large',S.lang==='en'?'Large':'Крупно',S.lang==='en'?'Larger text · 125%':'Увеличенный текст · 125%']
       ];
-      $('v10-reading-actions').innerHTML=reading.map(function(x){var active=S.settings.reading===x[0];return'<button class="reading-choice" type="button" data-v10-reading="'+x[0]+'" aria-pressed="'+String(active)+'"><span><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><i aria-hidden="true">'+(active?'✓':'')+'</i></button>';}).join('');
+      $('v10-reading-actions').innerHTML=reading.map(function(x){var active=(S.settings.reading==='comfortable'?'balanced':S.settings.reading)===x[0];return'<button class="reading-choice" type="button" data-v10-reading="'+x[0]+'" aria-pressed="'+String(active)+'"><span><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><i aria-hidden="true">'+(active?'✓':'')+'</i></button>';}).join('');
     }
     if($('v10-density-actions')){
       var density=[

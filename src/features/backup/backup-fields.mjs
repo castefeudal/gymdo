@@ -94,7 +94,7 @@ export function validateBackupField(name, raw, adapters = {}) {
     return value && typeof value === 'object' && !Array.isArray(value)
       ? stringify({
         rir: !!value.rir, rpe: !!value.rpe,
-        reading: ['balanced', 'comfortable', 'large'].includes(value.reading) ? value.reading : 'balanced',
+        reading: ['small', 'balanced', 'comfortable', 'large'].includes(value.reading) ? value.reading : 'balanced',
         density: ['compact', 'default', 'roomy'].includes(value.density) ? value.density : 'default',
         loadIncrements: typeof adapters.cleanLoadIncrementOverrides === 'function' ? adapters.cleanLoadIncrementOverrides(value.loadIncrements) : {},
       })

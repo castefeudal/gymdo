@@ -1396,10 +1396,10 @@ test('readability choice persists and progress supports multiple chart signals',
   await expect(page.locator('#v7-diagnostics-output')).toContainText('Состояние хранилища');
   await expect(page.locator('#v7-diagnostics-output')).toContainText('LocalStorage');
   await expect(page.locator('#v7-diagnostics-output')).toContainText(/service worker/i);
-  await page.locator('[data-v10-reading="comfortable"]').click();
-  await expect(page.locator('html')).toHaveAttribute('data-reading', 'comfortable');
+  await page.locator('[data-v10-reading="large"]').click();
+  await expect(page.locator('html')).toHaveAttribute('data-reading', 'large');
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-reading', 'comfortable');
+  await expect(page.locator('html')).toHaveAttribute('data-reading', 'large');
 
   await page.goto('/index.html#progress');
   await expect(page.locator('[data-progress-metric="weight"]')).toHaveAttribute('aria-pressed', 'true');

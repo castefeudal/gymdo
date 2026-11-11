@@ -76,4 +76,7 @@ test('settings backup preserves only bounded equipment load overrides', () => {
   assert.deepEqual(parse(settings), { rir: true, rpe: false, reading: 'large', density: 'compact', loadIncrements: { '0001': 1.25 } });
   const legacy = validateBackupField('settings', JSON.stringify({ reading: 'balanced' }));
   assert.equal(parse(legacy).density, 'default');
+  for (const reading of ['small', 'balanced', 'comfortable', 'large']) {
+    assert.equal(parse(validateBackupField('settings', JSON.stringify({ reading }))).reading, reading);
+  }
 });

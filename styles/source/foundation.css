@@ -4591,6 +4591,10 @@ body::before {
   gap: 8px;
 }
 /* @sequence 2549 */
+html[data-reading="small"] {
+  font-size: 87.5%;
+}
+/* @sequence 25490 */
 html[data-reading="balanced"] {
   font-size: 100%;
 }
@@ -4600,7 +4604,7 @@ html[data-reading="comfortable"] {
 }
 /* @sequence 2551 */
 html[data-reading="large"] {
-  font-size: 108%;
+  font-size: 125%;
 }
 /* @sequence 12320 */
 html[data-density="compact"] {
@@ -4747,13 +4751,13 @@ html[data-density="roomy"] {
 /* @sequence 2639 */
 @media (max-width:840px) {
   html[data-reading="comfortable"] {
-    font-size: 102%;
+    font-size: 104%;
   }
 }
 /* @sequence 2640 */
 @media (max-width:840px) {
   html[data-reading="large"] {
-    font-size: 105%;
+    font-size: 125%;
   }
 }
 /* @sequence 2641 */

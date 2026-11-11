@@ -1400,3 +1400,12 @@ body[data-v8-returning="true"] .v8-context-bar {
 .v8-context-copy{align-items:center;}
 /* @sequence 7125 */
 @media (min-width:901px) and (max-width:1179px){.nav-burger{display:inline-flex;}}
+
+/* @sequence 25491 */
+@media (min-width:901px) and (max-width:1749px){
+  html[data-reading="large"]{--header-h:112px;}
+  html[data-reading="large"] .topbar-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:48px 44px;gap:4px 16px;padding-block:8px;}
+  html[data-reading="large"] .topbar-inner>.brand{grid-column:1;grid-row:1;justify-self:start;}
+  html[data-reading="large"] .topbar-inner>.nav-tools{grid-column:2;grid-row:1;justify-self:end;}
+  html[data-reading="large"] .topbar-inner>.v7-primary-nav{grid-column:1/-1;grid-row:2;justify-content:center;margin-left:0;}
+}

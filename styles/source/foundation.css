@@ -5,7 +5,8 @@
 /* @sequence 101 */
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
+  /* Explicit in-page actions animate; route resets must not move pointer targets. */
+  scroll-behavior: auto;
 }
 /* @sequence 102 */
 body {

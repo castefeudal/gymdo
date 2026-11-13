@@ -2,6 +2,10 @@
 export function mountEntryScreen({ language, selectLanguage }) {
   const screen = document.getElementById('entry-screen');
   if (!screen || document.documentElement.dataset.entryRequested !== 'true') return;
+  const sculpture = screen.querySelector('.entry-sculpture picture');
+  const source = sculpture.querySelector('source'), art = sculpture.querySelector('img');
+  source.srcset = source.dataset.srcset;
+  art.src = art.dataset.src;
   const en = language() === 'en';
   const contact = screen.querySelector('[data-entry-contact]');
   contact.textContent = en ? 'Contact the creator ↗' : 'Написать автору ↗';
@@ -9,6 +13,7 @@ export function mountEntryScreen({ language, selectLanguage }) {
     ? "Hello Pavel! I'm contacting you from MARKOV MADE GYM."
     : 'Здравствуйте, Павел! Пишу вам с сайта MARKOV MADE GYM.');
   screen.querySelector('[data-entry-copy]').textContent = en ? 'Train with purpose. Progress with precision.' : 'Тренируйся осознанно. Прогрессируй точно.';
+  screen.querySelector('[data-entry-scope]').textContent = en ? 'Training / Nutrition / Progress' : 'Тренировки / Питание / Прогресс';
   screen.querySelector('[data-entry-label]').textContent = en ? 'Choose your language' : 'Выбери свой язык';
   screen.setAttribute('aria-label', en ? 'Welcome to MARKOV MADE GYM' : 'Добро пожаловать в MARKOV MADE GYM');
   const previous = [...document.body.children].filter(el => el !== screen && el.id !== 'mmg-boot' && !['SCRIPT','STYLE','LINK'].includes(el.tagName)).map(el => [el, el.inert]);
@@ -19,7 +24,6 @@ export function mountEntryScreen({ language, selectLanguage }) {
   screen.focus({ preventScroll: true });
   let closed = false;
   const motion = matchMedia('(prefers-reduced-motion: no-preference) and (pointer: fine)');
-  const sculpture = screen.querySelector('.entry-sculpture svg');
   let frame;
   screen.addEventListener('pointermove', event => {
     if (closed || !motion.matches || frame) return;

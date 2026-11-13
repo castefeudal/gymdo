@@ -1,4 +1,4 @@
-const VERSION = '2026.11-r78-editorial';
+const VERSION = '2026.11-r79-entry-cover';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -27,8 +27,8 @@ const PRECACHE = [
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
-  './assets/visual/entry-atmos-1600.webp',
-  './assets/visual/entry-atmos-800.webp',
+  './assets/visual/entry-sculpture-v2-1400.webp',
+  './assets/visual/entry-sculpture-v2-720.webp',
   './assets/visual/nutrition-plate-1120.webp',
   './assets/visual/onboarding-grip-960.webp',
   './assets/visual/plate-mark.svg',

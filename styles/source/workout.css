@@ -2124,14 +2124,6 @@ body[data-v7-route="home"] .nav-cta,body[data-v7-route="library"] .nav-cta,body[
 body.keyboard-open .mobile-rest-timer {
   display: none;
 }
-/* @sequence 2131 */
-body[data-v8-returning="true"] #library>.container>.section-head,
-body[data-v8-returning="true"] #workout>.container>.section-head,
-body[data-v8-returning="true"] #progress>.container>.section-head,
-body[data-v8-returning="true"] #program>.container>.section-head,
-body[data-v8-returning="true"] #nutrition>.container>.section-head {
-  display: none;
-}
 /* @sequence 2133 */
 .workout-name {
   appearance: none;

@@ -111,12 +111,12 @@
 /* @sequence 1 */
 html[data-theme="obsidian"] {
   color-scheme: dark;
-  --bg-canvas: #080c11;
-  --bg-workspace: #0a1016;
-  --bg-surface: #101720;
-  --bg-elevated: #17212b;
+  --bg-canvas: #0e1010;
+  --bg-workspace: #131616;
+  --bg-surface: #191d1d;
+  --bg-elevated: #252b2b;
   --bg-overlay: #1c2732;
-  --bg-inset: #070b0f;
+  --bg-inset: #111515;
   --border-subtle: rgba(226,238,232,.075);
   --border-strong: rgba(226,238,232,.16);
   --text-primary: #f4f7f5;

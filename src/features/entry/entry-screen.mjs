@@ -18,9 +18,23 @@ export function mountEntryScreen({ language, selectLanguage }) {
   screen.tabIndex = -1;
   screen.focus({ preventScroll: true });
   let closed = false;
+  const motion = matchMedia('(prefers-reduced-motion: no-preference) and (pointer: fine)');
+  const sculpture = screen.querySelector('.entry-sculpture svg');
+  let frame;
+  screen.addEventListener('pointermove', event => {
+    if (closed || !motion.matches || frame) return;
+    const x = (event.clientX / innerWidth - .5) * 5;
+    const y = (event.clientY / innerHeight - .5) * -5;
+    frame = requestAnimationFrame(() => {
+      sculpture.style.transform = `perspective(900px) rotateX(${y}deg) rotateY(${x}deg)`;
+      frame = null;
+    });
+  });
+  screen.addEventListener('pointerleave', () => { sculpture.style.transform = ''; });
   function close() {
     if (closed) return;
     closed = true;
+    cancelAnimationFrame(frame);
     screen.hidden = true;
     document.body.classList.remove('entry-open');
     document.body.classList.add('entry-entered');

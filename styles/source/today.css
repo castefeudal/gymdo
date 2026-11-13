@@ -1292,11 +1292,6 @@ p,.lede,.note,.v7-next-copy,.theme-choice-copy small {
   font-weight: 820;
   letter-spacing: -.038em;
 }
-/* @sequence 4507 */
-.v7-home-wrap>.v7-page-head {
-  display: none;
-}
-
 /* @sequence 6000 */
 .v7-page-head{
   display: flex;

@@ -1,5 +1,30 @@
 import {test,expect} from '@playwright/test';
 test.use({serviceWorkers:'block'});
+test('narrow Library actions and workout balance text stay inside their controls',async({page})=>{
+  await page.addInitScript(()=>{
+    localStorage.setItem('mmg.workout.v2',JSON.stringify([{id:'0025',sets:3,reps:'8–12',weight:'60',done:false}]));
+  });
+  for(const width of [320,390]){
+    await page.setViewportSize({width,height:900});
+    await page.goto('/index.html#library');
+    await expect(page.locator('html')).toHaveAttribute('data-route-ready','library');
+    const escaped=await page.locator('#custom-exercise-open').evaluate(button=>{
+      const range=document.createRange();range.selectNodeContents(button);
+      const box=button.getBoundingClientRect();
+      return [...range.getClientRects()].some(rect=>rect.left<box.left-1||rect.right>box.right+1);
+    });
+    expect(escaped,`${width}px: create-exercise text escapes its button`).toBe(false);
+    await page.goto('/index.html#workout');
+    await expect(page.locator('#v10-workout-balance')).toBeVisible();
+    const clipped=await page.locator('#v10-workout-balance').evaluate(panel=>{
+      const box=panel.getBoundingClientRect();
+      return [...panel.querySelectorAll('*')].filter(el=>!el.children.length&&el.textContent.trim()).some(el=>{
+        const rect=el.getBoundingClientRect();return rect.left<box.left-1||rect.right>box.right+1;
+      });
+    });
+    expect(clipped,`${width}px: balance text is clipped by its panel`).toBe(false);
+  }
+});
 test('header controls fit intermediate widths and mobile More retains tools and labs',async({page})=>{
  test.setTimeout(120_000);
  await page.setViewportSize({width:1920,height:900});await page.goto('/index.html#home');

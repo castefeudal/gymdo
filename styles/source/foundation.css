@@ -4684,12 +4684,14 @@ html[data-density="roomy"] {
 /* @sequence 2586 */
 .v10-balance-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
 }
 /* @sequence 2587 */
 .v10-balance-head>div {
+  min-width: 0;
   display: grid;
   gap: 2px;
 }

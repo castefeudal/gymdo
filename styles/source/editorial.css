@@ -92,8 +92,8 @@ html[data-theme="soft"] :is(.panel,.card),html[data-theme="ivory"] :is(.panel,.c
 /* @sequence 21060 */
 @media(max-width:600px) {
   :is(.container>.section-head,.v7-page-head) { min-height:0; padding:36px 0 20px; margin-bottom:16px; gap:12px; }
-  :is(.container>.section-head,.v7-page-head)::after { width:100px; height:72px; top:25px; opacity:.6; }
-  body :is(.container>.section-head,.v7-page-head) :is(h1,h2) { padding-right:76px; font-size:30px; }
+  :is(.container>.section-head,.v7-page-head)::after { width:72px; height:52px; top:20px; opacity:.6; }
+  body :is(.container>.section-head,.v7-page-head) :is(h1,h2) { padding-right:0; font-size:30px; }
   :is(.container>.section-head,.v7-page-head) p:not(.eyebrow) { font-size:14px; }
   .v7-home-date { position:static; font-size:11px; }
   .v7-context-card { padding:16px; }
@@ -102,7 +102,7 @@ html[data-theme="soft"] :is(.panel,.card),html[data-theme="ivory"] :is(.panel,.c
 }
 /* @sequence 21061 */
 @media(prefers-reduced-motion:no-preference) {
-  .section:not([hidden])>.container { animation:mmg-edition-rise .4s var(--ease-out) both; }
+  .section:not([hidden]) :is(.section-head,.v7-page-head) { animation:mmg-edition-rise .4s var(--ease-out) both; }
   @media(hover:hover) { .card:hover { transform:translateY(-3px); box-shadow:0 12px 24px -20px #0008; } .entry-sculpture:hover svg { filter:drop-shadow(0 18px 20px #0006) brightness(1.12); } }
 }
 /* @sequence 21062 */

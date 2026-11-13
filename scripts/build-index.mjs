@@ -20,7 +20,7 @@ const bootCss = `
   :root {
     --mmg-boot-bg:#0e1010;
     --mmg-boot-text:#f4f7f5;
-    --mmg-boot-muted:#93a1ad;
+    --mmg-boot-muted:#a3ada8;
     --mmg-boot-line:rgba(226,238,232,.12);
     --mmg-boot-accent:#bef47d;
     color-scheme:dark;

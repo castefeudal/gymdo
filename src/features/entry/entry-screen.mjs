@@ -30,7 +30,11 @@ export function mountEntryScreen({ language, selectLanguage }) {
       frame = null;
     });
   });
-  screen.addEventListener('pointerleave', () => { sculpture.style.transform = ''; });
+  screen.addEventListener('pointerleave', () => {
+    cancelAnimationFrame(frame);
+    frame = null;
+    sculpture.style.transform = '';
+  });
   function close() {
     if (closed) return;
     closed = true;

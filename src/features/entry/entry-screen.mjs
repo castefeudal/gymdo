@@ -2,6 +2,10 @@
 export function mountEntryScreen({ language, selectLanguage }) {
   const screen = document.getElementById('entry-screen');
   if (!screen || document.documentElement.dataset.entryRequested !== 'true') return;
+  const sculpture = screen.querySelector('.entry-sculpture picture');
+  const source = sculpture.querySelector('source'), art = sculpture.querySelector('img');
+  source.srcset = source.dataset.srcset;
+  art.src = art.dataset.src;
   const en = language() === 'en';
   const contact = screen.querySelector('[data-entry-contact]');
   contact.textContent = en ? 'Contact the creator ↗' : 'Написать автору ↗';
@@ -20,7 +24,6 @@ export function mountEntryScreen({ language, selectLanguage }) {
   screen.focus({ preventScroll: true });
   let closed = false;
   const motion = matchMedia('(prefers-reduced-motion: no-preference) and (pointer: fine)');
-  const sculpture = screen.querySelector('.entry-sculpture picture');
   let frame;
   screen.addEventListener('pointermove', event => {
     if (closed || !motion.matches || frame) return;

@@ -43,6 +43,7 @@ test('entry responsive composition and reduced motion', async({page},testInfo)=>
  test.setTimeout(120000);
  await page.emulateMedia({reducedMotion:'reduce'});
  await ready(page,'/');
+ await page.locator('.entry-sculpture img').evaluate(image=>image.decode());
  for(const [width,height] of [[320,568],[360,640],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1920,1080],[844,390]]){
   await page.setViewportSize({width,height});
   // Windows WebKit can map requested pixels through OS display scaling.
@@ -83,6 +84,22 @@ test('entry keyboard navigation and accessibility',async({page})=>{
  await page.keyboard.press('Enter');
  await expect(page.locator('#entry-screen')).toBeHidden();
  await expect(page.locator('html')).toHaveAttribute('lang','en');
+});
+
+test('entry keeps enlarged text and language controls inside narrow screens',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.addInitScript(()=>localStorage.setItem('mmg.settings.v1',JSON.stringify({reading:'large'})));
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:844});
+  await ready(page,'/');
+  await expect(page.locator('html')).toHaveAttribute('data-reading','large');
+  const audit=await page.evaluate(()=>{
+   const range=document.createRange();range.selectNodeContents(document.querySelector('.entry h1'));
+   const rects=[...range.getClientRects(),...[...document.querySelectorAll('.entry a,.entry button')].map(el=>el.getBoundingClientRect())];
+   return {width:document.documentElement.clientWidth,edges:rects.map(r=>[r.left,r.right])};
+  });
+  for(const [left,right] of audit.edges){expect(left).toBeGreaterThanOrEqual(0);expect(right).toBeLessThanOrEqual(audit.width+1);}
+ }
 });
 
 test('failed shell retains boot recovery instead of entry',async({page})=>{

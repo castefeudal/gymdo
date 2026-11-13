@@ -410,7 +410,7 @@
   .results-tools #custom-exercise-open,
   .results-tools .sort-select { min-height: 38px; }
   .results-tools #mfb-open { grid-column: 1; }
-  .results-tools #custom-exercise-open { grid-column: 2; min-width: 0; padding-inline: 4px; font-size: 14px; white-space: nowrap; }
+  .results-tools #custom-exercise-open { grid-column: 2; min-width: 0; padding-inline: 4px; font-size: 14px; white-space: normal; line-height: 1.35; }
   .results-tools .sort-select { grid-column: 1 / -1; }
   .v10-library-quick { flex-direction: row; align-items: center; gap: 0; }
   .v10-library-quick > span { display: none; }

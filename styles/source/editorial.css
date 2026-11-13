@@ -1,0 +1,126 @@
+/* MARKOV MADE / Instrument editions. Authored vector art, quiet surfaces. */
+/* @sequence 21000 */
+:root { --radius-card:12px; --radius-panel:14px; --radius-control:8px; --tracking-display:-.055em; }
+/* @sequence 21001 */
+html body { background:var(--bg-canvas); }
+/* @sequence 21002 */
+body::before,body::after { display:none; }
+/* @sequence 21003 */
+.section { --edition-art:url(assets/visual/plate-home.svg); --edition-index:"MM / SYSTEM"; }
+/* @sequence 21004 */
+#home { --edition-art:url(assets/visual/plate-home.svg); --edition-index:"01 / DAILY SYSTEM"; }
+/* @sequence 21005 */
+#workout { --edition-art:url(assets/visual/plate-workout.svg); --edition-index:"02 / FORCE & MOTION"; }
+/* @sequence 21006 */
+#library { --edition-art:url(assets/visual/plate-library.svg); --edition-index:"03 / MOVEMENT ATLAS"; }
+/* @sequence 21007 */
+#program { --edition-art:url(assets/visual/plate-program.svg); --edition-index:"04 / TRAINING ARCHITECTURE"; }
+/* @sequence 21008 */
+#nutrition { --edition-art:url(assets/visual/plate-nutrition.svg); --edition-index:"05 / ENERGY BALANCE"; }
+/* @sequence 21009 */
+#progress { --edition-art:url(assets/visual/plate-progress.svg); --edition-index:"06 / ADAPTATION RECORD"; }
+/* @sequence 21010 */
+#labs,#tools { --edition-art:url(assets/visual/plate-labs.svg); --edition-index:"07 / HUMAN LABORATORY"; }
+/* @sequence 21012 */
+:is(.container>.section-head,.v7-page-head) {
+  display:flex; position:relative; isolation:isolate; align-items:flex-start; flex-wrap:wrap; gap:20px;
+  padding:48px 300px 28px 0; min-height:190px; margin:0 0 24px;
+  border:0; border-bottom:1px solid var(--border-strong); background:none;
+}
+/* @sequence 21013 */
+:is(.container>.section-head,.v7-page-head)::before {
+  content:var(--edition-index); position:absolute; top:8px; left:0;
+  font-size:11px; font-weight:650; letter-spacing:.16em; color:var(--text-muted);
+  border-left:24px solid var(--accent); padding-left:10px; line-height:1;
+}
+/* @sequence 21014 */
+:is(.container>.section-head,.v7-page-head)::after {
+  content:""; display:block; position:absolute; inset:0 0 0 auto; translate:none;
+  width:280px; height:100%; max-height:none; max-width:32%; aspect-ratio:auto;
+  background:var(--edition-art) center/contain no-repeat; mask:none; -webkit-mask:none; opacity:1; z-index:-1;
+}
+/* @sequence 21016 */
+body :is(.container>.section-head,.v7-page-head) :is(h1,h2) { font-size:clamp(28px,3.4vw,52px); line-height:1.06; letter-spacing:-.055em; font-weight:760; max-width:23ch; text-wrap:balance; }
+/* @sequence 21019 */
+.section-head .section-brief { border:0; background:none; padding:0; }
+/* @sequence 21022 */
+.panel,.card,.v7-context-card,.v7-home-context,.tool-out,.gym-tool-card { background:var(--bg-surface); box-shadow:none; border-color:var(--border-subtle); }
+/* @sequence 21023 */
+html[data-theme="soft"] :is(.panel,.card),html[data-theme="ivory"] :is(.panel,.card) { box-shadow:none; }
+/* @sequence 21025 */
+.v7-next-card { border-radius:14px; border-top:3px solid var(--accent); background:var(--bg-surface); box-shadow:none; }
+/* @sequence 21026 */
+.v7-next-card::before,.v7-next-card::after { display:none; }
+/* @sequence 21028 */
+.v7-context-card { border-radius:0; border:0; border-bottom:1px solid var(--border-subtle); padding:20px; }
+/* @sequence 21029 */
+.v7-home-context { border-radius:14px; overflow:hidden; gap:0; }
+/* @sequence 21030 */
+.v7-command-row { gap:0; border-block:1px solid var(--border-subtle); padding-block:8px; margin-top:24px; }
+/* @sequence 21037 */
+#grid .card { border-radius:12px; overflow:hidden; border:1px solid var(--border-subtle); }
+/* @sequence 21039 */
+.tool-form { border-top:3px solid var(--accent); }
+/* @sequence 21042 */
+.btn-primary { box-shadow:none; font-weight:700; }
+/* @sequence 21043 */
+.btn-primary::after { display:none; }
+/* @sequence 21044 */
+.btn,.icon-btn,.chip { transition:background-color .2s var(--ease-out),border-color .2s var(--ease-out),transform .2s var(--ease-out); }
+/* @sequence 21045 */
+.btn:active,.icon-btn:active,.chip:active { transform:translateY(1px) scale(.98); }
+/* @sequence 21046 */
+.input,.select,.textarea { border-radius:8px; background:var(--bg-inset); box-shadow:none; }
+/* @sequence 21050 */
+.entry { background:#101314; }
+/* @sequence 21051 */
+.entry::before { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#bdccbd0b calc(25% - 1px),#bdccbd0b 25%); }
+/* @sequence 21052 */
+.entry-sculpture { border:1px solid #66716a44; border-radius:50% 50% 0 0; background:linear-gradient(120deg,#dce9d306,transparent 48%,#dce9d309); }
+/* @sequence 21053 */
+.entry-art-caption { padding:18px 4px; border-top:1px solid #66716a55; }
+/* @sequence 21055 */
+.entry-languages button { border-radius:0; border-width:0 0 1px; background:transparent; }
+/* @sequence 21056 */
+.entry-languages button:hover { background:#bef47d; color:#101314; }
+/* @sequence 21057 */
+.entry-languages button:hover :is(.entry-index,.entry-code,.entry-arrow) { color:#26351d; }
+/* @sequence 21058 */
+@media(min-width:1100px) { .entry-stage { grid-template-columns:1.15fr 1fr; gap:0 8vw; } .entry-sculpture { margin-block:20px; } #program .tool-layout { grid-template-columns:minmax(320px,.85fr) minmax(0,1.6fr); } }
+/* @sequence 21059 */
+@media(max-width:900px) { .v7-home-grid { grid-template-columns:1fr; } :is(.container>.section-head,.v7-page-head) { padding-right:210px; } }
+/* @sequence 21060 */
+@media(max-width:600px) {
+  :is(.container>.section-head,.v7-page-head) { min-height:0; padding:36px 0 20px; margin-bottom:16px; gap:12px; }
+  :is(.container>.section-head,.v7-page-head)::after { width:72px; height:52px; top:20px; opacity:.6; }
+  body :is(.container>.section-head,.v7-page-head) :is(h1,h2) { padding-right:0; font-size:30px; }
+  :is(.container>.section-head,.v7-page-head) p:not(.eyebrow) { font-size:14px; }
+  .v7-home-date { position:static; font-size:11px; }
+  .v7-context-card { padding:16px; }
+  .v7-command-row { margin-top:16px; }
+  .entry-sculpture { border-radius:50% 50% 0 0; }
+}
+/* @sequence 21061 */
+@media(prefers-reduced-motion:no-preference) {
+  .section:not([hidden]) :is(.section-head,.v7-page-head) { animation:mmg-edition-rise .4s var(--ease-out) both; }
+  @media(hover:hover) { .card:hover { transform:translateY(-3px); box-shadow:0 12px 24px -20px #0008; } .entry-sculpture:hover svg { filter:drop-shadow(0 18px 20px #0006) brightness(1.12); } }
+}
+/* @sequence 21062 */
+@media(prefers-reduced-motion:reduce) { .entry-sculpture svg,.v7-command-row>* { animation:none; } .btn,.icon-btn,.chip,.card { transition:none; } }
+
+/* @sequence 21063 */
+@keyframes mmg-edition-rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* @sequence 21067 */
+.food-heading { position:relative; padding:30px 240px 30px 0; border-bottom:1px solid var(--border-strong); margin-bottom:24px; background:var(--edition-art) right center/220px auto no-repeat; }
+/* @sequence 21068 */
+.food-heading h2 { font-size:clamp(30px,3.6vw,52px); letter-spacing:-.055em; }
+/* @sequence 21069 */
+@media(max-width:600px) { .food-heading { padding:20px 0; background-size:100px; background-position:right top; } .food-heading :is(h2,.eyebrow) { padding-right:76px; } }
+
+/* @sequence 21070 */
+.brand-mark path:first-of-type { fill:var(--mark-left); }
+/* @sequence 21071 */
+.brand-mark path:nth-of-type(2) { fill:var(--mark-right); }
+/* @sequence 21072 */
+@media(min-width:601px) { #labs .section-head { display:block; } }

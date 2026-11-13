@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { transform } from 'esbuild';
 
-const BUILD_VERSION = '2026.11-r77.1-text-size';
+const BUILD_VERSION = '2026.11-r78-editorial';
 const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
 const initialModules=[...runtimeMetrics.initialFiles,...runtimeMetrics.bootFiles.filter(file=>file.includes('/load-modules-'))].filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
@@ -18,9 +18,9 @@ const structuredData = {
 
 const bootCss = `
   :root {
-    --mmg-boot-bg:#080c11;
+    --mmg-boot-bg:#0e1010;
     --mmg-boot-text:#f4f7f5;
-    --mmg-boot-muted:#93a1ad;
+    --mmg-boot-muted:#a3ada8;
     --mmg-boot-line:rgba(226,238,232,.12);
     --mmg-boot-accent:#bef47d;
     color-scheme:dark;
@@ -75,7 +75,7 @@ const index = `<!doctype html>
   <meta name="copyright" content="Pavel Markov">
   <meta name="rights" content="All rights reserved. Third-party use of the code, design and dataset requires the author written permission; see LICENSE and NOTICE.md.">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta name="theme-color" content="#080c11">
+  <meta name="theme-color" content="#0e1010">
   <meta name="application-name" content="MARKOV MADE GYM">
   <meta name="color-scheme" content="dark light">
   <link rel="canonical" href="https://castefeudal.github.io/gymdo/">

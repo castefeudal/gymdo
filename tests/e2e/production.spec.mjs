@@ -1152,7 +1152,7 @@ test('all three themes resolve coherent tokens, persist and keep library informa
   await expect(page.locator('#mmg-boot')).toHaveCount(0);
 
   const expected = [
-    { theme: 'obsidian', canvas: '#080c11', signal: '#bef47d', scheme: 'dark' },
+    { theme: 'obsidian', canvas: '#0e1010', signal: '#bef47d', scheme: 'dark' },
     { theme: 'soft', canvas: '#eef1f3', signal: '#35700f', scheme: 'light' },
     { theme: 'ivory', canvas: '#f4f2ec', signal: '#4c6a1e', scheme: 'light' },
   ];

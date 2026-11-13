@@ -1,4 +1,4 @@
-const VERSION = '2026.11-r77.1-text-size';
+const VERSION = '2026.11-r78-editorial';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -32,6 +32,14 @@ const PRECACHE = [
   './assets/visual/nutrition-plate-1120.webp',
   './assets/visual/onboarding-grip-960.webp',
   './assets/visual/plate-mark.svg',
+  './assets/visual/plate-home.svg',
+  './assets/visual/plate-workout.svg',
+  './assets/visual/plate-library.svg',
+  './assets/visual/plate-program.svg',
+  './assets/visual/plate-nutrition.svg',
+  './assets/visual/plate-progress.svg',
+  './assets/visual/plate-labs.svg',
+
   './assets/visual/program-hypertrophy-720.webp',
   './assets/visual/section-labs.svg',
   './assets/visual/section-library.svg',

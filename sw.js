@@ -1,4 +1,4 @@
-const VERSION = '2026.11-r79.2-strength';
+const VERSION = '2026.11-r79.3-barbell';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -51,8 +51,8 @@ const PRECACHE = [
   './manifest.webmanifest',
   './images/gym-mark.svg',
   './images/exercise-placeholder.svg',
-  './assets/visual/entry-sculpture-v4-1400.webp',
-  './assets/visual/entry-sculpture-v4-720.webp',
+  './assets/visual/entry-sculpture-v5-1400.webp',
+  './assets/visual/entry-sculpture-v5-720.webp',
   './assets/visual/nutrition-plate-1120.webp',
   './assets/visual/onboarding-grip-960.webp',
   './assets/visual/plate-mark.svg',

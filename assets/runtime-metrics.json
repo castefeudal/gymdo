@@ -7,7 +7,7 @@
     "assets/runtime/chunk-NMLJROAV.js",
     "assets/runtime/chunk-RLO3Y2M4.js"
   ],
-  "initialBytes": 454434,
+  "initialBytes": 454433,
   "bootFiles": [
     "assets/runtime/application.js",
     "assets/runtime/calculator-history-EXXTNB5I.js",
@@ -29,6 +29,6 @@
     "assets/runtime/weight-trend-UMPM5GLM.js",
     "assets/runtime/workout-groups-LBZAVUAE.js"
   ],
-  "bootBytes": 485776,
-  "totalBytes": 531392
+  "bootBytes": 485775,
+  "totalBytes": 531391
 }

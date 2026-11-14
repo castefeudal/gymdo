@@ -34,7 +34,7 @@ for (const lang of ['ru','en']) test(`entry selects and persists ${lang}`, async
 test('entry bypasses every working route',async({page})=>{
  test.setTimeout(120000);
  const artRequests=[];
- page.on('request',request=>{if(request.url().includes('/entry-sculpture-v2-'))artRequests.push(request.url());});
+ page.on('request',request=>{if(request.url().includes('/entry-sculpture-v'))artRequests.push(request.url());});
  for(const route of ['home','workout','library','progress','program','nutrition','labs','tools','settings','knowledge','method','about','how','faq','contact','more']){
   await ready(page,`/index.html#${route}`);
   await expect(page.locator('#entry-screen')).toBeHidden();

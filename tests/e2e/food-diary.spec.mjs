@@ -42,3 +42,31 @@ test('language changes preserve food drafts and keep a single active catalog han
  await root.locator('[data-food-remove]').last().click();await expect(root.locator('.food-item')).toHaveCount(1);expect(dialogs).toBe(1);
  await page.reload();await expect(root.locator('.food-item')).toHaveCount(1);await expect(root.locator('.food-item')).toContainText('Locale oats');
 });
+
+test('a historical entry remains editable after removing its product', async ({ page }) => {
+  await page.goto('/index.html#nutrition');
+  const diary = page.locator('#food-diary');
+  const product = diary.locator('[data-food-create]');
+  const entry = diary.locator('[data-food-add]');
+  const date = diary.locator('[name=day]');
+  const day = await date.inputValue();
+  await expect(date).not.toHaveValue('');
+  for (const [name, value] of Object.entries({ name: 'Test oats', calories: '370', protein: '13', fat: '7', carbs: '60', portion: '50', source: 'Test label' })) {
+    await product.locator(`[name=${name}]`).fill(value);
+  }
+  await product.locator('[type=submit]').click();
+  await entry.locator('[type=submit]').click();
+  await expect(diary.locator('.food-entry')).toHaveCount(1);
+  page.once('dialog', dialog => dialog.accept());
+  await diary.locator('[data-food-remove]').click();
+  await expect(entry.locator('[type=submit]')).toBeDisabled();
+  await diary.locator('[data-entry-edit]').click();
+  await expect(entry.locator('[name=food] option')).toHaveCount(1);
+  await date.fill('');
+  await expect(entry.locator('[type=submit]')).toBeDisabled();
+  await date.fill(day);
+  await entry.locator('[name=amount]').fill('50');
+  await entry.locator('[type=submit]').click();
+  await expect(diary.locator('.food-entry')).toContainText('185');
+  await expect(entry.locator('[type=submit]')).toBeDisabled();
+});

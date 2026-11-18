@@ -15,6 +15,15 @@ test('food backup validates atomically and preserves independent historical snap
  for(const invalid of [{...row,grams:0},{...row,date:'2026-02-30'},{...row,meal:'invalid'},{...row,food:{...food,protein:-1}}])assert.equal(cleanFoodDiary({...state,entries:[row,invalid]}),null);
  assert.equal(cleanFoodDiary({...state,entries:[row,row]}),null);
 });
+test('small recipes retain nutrient precision before presentation rounding',()=>{
+ const ingredient={...food,protein:99,fat:1,carbs:0};
+ const tiny={...row,grams:0.15,food:ingredient};
+ const recipe=recipeFromEntries([tiny],'Sample','recipe1');
+ assert.ok(recipe);
+ assert.ok(Math.abs(recipe.protein-99)<1e-12);
+ assert.equal(recipe.fat,1);
+ assert.deepEqual(foodTotals([{food:recipe,grams:tiny.grams}]),foodTotals([tiny]));
+});
 test('food periods use calendar boundaries including month transitions',()=>{
  assert.deepEqual(foodPeriod('2026-11-01','week'),['2026-10-26','2026-11-01']);
  assert.deepEqual(foodPeriod('2024-02-10','month'),['2024-02-01','2024-02-29']);

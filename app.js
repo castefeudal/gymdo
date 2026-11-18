@@ -4306,7 +4306,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     $('timer-toggle').addEventListener('click', function () {
       if (restTimer.running) stopTimer(); else startTimer(restTimer.left || S.rest);
     });
-    $('timer-skip').addEventListener('click', function () { restTimer.left = 0; stopTimer(); $('timer').classList.remove('is-done'); renderTimer(); });
+    $('timer-skip').addEventListener('click', function () { $('timer').classList.remove('is-done'); stopTimer(true); });
 
     /* --- режим выполнения --- */
     $('w-run').addEventListener('click', openRun);
@@ -5422,8 +5422,8 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var minus = $('timer-minus'), plus = $('timer-plus');
     if (minus && !minus.dataset.bound) {
       minus.dataset.bound = plus.dataset.bound = '1';
-      minus.addEventListener('click', function () { restTimer.left = Math.max(0, restTimer.left - 15); renderTimer(); });
-      plus.addEventListener('click', function () { restTimer.left = Math.min(1800, restTimer.left + 15); renderTimer(); });
+      minus.addEventListener('click', function () { adjustRestTimer(-15); });
+      plus.addEventListener('click', function () { adjustRestTimer(15); });
     }
   }
 
@@ -5666,7 +5666,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
 
   function ensureMobileRestTimer(){
     if($('mobile-rest-timer')) return; var el=document.createElement('div'); el.id='mobile-rest-timer'; el.className='mobile-rest-timer'; el.setAttribute('role','status'); el.innerHTML='<b id="mobile-rest-clock">0:00</b><button type="button" data-mobile-rest="minus">−15</button><button type="button" data-mobile-rest="toggle">Ⅱ</button><button type="button" data-mobile-rest="plus">+15</button>'; document.body.appendChild(el);
-    el.addEventListener('click',function(e){ var b=e.target.closest('[data-mobile-rest]'); if(!b)return; var k=b.dataset.mobileRest; if(k==='minus'){restTimer.left=Math.max(0,restTimer.left-15);renderTimer();} if(k==='plus'){restTimer.left=Math.min(1800,restTimer.left+15);renderTimer();} if(k==='toggle'){if(restTimer.running)stopTimer();else startTimer(restTimer.left||S.rest);} });
+    el.addEventListener('click',function(e){ var b=e.target.closest('[data-mobile-rest]'); if(!b)return; var k=b.dataset.mobileRest; if(k==='minus')adjustRestTimer(-15); if(k==='plus')adjustRestTimer(15); if(k==='toggle'){if(restTimer.running)stopTimer();else startTimer(restTimer.left||S.rest);} });
   }
 
   function decorateConsoleIcons(){
@@ -5840,6 +5840,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     } else {
       restTimer.running = false;
       restTimer.endsAt = 0;
+      if (saved.running) left = 0;
     }
     restTimer.left = left;
     if (!left) store.remove(K.restTimer);
@@ -5858,9 +5859,21 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (left <= 0) { finishRestTimer(); return; }
     if (left !== restTimer.left) { restTimer.left=left; renderTimer(); }
   }
-  stopTimer = function(){
+  function adjustRestTimer(seconds){
+    if (restTimer.running) {
+      var now=Date.now();
+      restTimer.endsAt=Math.min(now+1800000,restTimer.endsAt+seconds*1000);
+      tickRestTimer();
+    } else {
+      restTimer.left=clamp(restTimer.left+seconds,0,1800);
+      renderTimer();
+    }
+    persistRestTimer();
+  }
+  stopTimer = function(skip){
     clearInterval(restTimer.id); restTimer.id=0;
-    if (restTimer.running && restTimer.endsAt) restTimer.left=Math.max(0,Math.ceil((restTimer.endsAt-Date.now())/1000));
+    if (skip === true) restTimer.left=0;
+    else if (restTimer.running && restTimer.endsAt) restTimer.left=Math.max(0,Math.ceil((restTimer.endsAt-Date.now())/1000));
     restTimer.running=false; restTimer.endsAt=0;
     persistRestTimer(); renderTimer();
   };
@@ -6159,8 +6172,6 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       var syncBottomLayer=function(){bottomTimer.classList.toggle('is-raised',MOBILE_MQ.matches&&bottomBar.getAttribute('data-open')==='true');};
       new MutationObserver(syncBottomLayer).observe(bottomBar,{attributes:true,attributeFilter:['data-open']}); syncBottomLayer();
     }
-    var minus=$('timer-minus'),plus=$('timer-plus');
-    [minus,plus].forEach(function(btn){if(btn)btn.addEventListener('click',function(){if(restTimer.running){restTimer.endsAt=Date.now()+Math.max(0,restTimer.left)*1000;persistRestTimer();}});});
     document.addEventListener('visibilitychange',function(){tickRestTimer();persistRestTimer();},{passive:true});
     window.addEventListener('pageshow',tickRestTimer,{passive:true});
     window.mmgDiagnostics={version:APP_VERSION,storagePersistent:storageOk,get storageWarnings(){return storageWarnings.slice();},get exerciseCount(){return EX.length;},get customExerciseCount(){return databaseCustomExercises.length;},get equipmentProfileCount(){return databaseEquipmentProfiles.length;},get activeEquipmentProfileId(){return activeEquipmentProfileId;},backupSchema:BACKUP_SCHEMA,get historySchema(){return historyRepository?historyRepository.schemaVersion:0;},get historyCount(){return Array.isArray(databaseHistory)?databaseHistory.length:S.history.length;},get nutritionCount(){return databaseNutritionDays.length;},get userStateReady(){return indexedAppStateReady;},get repositoryReady(){return !!historyRepository;},get lastLocalError(){return lastLocalError;}};

@@ -26,14 +26,19 @@ export function cleanFoodDiary(value) {
   }
   return { products, recipes, entries };
 }
+function nutrientTotal(entries, key) {
+  return entries.reduce((sum, row) => sum + row.food[key] * (row.grams / 100), 0);
+}
 export function foodTotals(entries) {
-  return Object.fromEntries(MACROS.map(key => [key, Math.round(entries.reduce((sum, row) => sum + row.food[key] * row.grams / 100, 0) * 10) / 10]));
+  return Object.fromEntries(MACROS.map(key => [key, Math.round(nutrientTotal(entries, key) * 10) / 10]));
 }
 export function recipeFromEntries(entries, name, id) {
   const grams = entries.reduce((sum, row) => sum + row.grams, 0);
   if (!grams || !name?.trim()) return null;
-  const totals = foodTotals(entries);
-  return cleanFood({ id, name, portion: grams, favorite: true, source: entries.map(row => `${row.food.name}: ${row.grams} g`).join('; '), ...Object.fromEntries(MACROS.map(key => [key, totals[key] * 100 / grams])) });
+  const composition = Object.fromEntries(MACROS.map(key => [
+    key, Math.min(key === 'calories' ? 1000 : 100, nutrientTotal(entries, key) / (grams / 100))
+  ]));
+  return cleanFood({ id, name, portion: grams, favorite: true, source: entries.map(row => `${row.food.name}: ${row.grams} g`).join('; '), ...composition });
 }
 export function foodPeriod(date, period) {
   const end = new Date(date + 'T12:00:00Z'), start = new Date(end);

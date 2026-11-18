@@ -97,7 +97,7 @@ graphite gym bench, arranged on the middle-right, with soft overhead daylight,
 controlled lime rim light, visible metal and rubber texture, and empty
 graphite on the left. No people, logos, or lettering.
 
-The workout history section uses a lazy-loaded 900 × 600 WebP and a tighter
+After the workout controls and history, the page uses a lazy-loaded 900 × 600 WebP and a tighter
 440 × 402 WebP crop below 600 px. The light themes tone the photograph
 independently. Both WebPs are available offline. The original is kept with
 the project documentation, outside the public site bundle.

@@ -1,0 +1,27 @@
+name: Verify published GYMDO
+on:
+  push:
+    branches: [verify-live-99a03e9]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 99a03e99a5ff8f7e7f2ab745eba361a0342fd5c4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: node scripts/check-live.mjs 99a03e99a5ff8f7e7f2ab745eba361a0342fd5c4
+      - name: Upload live verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-verification-99a03e9
+          path: artifacts/live-r75-*
+          if-no-files-found: ignore

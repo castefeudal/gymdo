@@ -17,7 +17,7 @@ export function progressIntelligenceHtmlView(context) {
     var latestWaist=S.diary.filter(function(d){return typeof d.waist==='number';})[0];
     var d30=diaryDelta('weight',30), w30=diaryDelta('waist',30), sleep=diaryAvg('sleep',14), mood=diaryAvg('mood',14);
     var latestLift=S.diary.filter(function(d){return !!d.lift;})[0];
-    var cutoff30=Date.now()-30*86400000,recentSessions=S.history.filter(function(h){var ts=Date.parse(h.date||'');return isFinite(ts)&&ts>=cutoff30;}),recentWorkSets=recentSessions.reduce(function(sum,h){return sum+totalCompletedHistorySets(h);},0);
+    var cutoff30=Date.now()-30*86400000,recentSessions=S.history.filter(function(h){var ts=Date.parse(h.date||'');return isFinite(ts)&&ts>=cutoff30&&h.date<=today;}),recentWorkSets=recentSessions.reduce(function(sum,h){return sum+totalCompletedHistorySets(h);},0);
     function delta(v,unit){ return v===null?t('progressNeedMore'):(v>0?'+':'')+v.toFixed(1)+' '+unit; }
     function metric(label,value,sub){ if(!value||value==='—')return ''; return '<div class="intel-metric"><span>'+esc(label)+'</span><b>'+esc(value||'—')+'</b><small>'+esc(sub||'')+'</small></div>'; }
     var action=diaryVerdict(diaryDelta('weight',14),w30);

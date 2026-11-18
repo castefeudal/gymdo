@@ -1,6 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { progressSummary, progressVerdictKey } from '../src/features/progress/summary.mjs';
+import { trainingPeriods } from '../src/features/progress/progressintelligence-view.mjs';
+
+test('training-period comparison counts each boundary once and excludes future sessions', () => {
+  const history = [
+    { date: '2026-11-19', sets: 100 },
+    { date: '2026-11-18', sets: 5 },
+    { date: '2026-10-22', sets: 3 },
+    { date: '2026-10-21', sets: 7 },
+    { date: '2026-09-23', sets: 100 },
+  ];
+  assert.deepEqual(trainingPeriods(history, '2026-11-18', row => row.sets), [
+    { start: '2026-10-22', end: '2026-11-18', sessions: 2, sets: 8 },
+    { start: '2026-09-24', end: '2026-10-21', sessions: 1, sets: 7 },
+  ]);
+});
 
 test('Progress recommendation stays neutral without a comparable trend', () => {
   assert.equal(progressVerdictKey('fat', null, -2), 'diaryNoTrend');

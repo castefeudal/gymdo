@@ -1262,6 +1262,20 @@ test('flagship restores saved programme on home and exposes the weekly pulse', a
     return getComputedStyle(heading, '::after').backgroundImage.includes(`program-strength-${size}.webp`);
   });
   expect(cover).toBe(true);
+  await page.locator('#lang-switch [data-lang="en"]').evaluate(button => button.click());
+  await expect(page.locator('.v10-plan-hero')).toHaveAttribute('data-goal', 'strength');
+  await expect(page.locator('#plan-out .v10-plan-day')).toHaveCount(2);
+  await expect(page.locator('.v10-plan-day [data-open]').first()).toHaveAttribute('data-open', '0001');
+  await page.locator('#lang-switch [data-lang="ru"]').evaluate(button => button.click());
+  const firstDate = page.locator('[data-plan-date="0"]');
+  const secondDate = page.locator('[data-plan-date="1"]');
+  const monday = await secondDate.getAttribute('min');
+  const sunday = await firstDate.getAttribute('max');
+  await firstDate.fill(sunday);
+  await secondDate.fill(monday);
+  await expect(page.locator('.v10-plan-day[data-state="current"]')).toHaveAttribute('data-plan-day', '1');
+  await page.reload();
+  await expect(secondDate).toHaveValue(monday);
   await expect(page.locator('#plan-out [data-mesocycle-status="active"]')).toContainText('Неделя блока 1 из 4');
   const programMigration = await page.evaluate(async () => {
     const db = await new Promise((resolve, reject) => {

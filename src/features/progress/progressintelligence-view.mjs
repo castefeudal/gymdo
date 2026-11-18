@@ -1,6 +1,16 @@
+export function trainingPeriods(history, today, countSets) {
+  const anchor = Date.parse(today);
+  const date = daysAgo => new Date(anchor - daysAgo * 86400000).toISOString().slice(0, 10);
+  return [[27, 0], [55, 28]].map(([first, last]) => {
+    const start = date(first), end = date(last);
+    const sessions = history.filter(row => row.date >= start && row.date <= end);
+    return { start, end, sessions: sessions.length, sets: sessions.reduce((sum, row) => sum + countSets(row), 0) };
+  });
+}
+
 // Feature-owned presentation; the app supplies current state and adapters.
 export function progressIntelligenceHtmlView(context) {
-  const { S, dashSignal, diaryAvg, diaryDelta, diaryVerdict, esc, premiumIcon, signal, t, totalCompletedHistorySets } = context;
+  const { S, dashSignal, diaryAvg, diaryDelta, diaryVerdict, esc, premiumIcon, signal, t, today, totalCompletedHistorySets } = context;
 
     if(!S.diary.length&&!S.history.length) return '';
     var latestWeight=S.diary.filter(function(d){return typeof d.weight==='number';})[0];
@@ -11,6 +21,13 @@ export function progressIntelligenceHtmlView(context) {
     function delta(v,unit){ return v===null?t('progressNeedMore'):(v>0?'+':'')+v.toFixed(1)+' '+unit; }
     function metric(label,value,sub){ if(!value||value==='—')return ''; return '<div class="intel-metric"><span>'+esc(label)+'</span><b>'+esc(value||'—')+'</b><small>'+esc(sub||'')+'</small></div>'; }
     var action=diaryVerdict(diaryDelta('weight',14),w30);
+    const periods = trainingPeriods(S.history, today, totalCompletedHistorySets);
+    const comparison = periods.every(period => period.sessions)
+      ? '<details class="note"><summary>' + (S.lang === 'en' ? 'Compare training periods' : 'Сравнить периоды тренировок') + '</summary>' +
+        periods.map(({ start, end, sessions, sets }) =>
+          '<p>' + start + ' — ' + end + ' · ' + sessions + (S.lang === 'en' ? ' sessions · ' : ' тренировок · ') +
+          sets + (S.lang === 'en' ? ' completed sets' : ' выполненных подходов') + '</p>').join('') + '</details>'
+      : '';
     return '<div class="progress-intel"><div class="progress-intel-head"><div><h3>'+esc(t('progressIntel'))+'</h3><p>'+esc(t('progressIntelSub'))+'</p></div>'+signal(dashSignal().state,dashSignal().label)+'</div><div class="intel-metrics">'+
       metric(t('progressWeight'),latestWeight?latestWeight.weight.toFixed(1)+' '+t('kg'):'—',delta(d30,t('kg')))+
       metric(t('progressWaist'),latestWaist?latestWaist.waist.toFixed(1)+' '+t('cm'):'—',delta(w30,t('cm')))+
@@ -19,6 +36,6 @@ export function progressIntelligenceHtmlView(context) {
       metric(t('progressStrength'),latestLift?latestLift.lift:'—',latestLift?latestLift.date:t('progressNeedMore'))+
       metric(t('progressSessions'),recentSessions.length?String(recentSessions.length):'—',recentSessions.length?'30 '+(S.lang==='en'?'days':'дней'):t('progressNeedMore'))+
       metric(t('progressWorkSets'),recentWorkSets?String(recentWorkSets):'—',recentSessions.length?'30 '+(S.lang==='en'?'days':'дней'):t('progressNeedMore'))+
-      '</div><div class="intel-evidence">'+esc(t('progressEvidence',{diary:S.diary.length,sessions:recentSessions.length}))+'</div><div class="intel-action"><span class="intel-action-icon" aria-hidden="true">'+premiumIcon('progress')+'</span><div><b>'+esc(t('progressAction'))+'</b><p>'+esc(action)+'</p></div></div></div>';
+      '</div><div class="intel-evidence">'+esc(t('progressEvidence',{diary:S.diary.length,sessions:recentSessions.length}))+'</div><div class="intel-action"><span class="intel-action-icon" aria-hidden="true">'+premiumIcon('progress')+'</span><div><b>'+esc(t('progressAction'))+'</b><p>'+esc(action)+'</p></div></div>'+comparison+'</div>';
 
 }

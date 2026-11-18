@@ -2069,7 +2069,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var m = store.json(K.meta, null);
     S.meta = (m && typeof m === 'object') ? {
       name:String(m.name||'').slice(0,80), date:String(m.date||'').slice(0,10), note:String(m.note||'').slice(0,600),
-      planDay:Number.isInteger(Number(m.planDay))?Number(m.planDay):null
+      planDay:m.planDay!=null&&Number.isInteger(Number(m.planDay))?Number(m.planDay):null
     } : { name:'', date:'', note:'', planDay:null };
 
     var h = store.json(K.history, []);
@@ -3205,7 +3205,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       name: S.meta.name || t('wTitle'),
       date: S.meta.date || todayISO(),
       note:S.meta.note,
-      planDay:Number.isInteger(Number(S.meta.planDay))?Number(S.meta.planDay):null,
+      planDay:S.meta.planDay==null?null:Number(S.meta.planDay),
       durationSec: runState && runState.startedAt ? runElapsedSeconds() : 0,
       personalRecords:workoutPersonalRecords(),
       items: S.workout.map(function (w) {
@@ -3215,9 +3215,10 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var previousIndex=S.history.findIndex(function(record){return record.id===entry.id;});
     if(previousIndex!==-1)S.history.splice(previousIndex,1);
     S.history.unshift(entry);
-    if(S.plan&&Number.isInteger(Number(S.meta.planDay))){v7EnsurePlanWeek();var pd=Number(S.meta.planDay);if(S.plan.completedDays.indexOf(pd)===-1)S.plan.completedDays.push(pd);savePlanV7();}
+
     var persisted=await saveHistory();
     if(!persisted){showToast(S.lang==='en'?'Could not save. Keep this session open and retry.':'Не удалось сохранить. Оставь тренировку открытой и повтори.', 'error');return false;}
+    if(S.plan?.days[entry.planDay]){v7EnsurePlanWeek();if(!S.plan.completedDays.includes(entry.planDay)){S.plan.completedDays.push(entry.planDay);savePlanV7();}}
     renderHistory();
     renderProgress();
     renderDashIfVisible();
@@ -6337,7 +6338,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(ecoRoute!==route||ecoLang!==S.lang){ecoRoute=route;ecoLang=S.lang;renderEco(false);if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();}if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);syncPrimaryNav(route);var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
   function navigateV7(route,focus){route=routeIsKnown&&routeIsKnown(route)?route:'home';if(location.hash!=='#'+route)location.hash=route;else{applyV7Route(focus!==false);}}
   function syncV7Floating(){var route=v7RouteFromHash(),bar=$('mfb');if(bar){var show=MOBILE_MQ.matches&&route==='library';bar.setAttribute('data-open',String(show));}var sticky=$('mobile-rest-timer');if(sticky)sticky.classList.toggle('is-raised',!!(bar&&bar.getAttribute('data-open')==='true'));}
-  function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
+  function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;if(S.workout.length&&!window.confirm(S.lang==="en"?"Replace the current workout?":"Заменить текущую тренировку?"))return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
   function progressionIncrementForExercise(ex){var source=ex&&ex.compound==null?Object.assign({},ex,{compound:exKind(ex)==='compound'}):ex;return equipmentLoadIncrement(source,S.settings&&S.settings.loadIncrements);}
   function progressionAdviceV7(id,item){
     if(!progressionEngine||!item)return null;
@@ -6569,8 +6570,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var hasPersistedExerciseState = !!((store.json(K.fav,[])||[]).length || (store.json(K.workout,[])||[]).length || store.json(K.plan,null) || Object.keys(databaseExercisePreferences).length || databaseCustomExercises.length);
     var needsData = dataRouteNeedsLibrary(initialRoute) || hasPersistedExerciseState;
     if (needsData) window.dispatchEvent(new CustomEvent('mmg:stage', { detail: { key: 'data' } }));
-    var contentLoaded = await loadContent();
-    var dataLoaded = needsData ? await ensureData() : true;
+    var [contentLoaded,dataLoaded] = await Promise.all([loadContent(), needsData ? ensureData() : true]);
     if (!dataLoaded && needsData) {
       var grid = $('grid');
       if (grid) grid.innerHTML = '<div class="empty v8-grid-span"><b>Библиотека не загрузилась</b>' +

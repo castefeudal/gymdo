@@ -46,6 +46,7 @@ test('profile and workout metadata are bounded and have stable defaults', () => 
   const meta = parse(validateBackupField('meta', JSON.stringify({ name: 'n'.repeat(100), planDay: '2' })));
   assert.equal(meta.name.length, 80);
   assert.equal(meta.planDay, 2);
+  assert.equal(parse(validateBackupField('meta', '{"planDay":null}')).planDay, null);
   assert.equal(validateBackupField('meta', '[]'), null);
 });
 

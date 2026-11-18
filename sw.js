@@ -22,7 +22,7 @@ const PRECACHE = [
   './assets/runtime/nutrition-analytics-OBDU5YCR.js',
   './assets/runtime/pr-engine-EHEKVMRG.js',
   './assets/runtime/progression-VLKS4LDK.js',
-  './assets/runtime/results-view-3I76USPD.js',
+  './assets/runtime/results-view-C6LSLQFB.js',
   './assets/runtime/router-GQ7X5DUD.js',
   './assets/runtime/substitution-engine-CEQUMOF4.js',
   './assets/runtime/trend-model-5F6L5A6V.js',

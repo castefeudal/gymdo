@@ -69,6 +69,7 @@ test('saving the session once opens real progress and removes the repeated Save 
   await expect(page.locator('#prog-out .intel-metrics')).toBeVisible();
   const history = await page.evaluate(() => window.mmgLocalData.readSnapshot().history);
   expect(history).toHaveLength(1);
+  expect(history[0].planDay).toBeNull();
   expect(history[0].items[0].setLog[0].completed).toBe(true);
   await page.goto('/index.html#home');
   await expect(page.locator('#v7-home-next')).not.toContainText('Сохранить тренировку');

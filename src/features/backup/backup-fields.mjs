@@ -48,7 +48,7 @@ export function validateBackupField(name, raw, adapters = {}) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
     return stringify({
       name: String(value.name || '').slice(0, 80), date: String(value.date || '').slice(0, 10),
-      note: String(value.note || '').slice(0, 600), planDay: Number.isInteger(Number(value.planDay)) ? Number(value.planDay) : null,
+      note: String(value.note || '').slice(0, 600), planDay: value.planDay != null && Number.isInteger(Number(value.planDay)) ? Number(value.planDay) : null,
     });
   }
   if (name === 'history') return stringify(Array.isArray(value) ? value.filter((item) => item && Array.isArray(item.items)) : []);

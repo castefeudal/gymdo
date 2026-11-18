@@ -8,7 +8,7 @@ test('comparable results display absolute and relative change', async ({ page })
   await form.locator('[name=laboratory]').fill('Lab A');
   await form.locator('[name=method]').fill('Assay A');
   await form.locator('[name=date]').fill('2026-01-01');
-  await form.locator('[name=value]').fill('10');
+  await form.locator('[name=value]').fill('10.00001');
   await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page.locator('[data-lab-result-status]')).toContainText('Сохранено');
   await form.getByRole('button', { name: 'Отменить правку' }).click();
@@ -18,6 +18,8 @@ test('comparable results display absolute and relative change', async ({ page })
   await form.locator('[name=value]').fill('12');
   await form.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(page.locator('.lab-result-entry').first()).toContainText('+2 nmol/L (+20%)');
+  await page.locator('[data-lab-result-filter]').selectOption('testosterone');
+  await expect(page.locator('.lab-trend table')).toContainText('10.00001 nmol/L');
 });
 
 test('CKD-EPI 2021 eGFR estimate uses adult inputs, states limits and is not saved', async ({ page }) => {

@@ -875,6 +875,8 @@ body[data-v7-route="program"] #program {
 @media(max-width:600px) {
   .v10-plan-hero[data-goal="strength"]::after { background-image:url(assets/visual/program-strength-320.webp); }
 }
+/* @sequence 21107 */
+:is([data-theme="soft"],[data-theme="ivory"]) .v10-plan-hero[data-goal="strength"]::after { opacity:.42; }
 /* @sequence 13020 */
 .tool-layout:has(#plan-form) { align-items: start; gap: 16px; }
 /* @sequence 13021 */

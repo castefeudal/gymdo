@@ -38,6 +38,7 @@ jobs:
   behavior:
     needs: foundation
     runs-on: ubuntu-24.04 # pinned: the Playwright WebKit build links libicu74; ubuntu-latest rolled to 26.04 (libicu78)
+    container: ${{ matrix.image }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -51,6 +52,8 @@ jobs:
             browser: firefox
           - project: webkit
             browser: webkit
+            # Match package-lock.json. The image already has WebKit and its system libraries.
+            image: mcr.microsoft.com/playwright:v1.63.0-noble
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -59,10 +62,12 @@ jobs:
           cache: npm
       - run: npm ci
       - uses: actions/cache@v4
+        if: ${{ !matrix.image }}
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps ${{ matrix.browser }}
+        if: ${{ !matrix.image }}
       - name: Behavior, persistence, keyboard and Axe
         run: npx playwright test entry-screen.spec.mjs production.spec.mjs accessibility.spec.mjs session-safety.spec.mjs backup-cold-start.spec.mjs exercise-video.spec.mjs exercise-preview-motion.spec.mjs nav-dropdown-layout.spec.mjs library-search-state.spec.mjs header-layout.spec.mjs lab-results.spec.mjs food-diary.spec.mjs lab-report.spec.mjs offline-shell.spec.mjs text-size.spec.mjs --project=${{ matrix.project }} --workers=2
       - name: Upload behavior evidence

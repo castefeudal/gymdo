@@ -7,7 +7,9 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    container: mcr.microsoft.com/playwright:v1.63.0-noble
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user pwuser
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v5
@@ -18,7 +20,6 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: |
-          export HOME=/root
           git config --global --add safe.directory "$PWD"
           node scripts/check-live.mjs 99a03e99a5ff8f7e7f2ab745eba361a0342fd5c4
       - name: Upload live verification evidence

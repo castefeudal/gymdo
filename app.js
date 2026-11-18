@@ -454,25 +454,13 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (!raw || !Array.isArray(raw.x) || !raw.x.length) return false;
 
     EX = decodeCompactExercises(raw, { equipmentWeight: EQUIP_WEIGHT, normalize: norm });
-    EX.forEach(function (ex) {
-      ex.search = norm([
-        ex.search, RU_ZONE[ex.zone], EN_ZONE[ex.zone], RU_EQ[ex.equip], EN_EQ[ex.equip],
-        RU_MU[ex.target], EN_MU[ex.target], RU_MU[ex.group],
-        ex.secondary.map(function (m) { return RU_MU[m] || ''; }).join(' ')
-      ].join(' '));
-      BY_ID[ex.id] = ex;
-    });
+    EX.forEach(function (ex) { BY_ID[ex.id] = ex; });
 
     databaseCustomExercises.forEach(function (record) {
       if (!record || BY_ID[record.id]) return;
       var ex = makeCustomExerciseRuntimeRecord(record, EX.length);
       BY_ID[ex.id] = ex;
       EX.push(ex);
-    });
-
-    EX.forEach(function (ex) {
-      var latin = translitRu([ex.nameRu, RU_ZONE[ex.zone], RU_MU[ex.target], RU_MU[ex.group], ex.secondary.map(function (m) { return RU_MU[m] || m; }).join(' ')].join(' '));
-      ex.search = norm(ex.search + ' ' + latin);
     });
 
     EX.forEach(function (ex) {
@@ -589,6 +577,20 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   }
 
   /* ---------- 7. БИБЛИОТЕКА ----------------------------------------------- */
+  function exerciseSearchText(ex) {
+    if (ex.searchReady) return ex.search;
+    var latin = translitRu([ex.nameRu, RU_ZONE[ex.zone], RU_MU[ex.target], RU_MU[ex.group],
+      ex.secondary.map(function (muscle) { return RU_MU[muscle] || muscle; }).join(' ')].join(' '));
+    if (!ex.custom) {
+      ex.search = norm([ex.search, RU_ZONE[ex.zone], EN_ZONE[ex.zone], RU_EQ[ex.equip], EN_EQ[ex.equip],
+        RU_MU[ex.target], EN_MU[ex.target], RU_MU[ex.group],
+        ex.secondary.map(function (muscle) { return RU_MU[muscle] || ''; }).join(' ')].join(' '));
+    }
+    ex.search = norm(ex.search + ' ' + latin);
+    ex.searchReady = true;
+    return ex.search;
+  }
+
   function getFiltered() {
     var tokens = S.query ? norm(S.query).split(' ').filter(Boolean) : [];
     var out = EX.filter(function (ex) {
@@ -597,7 +599,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       if (S.muscles.length && S.muscles.indexOf(ex.target) === -1) return false;
       if (S.equipment.length && S.equipment.indexOf(ex.equip) === -1) return false;
       for (var i = 0; i < tokens.length; i++) {
-        if (ex.search.indexOf(tokens[i]) === -1) return false;
+        if (exerciseSearchText(ex).indexOf(tokens[i]) === -1) return false;
       }
       return true;
     });
@@ -3437,7 +3439,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (avoidRaw) {
       var terms = avoidRaw.split(',').map(norm).filter(function (x) { return x.length > 2; });
       for (var i = 0; i < terms.length; i++) {
-        if (ex.search.indexOf(terms[i]) !== -1) return false;
+        if (exerciseSearchText(ex).indexOf(terms[i]) !== -1) return false;
       }
     }
     return true;
@@ -5419,7 +5421,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var q=norm(query),s=norm(label);if(!q||!s)return-1;if(s===q)return 120;if(s.indexOf(q)===0)return 90;if(s.split(' ').indexOf(q)!==-1)return 76;if(s.indexOf(' '+q)!==-1)return 64;if(s.indexOf(q)!==-1)return 48;return-1;
   }
   function allTokenRank(query,haystack){var q=norm(query),s=norm(haystack);if(!q||!s)return-1;var tokens=q.split(' ').filter(Boolean);if(!tokens.length||!tokens.every(function(token){return s.indexOf(token)!==-1;}))return-1;var whole=matchRank(q,s);return whole>=0?whole:58+Math.min(18,tokens.length*4);}
-  function exerciseDiscoveryRank(ex,query){var q=norm(query);var name=Math.max(matchRank(q,ex.nameRu),matchRank(q,ex.nameEn));var muscle=Math.max(matchRank(q,ex.target),matchRank(q,RU_MU[ex.target]),matchRank(q,EN_MU[ex.target]));var zone=Math.max(matchRank(q,ex.zone),matchRank(q,RU_ZONE[ex.zone]),matchRank(q,EN_ZONE[ex.zone]));var equip=Math.max(matchRank(q,ex.equip),matchRank(q,RU_EQ[ex.equip]),matchRank(q,EN_EQ[ex.equip]));var tokens=allTokenRank(q,ex.search);return Math.max(name>=0?name+80:-1,muscle>=0?muscle+55:-1,zone>=0?zone+40:-1,equip>=0?equip+32:-1,tokens);}
+  function exerciseDiscoveryRank(ex,query){var q=norm(query);var name=Math.max(matchRank(q,ex.nameRu),matchRank(q,ex.nameEn));var muscle=Math.max(matchRank(q,ex.target),matchRank(q,RU_MU[ex.target]),matchRank(q,EN_MU[ex.target]));var zone=Math.max(matchRank(q,ex.zone),matchRank(q,RU_ZONE[ex.zone]),matchRank(q,EN_ZONE[ex.zone]));var equip=Math.max(matchRank(q,ex.equip),matchRank(q,RU_EQ[ex.equip]),matchRank(q,EN_EQ[ex.equip]));var tokens=allTokenRank(q,exerciseSearchText(ex));return Math.max(name>=0?name+80:-1,muscle>=0?muscle+55:-1,zone>=0?zone+40:-1,equip>=0?equip+32:-1,tokens);}
 
   function discoveryRows(query) {
     var q = norm(query);

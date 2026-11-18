@@ -15,7 +15,7 @@ test('route heading focus never overrides a later field focus',async({page})=>{
  });
  await expect(page.locator('html')).toHaveAttribute('data-route-ready','library');await frames(page);
  await expect(page.locator('#search')).toBeFocused();
- await page.locator('#search').fill('0025');await expect(page.locator('#grid [data-open="0025"]')).toBeVisible();
+ await page.locator('#search').fill('0025 zhim');await expect(page.locator('#grid [data-open="0025"]')).toBeVisible();
  expect(await page.evaluate(()=>window.mmgDiagnostics.exerciseCount)).toBe(1324);
 });
 

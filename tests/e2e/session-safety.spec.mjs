@@ -27,7 +27,7 @@ test('closing and reloading Run Mode preserves the entered draft and active set'
   await expect(page.locator('.run-set-chip[data-state="current"]')).toHaveText('1');
 });
 
-test('skipped and expired workout rest timers restart with the default preset', async ({ page }) => {
+test('rest adjustments keep their deadline, and skipped and expired rests reset', async ({ page, isMobile }) => {
   await page.clock.install({ time: new Date('2026-11-18T10:00:00Z') });
   await page.goto('/index.html#workout');
   await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'workout');
@@ -37,6 +37,14 @@ test('skipped and expired workout rest timers restart with the default preset', 
   await toggle.evaluate(button => button.click());
   await page.clock.fastForward(20_000);
   await expect(timer).toHaveAttribute('data-run', 'true');
+  const beforeAdjustment = await clock.textContent();
+  const [minutes, seconds] = beforeAdjustment.split(':').map(Number);
+  const remaining = minutes * 60 + seconds;
+  const increase = isMobile ? '[data-mobile-rest="plus"]' : '#timer-plus';
+  await page.locator(increase).evaluate(button => button.click());
+  await page.clock.fastForward(1_000);
+  const [adjustedMinutes, adjustedSeconds] = (await clock.textContent()).split(':').map(Number);
+  expect(adjustedMinutes * 60 + adjustedSeconds - remaining).toBeGreaterThanOrEqual(12);
   await page.locator('#timer-skip').evaluate(button => button.click());
   await expect(timer).toHaveAttribute('data-run', 'false');
   await toggle.evaluate(button => button.click());

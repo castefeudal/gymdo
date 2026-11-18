@@ -865,6 +865,12 @@ body[data-v7-route="program"] #program {
   pointer-events: none;
 }
 /* Compact the generated programme so the week reads before its commentary. */
+/* @sequence 21104 */
+.v10-plan-hero[data-goal="strength"]::after { background-image:url(assets/visual/program-strength-720.webp); }
+/* @sequence 21105 */
+@media(max-width:600px) {
+  .v10-plan-hero[data-goal="strength"]::after { background-image:url(assets/visual/program-strength-320.webp); }
+}
 /* @sequence 13020 */
 .tool-layout:has(#plan-form) { align-items: start; gap: 16px; }
 /* @sequence 13021 */

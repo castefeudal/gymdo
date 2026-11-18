@@ -3611,7 +3611,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var completedText = completed.length + ' / ' + week.length;
     var allDone = completed.length >= week.length;
 
-    out.innerHTML = '<div class="v10-plan-hero">' +
+    out.innerHTML = '<div class="v10-plan-hero" data-goal="'+esc(goal)+'">' +
         '<div><p class="eyebrow v8-eyebrow-tight">'+esc(goalLabel+' · '+levelLabel+' · '+placeLabel)+'</p>' +
         '<h3 class="v8-output-title">'+esc(allDone?(S.lang==='en'?'Week complete':'Неделя выполнена'):(S.lang==='en'?'Active programme':'Активная программа'))+'</h3>' +
         '<p class="small v8-mt-2">'+esc(t('planWeekly',{days:days,time:time,ex:week[0]&&week[0].items?week[0].items.length:0}))+(createdLabel?' · '+esc(createdLabel):'')+'</p></div>' +
@@ -5738,7 +5738,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.11-r79.3-barbell';
+  var APP_VERSION = '2026.11-r79.4-programme';
   var BACKUP_SCHEMA = 12;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
@@ -6475,6 +6475,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
 
 
   async function init() {
+    var contentRequest = loadContent();
     window.addEventListener('mmg:error',function(event){lastLocalError=String(event&&event.detail&&event.detail.key||'unknown');renderV7Diagnostics();});
     var modules = {};
     try {
@@ -6570,7 +6571,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var hasPersistedExerciseState = !!((store.json(K.fav,[])||[]).length || (store.json(K.workout,[])||[]).length || store.json(K.plan,null) || Object.keys(databaseExercisePreferences).length || databaseCustomExercises.length);
     var needsData = dataRouteNeedsLibrary(initialRoute) || hasPersistedExerciseState;
     if (needsData) window.dispatchEvent(new CustomEvent('mmg:stage', { detail: { key: 'data' } }));
-    var [contentLoaded,dataLoaded] = await Promise.all([loadContent(), needsData ? ensureData() : true]);
+    var [contentLoaded,dataLoaded] = await Promise.all([contentRequest, needsData ? ensureData() : true]);
     if (!dataLoaded && needsData) {
       var grid = $('grid');
       if (grid) grid.innerHTML = '<div class="empty v8-grid-span"><b>Библиотека не загрузилась</b>' +

@@ -1,4 +1,4 @@
-const VERSION = '2026.11-r79.3-barbell';
+const VERSION = '2026.11-r79.4-programme';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -67,6 +67,8 @@ const PRECACHE = [
   './assets/visual/plate-labs.svg',
 
   './assets/visual/program-hypertrophy-720.webp',
+  './assets/visual/program-strength-320.webp',
+  './assets/visual/program-strength-720.webp',
   './assets/visual/section-labs.svg',
   './assets/visual/section-library.svg',
   './assets/visual/section-nutrition.svg',

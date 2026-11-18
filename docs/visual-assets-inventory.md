@@ -101,3 +101,12 @@ After the workout controls and history, the page uses a lazy-loaded 900 × 600 W
 440 × 402 WebP crop below 600 px. The light themes tone the photograph
 independently. Both WebPs are available offline. The original is kept with
 the project documentation, outside the public site bundle.
+
+## Strength programme artwork
+
+ImageGen original: `docs/visual-source/program-strength.png`. The artwork
+shows a calibrated plate and knurled steel in graphite side light with a
+restrained lime reflection. The strength programme displays the 720 px WebP
+above 600 px and a tighter 320 px WebP crop on smaller screens. Both variants
+use the programme cover's existing text mask and are included in the offline
+shell.

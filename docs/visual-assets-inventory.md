@@ -87,3 +87,17 @@ which 42 KB is the two TODAY variants (only one is ever fetched). The layer
 adds no render-blocking request beyond `app.css` itself: every photograph is a
 CSS background, so it is discovered after the stylesheet and never competes
 with the hero text for LCP.
+
+## Workout equipment photograph
+
+`docs/visual-source/workout-equipment.png` is the original ImageGen output for
+MARKOV MADE GYM. Prompt: Photorealistic editorial fitness equipment still
+life in 3:2. Two black cast-iron dumbbells and a folded charcoal towel on a
+graphite gym bench, arranged on the middle-right, with soft overhead daylight,
+controlled lime rim light, visible metal and rubber texture, and empty
+graphite on the left. No people, logos, or lettering.
+
+The workout history section uses a lazy-loaded 900 × 600 WebP and a tighter
+440 × 402 WebP crop below 600 px. The light themes tone the photograph
+independently. Both WebPs are available offline. The original is kept with
+the project documentation, outside the public site bundle.

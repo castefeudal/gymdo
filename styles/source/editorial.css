@@ -98,6 +98,14 @@ html[data-theme="soft"] :is(.panel,.card),html[data-theme="ivory"] :is(.panel,.c
 
 /* @sequence 21067 */
 .food-heading { position:relative; padding:30px 240px 30px 0; border-bottom:1px solid var(--border-strong); margin-bottom:24px; background:var(--edition-art) right center/220px auto no-repeat; }
+/* @sequence 21100 */
+.workout-equipment-art { display:block; margin-block:24px 0; border:1px solid var(--border-strong); border-radius:var(--radius-card); overflow:hidden; }
+/* @sequence 21101 */
+.workout-equipment-art img { display:block; width:100%; height:auto; }
+/* @sequence 21102 */
+html[data-theme="soft"] .workout-equipment-art img { filter:brightness(1.12) saturate(.85); }
+/* @sequence 21103 */
+html[data-theme="ivory"] .workout-equipment-art img { filter:brightness(1.13) sepia(.12); }
 /* @sequence 21068 */
 .food-heading h2 { font-size:clamp(30px,3.6vw,52px); letter-spacing:-.055em; }
 /* @sequence 21069 */

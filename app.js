@@ -4306,7 +4306,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     $('timer-toggle').addEventListener('click', function () {
       if (restTimer.running) stopTimer(); else startTimer(restTimer.left || S.rest);
     });
-    $('timer-skip').addEventListener('click', function () { restTimer.left = 0; stopTimer(); $('timer').classList.remove('is-done'); renderTimer(); });
+    $('timer-skip').addEventListener('click', function () { $('timer').classList.remove('is-done'); stopTimer(true); });
 
     /* --- режим выполнения --- */
     $('w-run').addEventListener('click', openRun);
@@ -5840,6 +5840,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     } else {
       restTimer.running = false;
       restTimer.endsAt = 0;
+      if (saved.running) left = 0;
     }
     restTimer.left = left;
     if (!left) store.remove(K.restTimer);
@@ -5858,9 +5859,10 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (left <= 0) { finishRestTimer(); return; }
     if (left !== restTimer.left) { restTimer.left=left; renderTimer(); }
   }
-  stopTimer = function(){
+  stopTimer = function(skip){
     clearInterval(restTimer.id); restTimer.id=0;
-    if (restTimer.running && restTimer.endsAt) restTimer.left=Math.max(0,Math.ceil((restTimer.endsAt-Date.now())/1000));
+    if (skip === true) restTimer.left=0;
+    else if (restTimer.running && restTimer.endsAt) restTimer.left=Math.max(0,Math.ceil((restTimer.endsAt-Date.now())/1000));
     restTimer.running=false; restTimer.endsAt=0;
     persistRestTimer(); renderTimer();
   };

@@ -3,18 +3,18 @@
     "assets/runtime/application.js",
     "assets/runtime/chunk-2QAHXVO4.js",
     "assets/runtime/chunk-5MTFQ47D.js",
+    "assets/runtime/chunk-ESFODIDO.js",
     "assets/runtime/chunk-HIS2USCZ.js",
-    "assets/runtime/chunk-NMLJROAV.js",
     "assets/runtime/chunk-RLO3Y2M4.js"
   ],
-  "initialBytes": 454433,
+  "initialBytes": 454521,
   "bootFiles": [
     "assets/runtime/application.js",
     "assets/runtime/calculator-history-EXXTNB5I.js",
     "assets/runtime/chunk-2QAHXVO4.js",
     "assets/runtime/chunk-5MTFQ47D.js",
+    "assets/runtime/chunk-ESFODIDO.js",
     "assets/runtime/chunk-HIS2USCZ.js",
-    "assets/runtime/chunk-NMLJROAV.js",
     "assets/runtime/chunk-RLO3Y2M4.js",
     "assets/runtime/decision-engine-PXY5OBCC.js",
     "assets/runtime/history-repository-XZLWYEQW.js",
@@ -29,6 +29,6 @@
     "assets/runtime/weight-trend-UMPM5GLM.js",
     "assets/runtime/workout-groups-LBZAVUAE.js"
   ],
-  "bootBytes": 485775,
-  "totalBytes": 531391
+  "bootBytes": 485863,
+  "totalBytes": 531668
 }

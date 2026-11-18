@@ -23,12 +23,17 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
   const form = q('[data-food-add]'), productForm = q('[data-food-create]');
   let busy = false, editingFood = null;
   async function save(next) {
-    if (busy || !cleanFoodDiary(next)) return false;
+    if (busy) return false;
+    const validated = cleanFoodDiary(next);
+    if (!validated) {
+      status.textContent = t('Проверь введённые значения и ограничения дневника.', 'Check the entered values and diary limits.');
+      return false;
+    }
     busy = true; host.setAttribute('aria-busy', 'true');
     try {
-      if (!await write(next)) throw Error();
+      if (!await write(validated)) throw Error();
       if(signal.aborted)return true;
-      state = next; status.textContent = t('Сохранено на устройстве.', 'Saved on this device.'); render(); return true;
+      state = validated; status.textContent = t('Сохранено на устройстве.', 'Saved on this device.'); render(); return true;
     } catch { status.textContent = t('Не удалось сохранить. Ввод сохранён в форме; повтори попытку.', 'Could not save. Your input remains in the form; try again.'); return false; }
     finally { busy = false; if(!signal.aborted)host.setAttribute('aria-busy', 'false'); }
   }
@@ -55,7 +60,7 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     if(editingFood&&!foods.some(food=>food.id===editingFood.id))form.elements.food.add(new Option(editingFood.name,editingFood.id));
     if (foods.some(food => food.id === selected)) form.elements.food.value = selected;
     else if(editingFood&&form.elements.entry.value)form.elements.food.value=editingFood.id;
-    form.querySelector('[type="submit"]').disabled = foods.length === 0;
+    form.querySelector('[type="submit"]').disabled = form.elements.food.options.length === 0 || !get('day').value;
     const query = get('search').value.toLocaleLowerCase();
     const visible = foods.filter(food => food.name.toLocaleLowerCase().includes(query) && (!get('favorites').checked || food.favorite));
     q('[data-food-catalog]').innerHTML = visible.slice(0, 100).map(food => `<article class="food-item"><button class="btn btn-quiet" data-food-select="${food.id}" type="button">${esc(food.name)}</button><p class="small">${line(food)} / 100 g · ${t('Введено пользователем', 'User entered')}</p><p class="small">${esc(food.source)}</p><div class="food-actions"><button class="btn btn-quiet" data-food-favorite="${food.id}" aria-pressed="${food.favorite}" type="button">${t('Избранное','Favorite')}</button><button class="btn btn-quiet" data-food-edit="${food.id}" type="button">${t('Изменить','Edit')}</button><button class="btn btn-quiet" data-food-remove="${food.id}" type="button">${t('Удалить','Delete')}</button></div></article>`).join('') || `<p class="empty">${t('Продуктов пока нет. Добавь первый по этикетке — без вымышленных пищевых значений.', 'No foods yet. Add your first label — no invented nutrition values.')}</p>`;
@@ -63,7 +68,7 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     const entries = state.entries.filter(row => row.date >= start && row.date <= end);
     const todayMeal = entries.filter(row => row.date === get('day').value && row.meal === get('meal').value);
     const previousMeal = state.entries.some(row => row.meal === get('meal').value && row.date < get('day').value);
-    q('[data-food-repeat]').disabled = !previousMeal;
+    q('[data-food-repeat]').disabled = !get('day').value || !previousMeal;
     q('[data-food-recipe]').disabled = todayMeal.length === 0;
     q('[data-food-publish]').disabled = !entries.some(row => row.date === get('day').value);
     const dates = [...new Set(entries.map(row => row.date))].sort().reverse(), totals = foodTotals(entries);
@@ -94,17 +99,17 @@ export function renderFoodDiary({ host, read, write, lang, esc, today, publishDa
     const grams = Number(form.elements.amount.value) * (form.elements.unit.value === 'servings' ? food.portion : 1);
     const next = { ...state, entries: [...state.entries.filter(row => row.id !== id), {id, date:get('day').value, meal:get('meal').value, food:{...food}, grams}] };
     if(!cleanFoodDiary(next)){status.textContent=t('Проверь дату и граммовку до 10 000 г.','Check date and amount up to 10,000 g.');return;}
-    if(await save(next)){form.elements.entry.value='';editingFood=null;}
+    if(await save(next)&&!signal.aborted){form.elements.entry.value='';editingFood=null;render();}
   });
   listen('input', event => { if(event.target===get('search'))render(); else if(form.contains(event.target))preview(); });
   listen('change', event => { if(event.target===get('day')||event.target===get('period')||event.target===get('meal')||event.target===get('favorites'))render(); else preview(); });
   listen('click', async event => {
     const b = event.target.closest('button'); if(!b||busy)return;
-    if(b.dataset.foodSelect){ form.elements.food.value=b.dataset.foodSelect;form.elements.entry.value='';form.elements.amount.value=1;form.elements.unit.value='servings';preview();form.elements.amount.focus(); }
+    if(b.dataset.foodSelect){ form.elements.food.value=b.dataset.foodSelect;form.elements.entry.value='';editingFood=null;form.elements.amount.value=1;form.elements.unit.value='servings';render();form.elements.amount.focus(); }
     if(b.dataset.foodFavorite){const id=b.dataset.foodFavorite;await save({...state,products:state.products.map(f=>f.id===id?{...f,favorite:!f.favorite}:f),recipes:state.recipes.map(f=>f.id===id?{...f,favorite:!f.favorite}:f)});}
     if(b.dataset.foodEdit){const food=foodById(b.dataset.foodEdit);Object.entries(food).forEach(([key,value])=>{if(productForm.elements[key])productForm.elements[key].value=value;});q('[data-food-product]').open=true;productForm.elements.name.focus();}
     if(b.dataset.foodRemove&&confirm(t('Удалить из каталога? История сохранится.','Remove from catalog? History will be retained.'))){const id=b.dataset.foodRemove;await save({...state,products:state.products.filter(f=>f.id!==id),recipes:state.recipes.filter(f=>f.id!==id)});}
-    if(b.dataset.entryEdit){const row=state.entries.find(row=>row.id===b.dataset.entryEdit);get('day').value=row.date;get('meal').value=row.meal;form.elements.entry.value=row.id;editingFood={...row.food};render();if(!foodById(row.food.id))form.elements.food.add(new Option(row.food.name,row.food.id));form.elements.food.value=row.food.id;form.elements.unit.value='grams';form.elements.amount.value=row.grams;preview();form.elements.amount.focus();}
+    if(b.dataset.entryEdit){const row=state.entries.find(row=>row.id===b.dataset.entryEdit);get('day').value=row.date;get('meal').value=row.meal;form.elements.entry.value=row.id;editingFood={...row.food};render();form.elements.food.value=row.food.id;form.elements.unit.value='grams';form.elements.amount.value=row.grams;preview();form.elements.amount.focus();}
     if(b.dataset.entryRemove&&confirm(t('Удалить запись?','Delete entry?')))await save({...state,entries:state.entries.filter(row=>row.id!==b.dataset.entryRemove)});
     if(b.hasAttribute('data-food-repeat')){
       const prior=state.entries.filter(row=>row.meal===get('meal').value&&row.date<get('day').value).sort((a,b)=>b.date.localeCompare(a.date))[0];

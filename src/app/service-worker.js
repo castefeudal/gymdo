@@ -34,6 +34,8 @@ const PRECACHE = [
   './assets/visual/plate-mark.svg',
   './assets/visual/plate-home.svg',
   './assets/visual/plate-workout.svg',
+  './assets/visual/workout-equipment-440.webp',
+  './assets/visual/workout-equipment-900.webp',
   './assets/visual/plate-library.svg',
   './assets/visual/plate-program.svg',
   './assets/visual/plate-nutrition.svg',

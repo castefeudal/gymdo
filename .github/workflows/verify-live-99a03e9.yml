@@ -18,6 +18,7 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: |
+          export HOME=/root
           git config --global --add safe.directory "$PWD"
           node scripts/check-live.mjs 99a03e99a5ff8f7e7f2ab745eba361a0342fd5c4
       - name: Upload live verification evidence

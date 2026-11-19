@@ -27,6 +27,7 @@ test('diary average uses the requested cutoff and ignores malformed records', ()
     { date: '2026-09-28', sleep: 6 },
     { date: '2026-09-01', sleep: 2 },
     { date: '2026-09-30', sleep: Infinity },
+    { date: '2026-10-01', sleep: 10 },
   ];
   const now = Date.parse('2026-09-30T12:00:00Z');
   assert.equal(diaryAverage(entries, 'sleep', 3, now), 7);

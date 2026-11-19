@@ -55,6 +55,8 @@ export function labCanonicalValue(row) {
 }
 
 export function labPosition(row) {
+  if (row.low != null && row.value < row.low) return 'low';
+  if (row.high != null && row.value > row.high) return 'high';
   if (row.low == null || row.high == null) return 'unknown';
-  return row.value < row.low ? 'low' : row.value > row.high ? 'high' : 'within';
+  return 'within';
 }

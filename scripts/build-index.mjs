@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { transform } from 'esbuild';
 
-const BUILD_VERSION = '2026.11-r79.3-barbell';
+const BUILD_VERSION = '2026.11-r79.4-programme';
 const runtimeMetrics=JSON.parse(await readFile(new URL('../assets/runtime-metrics.json',import.meta.url),'utf8'));
 const initialModules=[...runtimeMetrics.initialFiles,...runtimeMetrics.bootFiles.filter(file=>file.includes('/load-modules-'))].filter(file=>!file.endsWith('/application.js'));
 const structuredData = {
@@ -125,6 +125,7 @@ const index = `<!doctype html>
   <link rel="modulepreload" href="./assets/runtime/application.js">
   ${initialModules.map(file=>`<link rel="modulepreload" href="./${file}">`).join('\n  ')}
   <script>if(/^#(?:library|workout|program)$/.test(location.hash)){const l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='./data/exercise-catalog.json';document.head.append(l);if(location.hash==='#library'){const p=document.createElement('link');p.rel='preload';p.as='image';p.href='./images/1201-0JtKWum.jpg';document.head.append(p);}}</script>
+  <script>if(location.hash==='#home'){const l=document.createElement('link');l.rel='preload';l.as='image';l.fetchPriority='high';l.href='./assets/visual/today-hero-'+(matchMedia('(max-width:760px)').matches?640:1280)+'.webp';document.head.append(l);}</script>
   <link rel="preload" href="./ui.html" as="fetch" crossorigin="anonymous">
   <link rel="preload" href="./data/content.json" as="fetch" crossorigin="anonymous">
   <style>${(await transform(bootCss,{loader:'css',minify:true})).code.trim()}</style>

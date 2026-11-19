@@ -310,11 +310,15 @@
 /* @sequence 1141 */
 .plan-day-actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: end;
   gap: 7px;
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--border-subtle);
 }
+/* @sequence 21106 */
+.plan-day-actions label { flex:1 1 12rem; min-width:0; font-size:.875rem; }
 /* @sequence 1195 */
 @media (max-width:1024px) {
   .plan-week {
@@ -865,6 +869,14 @@ body[data-v7-route="program"] #program {
   pointer-events: none;
 }
 /* Compact the generated programme so the week reads before its commentary. */
+/* @sequence 21104 */
+.v10-plan-hero[data-goal="strength"]::after { background-image:url(assets/visual/program-strength-720.webp); }
+/* @sequence 21105 */
+@media(max-width:600px) {
+  .v10-plan-hero[data-goal="strength"]::after { background-image:url(assets/visual/program-strength-320.webp); }
+}
+/* @sequence 21107 */
+:is([data-theme="soft"],[data-theme="ivory"]) .v10-plan-hero[data-goal="strength"]::after { opacity:.42; }
 /* @sequence 13020 */
 .tool-layout:has(#plan-form) { align-items: start; gap: 16px; }
 /* @sequence 13021 */

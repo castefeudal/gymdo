@@ -1,4 +1,4 @@
-const VERSION = '2026.11-r79.3-barbell';
+const VERSION = '2026.11-r79.4-programme';
 const PREFIX = 'mmg-gym-';
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const MEDIA = `${PREFIX}media-${VERSION}`;
@@ -7,10 +7,10 @@ const PRECACHE = [
   './assets/runtime/application.js',
   './assets/runtime/calculator-history-EXXTNB5I.js',
   './assets/runtime/chunk-2QAHXVO4.js',
+  './assets/runtime/chunk-3CUUV3KE.js',
   './assets/runtime/chunk-5MTFQ47D.js',
+  './assets/runtime/chunk-CUEYJXBU.js',
   './assets/runtime/chunk-ESFODIDO.js',
-  './assets/runtime/chunk-HIS2USCZ.js',
-  './assets/runtime/chunk-PTK6Z5I3.js',
   './assets/runtime/chunk-RLO3Y2M4.js',
   './assets/runtime/decision-engine-PXY5OBCC.js',
   './assets/runtime/egfr-view-K4UEHPQF.js',
@@ -22,10 +22,10 @@ const PRECACHE = [
   './assets/runtime/nutrition-analytics-OBDU5YCR.js',
   './assets/runtime/pr-engine-EHEKVMRG.js',
   './assets/runtime/progression-VLKS4LDK.js',
-  './assets/runtime/results-view-3I76USPD.js',
+  './assets/runtime/results-view-Y7GSAJWP.js',
   './assets/runtime/router-GQ7X5DUD.js',
   './assets/runtime/substitution-engine-CEQUMOF4.js',
-  './assets/runtime/trend-model-5F6L5A6V.js',
+  './assets/runtime/trend-model-SSQYGDN7.js',
   './assets/runtime/weekly-review-4RBJ5OET.js',
   './assets/runtime/weight-trend-UMPM5GLM.js',
   './assets/runtime/workout-groups-LBZAVUAE.js',
@@ -67,6 +67,8 @@ const PRECACHE = [
   './assets/visual/plate-labs.svg',
 
   './assets/visual/program-hypertrophy-720.webp',
+  './assets/visual/program-strength-320.webp',
+  './assets/visual/program-strength-720.webp',
   './assets/visual/section-labs.svg',
   './assets/visual/section-library.svg',
   './assets/visual/section-nutrition.svg',

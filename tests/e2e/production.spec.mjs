@@ -1241,7 +1241,7 @@ test('flagship restores saved programme on home and exposes the weekly pulse', a
       createdAt: Date.now(),
       weekKey: '',
       completedDays: [],
-      ctx: { goal: 'muscle', level: 'middle', days: 2, time: 60, place: 'gym', focus: 'balanced', cardio: 'light', steps: 'mid' },
+      ctx: { goal: 'strength', level: 'middle', days: 2, time: 60, place: 'gym', focus: 'balanced', cardio: 'light', steps: 'mid' },
       days: [
         { key: 'fullA', index: 0, items: [{ id: '0001', sets: 3, reps: '10–12', rest: 90 }] },
         { key: 'fullB', index: 1, items: [{ id: '0002', sets: 3, reps: '10–12', rest: 90 }] },
@@ -1257,6 +1257,25 @@ test('flagship restores saved programme on home and exposes the weekly pulse', a
   await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'program');
   await expect(page.locator('#plan-out')).toHaveAttribute('data-filled', 'true');
   await expect(page.locator('#plan-out .v10-plan-day')).toHaveCount(2);
+  const cover = await page.locator('.v10-plan-hero').evaluate(heading => {
+    const size = matchMedia('(max-width:600px)').matches ? 320 : 720;
+    return getComputedStyle(heading, '::after').backgroundImage.includes(`program-strength-${size}.webp`);
+  });
+  expect(cover).toBe(true);
+  await page.locator('#lang-switch [data-lang="en"]').evaluate(button => button.click());
+  await expect(page.locator('.v10-plan-hero')).toHaveAttribute('data-goal', 'strength');
+  await expect(page.locator('#plan-out .v10-plan-day')).toHaveCount(2);
+  await expect(page.locator('.v10-plan-day [data-open]').first()).toHaveAttribute('data-open', '0001');
+  await page.locator('#lang-switch [data-lang="ru"]').evaluate(button => button.click());
+  const firstDate = page.locator('[data-plan-date="0"]');
+  const secondDate = page.locator('[data-plan-date="1"]');
+  const monday = await secondDate.getAttribute('min');
+  const sunday = await firstDate.getAttribute('max');
+  await firstDate.fill(sunday);
+  await secondDate.fill(monday);
+  await expect(page.locator('.v10-plan-day[data-state="current"]')).toHaveAttribute('data-plan-day', '1');
+  await page.reload();
+  await expect(secondDate).toHaveValue(monday);
   await expect(page.locator('#plan-out [data-mesocycle-status="active"]')).toContainText('Неделя блока 1 из 4');
   const programMigration = await page.evaluate(async () => {
     const db = await new Promise((resolve, reject) => {

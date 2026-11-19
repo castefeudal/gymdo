@@ -19,7 +19,10 @@ export function diaryDelta(entries, field, days) {
 export function diaryAverage(entries, field, days, now = Date.now()) {
   if (!Number.isFinite(Number(days)) || Number(days) < 0 || !Number.isFinite(Number(now))) return null;
   const cutoff = Number(now) - Number(days) * 86400000;
-  const values = datedValues(entries, field).filter((entry) => Date.parse(entry.date) >= cutoff);
+  const values = datedValues(entries, field).filter((entry) => {
+    const timestamp = Date.parse(entry.date);
+    return timestamp >= cutoff && timestamp <= Number(now);
+  });
   if (!values.length) return null;
   return values.reduce((sum, entry) => sum + entry[field], 0) / values.length;
 }

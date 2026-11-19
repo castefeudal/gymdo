@@ -409,7 +409,6 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     renderEco(initial);
     if (!initial) {
       if ($('kbju-out').getAttribute('data-filled') === 'true') { try { calcKbju(); } catch (e) {} }
-      if ($('plan-out').getAttribute('data-filled') === 'true') { try { buildPlan(); } catch (e) {} }
     }
     if (S.activeId) openExercise(S.activeId, null, true);
   }
@@ -455,25 +454,13 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (!raw || !Array.isArray(raw.x) || !raw.x.length) return false;
 
     EX = decodeCompactExercises(raw, { equipmentWeight: EQUIP_WEIGHT, normalize: norm });
-    EX.forEach(function (ex) {
-      ex.search = norm([
-        ex.search, RU_ZONE[ex.zone], EN_ZONE[ex.zone], RU_EQ[ex.equip], EN_EQ[ex.equip],
-        RU_MU[ex.target], EN_MU[ex.target], RU_MU[ex.group],
-        ex.secondary.map(function (m) { return RU_MU[m] || ''; }).join(' ')
-      ].join(' '));
-      BY_ID[ex.id] = ex;
-    });
+    EX.forEach(function (ex) { BY_ID[ex.id] = ex; });
 
     databaseCustomExercises.forEach(function (record) {
       if (!record || BY_ID[record.id]) return;
       var ex = makeCustomExerciseRuntimeRecord(record, EX.length);
       BY_ID[ex.id] = ex;
       EX.push(ex);
-    });
-
-    EX.forEach(function (ex) {
-      var latin = translitRu([ex.nameRu, RU_ZONE[ex.zone], RU_MU[ex.target], RU_MU[ex.group], ex.secondary.map(function (m) { return RU_MU[m] || m; }).join(' ')].join(' '));
-      ex.search = norm(ex.search + ' ' + latin);
     });
 
     EX.forEach(function (ex) {
@@ -590,6 +577,20 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   }
 
   /* ---------- 7. БИБЛИОТЕКА ----------------------------------------------- */
+  function exerciseSearchText(ex) {
+    if (ex.searchReady) return ex.search;
+    var latin = translitRu([ex.nameRu, RU_ZONE[ex.zone], RU_MU[ex.target], RU_MU[ex.group],
+      ex.secondary.map(function (muscle) { return RU_MU[muscle] || muscle; }).join(' ')].join(' '));
+    if (!ex.custom) {
+      ex.search = norm([ex.search, RU_ZONE[ex.zone], EN_ZONE[ex.zone], RU_EQ[ex.equip], EN_EQ[ex.equip],
+        RU_MU[ex.target], EN_MU[ex.target], RU_MU[ex.group],
+        ex.secondary.map(function (muscle) { return RU_MU[muscle] || ''; }).join(' ')].join(' '));
+    }
+    ex.search = norm(ex.search + ' ' + latin);
+    ex.searchReady = true;
+    return ex.search;
+  }
+
   function getFiltered() {
     var tokens = S.query ? norm(S.query).split(' ').filter(Boolean) : [];
     var out = EX.filter(function (ex) {
@@ -598,7 +599,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       if (S.muscles.length && S.muscles.indexOf(ex.target) === -1) return false;
       if (S.equipment.length && S.equipment.indexOf(ex.equip) === -1) return false;
       for (var i = 0; i < tokens.length; i++) {
-        if (ex.search.indexOf(tokens[i]) === -1) return false;
+        if (exerciseSearchText(ex).indexOf(tokens[i]) === -1) return false;
       }
       return true;
     });
@@ -1635,57 +1636,10 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       isExerciseAllowed: planExtraFilter
     });
     var week = generated.week;
-    var split = generated.split;
-    var perSession = generated.perSession;
-
-    lastPlan = { week: week, goal: goal, level: level, days: days, time: time, place: place, focus: focus, ctx: {goal:goal,level:level,days:days,time:time,place:place,focus:focus,style:$('p-style')?$('p-style').value:'balanced',recovery:recovery,cardio:$('p-cardio')?$('p-cardio').value:'light',steps:$('p-steps')?$('p-steps').value:'mid',blockWeeks:blockWeeks} };
-
-    var goalLabel = $('p-goal').selectedOptions[0].textContent;
-    var placeLabel = $('p-place').selectedOptions[0].textContent;
-    var levelLabel = $('p-level').selectedOptions[0].textContent;
-
-    var weekHtml = week.map(function (day, dayIndex) {
-      var name = DAY_NAMES[day.key][S.lang] || DAY_NAMES[day.key].ru;
-      return '<div class="plan-day" data-plan-day="' + dayIndex + '">' +
-        '<div class="plan-day-head"><b>' + esc(t('planDay', { n: day.index + 1 })) + ' · ' + esc(name) + '</b>' +
-        '<span>' + esc(t('planRest')) + ' ' + (day.items.length ? day.items[0].rest + ' ' + esc(t('planSec')) : '—') + '</span></div>' +
-        day.items.map(function (it, itemIndex) {
-          return '<div class="plan-ex" data-plan-day="' + dayIndex + '" data-plan-item="' + itemIndex + '">' +
-            '<button class="plan-ex-name" type="button" data-open="' + esc(it.ex.id) + '">' + esc(exName(it.ex)) + '</button>' +
-            '<span class="meta-tag">' + esc(labelEq(it.ex.equip)) + '</span>' +
-            '<span class="plan-ex-reason">' + esc(exercisePreference(it.ex.id) === 'prefer' ? (S.lang === 'en' ? 'Preferred by you' : 'Вы отметили как предпочтительное') : isFav(it.ex.id) ? (S.lang === 'en' ? 'Saved as a favourite' : 'В избранном') : (S.lang === 'en' ? 'Matches this day, goal and available equipment' : 'Подходит для этого дня, цели и доступного оборудования')) + '</span>' +
-            '<span class="plan-ex-dose">' + it.sets + ' × ' + esc(it.reps) + '</span>' +
-          '</div>';
-        }).join('') +
-      '</div>';
-    }).join('');
-
-    var out = $('plan-out');
-    out.innerHTML = '<div>' +
-        '<p class="eyebrow v8-eyebrow-tight">' + esc(goalLabel + ' · ' + levelLabel + ' · ' + placeLabel) + '</p>' +
-        '<h3 class="v8-output-title">' + esc(DAY_NAMES[split[0]][S.lang] || '') + ' → ' + esc(String(days)) + '/7</h3>' +
-        '<p class="small v8-mt-2">' + esc(t('planWeekly', { days: days, time: time, ex: perSession })) + '</p>' +
-      '</div>' +
-      '<div class="plan-week">' + weekHtml + '</div>' +
-      '<div class="note"><b>' + esc(t('planCardio')) + '.</b> ' + esc(planCardioTextV10({goal:goal,cardio:$('p-cardio')?$('p-cardio').value:'light',steps:$('p-steps')?$('p-steps').value:'mid'})) + '</div>' +
-      '<div class="note"><b>' + esc(t('planProgress')) + '.</b> ' + esc(PROGRESS_TEXT[level][S.lang] || PROGRESS_TEXT[level].ru) + '</div>' +
-      '<div class="note note-warn">' + esc(t('plan.disclaimer')) + '</div>' +
-      '<div class="plan-actions">' +
-        '<button class="btn btn-primary btn-sm" type="button" id="plan-copy">' + esc(t('planCopy')) + '</button>' +
-        '<button class="btn btn-solid btn-sm" type="button" id="plan-to-workout">' + esc(t('planToWorkout')) + '</button>' +
-      '</div>';
-    out.setAttribute('data-filled', 'true');
-
-    $('plan-copy').addEventListener('click', function () { copyText(planText()); });
-    $('plan-to-workout').addEventListener('click', function () {
-      week[0].items.forEach(function (it) {
-        if (!inWorkout(it.ex.id)) {
-          S.workout.push({ id: it.ex.id, sets: it.sets, reps: it.reps, weight: '', done: false });
-        }
-      });
-      saveWorkout(); renderWorkout(); renderResults();
-      showToast(t('planAddedDay'));
-    });
+    if (!week.length) {
+      showToast(S.lang === 'en' ? 'No sessions match these constraints.' : 'При этих ограничениях не удалось собрать тренировки.');
+      return;
+    }
 
     decoratePlan(week, {
       days: days, time: time, goal: goal, level: level, place: place, focus: focus,
@@ -1693,8 +1647,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       recovery: $('p-recovery') ? $('p-recovery').value : 'mid',
       cardio: $('p-cardio') ? $('p-cardio').value : 'light',
       steps: $('p-steps') ? $('p-steps').value : 'mid',
-      blockWeeks: blockWeeks,
-      goalLabel: goalLabel, levelLabel: levelLabel, placeLabel: placeLabel
+      blockWeeks: blockWeeks
     });
   }
 
@@ -2069,7 +2022,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var m = store.json(K.meta, null);
     S.meta = (m && typeof m === 'object') ? {
       name:String(m.name||'').slice(0,80), date:String(m.date||'').slice(0,10), note:String(m.note||'').slice(0,600),
-      planDay:Number.isInteger(Number(m.planDay))?Number(m.planDay):null
+      planDay:m.planDay!=null&&Number.isInteger(Number(m.planDay))?Number(m.planDay):null
     } : { name:'', date:'', note:'', planDay:null };
 
     var h = store.json(K.history, []);
@@ -3205,7 +3158,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       name: S.meta.name || t('wTitle'),
       date: S.meta.date || todayISO(),
       note:S.meta.note,
-      planDay:Number.isInteger(Number(S.meta.planDay))?Number(S.meta.planDay):null,
+      planDay:S.meta.planDay==null?null:Number(S.meta.planDay),
       durationSec: runState && runState.startedAt ? runElapsedSeconds() : 0,
       personalRecords:workoutPersonalRecords(),
       items: S.workout.map(function (w) {
@@ -3215,9 +3168,10 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var previousIndex=S.history.findIndex(function(record){return record.id===entry.id;});
     if(previousIndex!==-1)S.history.splice(previousIndex,1);
     S.history.unshift(entry);
-    if(S.plan&&Number.isInteger(Number(S.meta.planDay))){v7EnsurePlanWeek();var pd=Number(S.meta.planDay);if(S.plan.completedDays.indexOf(pd)===-1)S.plan.completedDays.push(pd);savePlanV7();}
+
     var persisted=await saveHistory();
     if(!persisted){showToast(S.lang==='en'?'Could not save. Keep this session open and retry.':'Не удалось сохранить. Оставь тренировку открытой и повтори.', 'error');return false;}
+    if(S.plan?.days[entry.planDay]){v7EnsurePlanWeek();if(!S.plan.completedDays.includes(entry.planDay)){S.plan.completedDays.push(entry.planDay);savePlanV7();}}
     renderHistory();
     renderProgress();
     renderDashIfVisible();
@@ -3485,7 +3439,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     if (avoidRaw) {
       var terms = avoidRaw.split(',').map(norm).filter(function (x) { return x.length > 2; });
       for (var i = 0; i < terms.length; i++) {
-        if (ex.search.indexOf(terms[i]) !== -1) return false;
+        if (exerciseSearchText(ex).indexOf(terms[i]) !== -1) return false;
       }
     }
     return true;
@@ -3566,11 +3520,13 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var place = ctx.place || S.profile.place || 'gym';
     var completed = Array.isArray(S.plan.completedDays) ? S.plan.completedDays : [];
     var nextDay = v7NextPlanDay();
+    var weekEnd = v7PlanWeekEnd();
+    var today = todayISO();
     lastPlan = { week:week, goal:goal, level:level, days:days, time:time, place:place, focus:ctx.focus||S.profile.focus||'balanced', ctx:ctx };
 
-    var goalLabel = ctx.goalLabel || (S.lang === 'en' ? ({muscle:'Muscle',strength:'Strength',fatloss:'Fat loss',health:'Health'}[goal] || goal) : ({muscle:'Мышцы',strength:'Сила',fatloss:'Снижение жира',health:'Здоровье'}[goal] || goal));
-    var levelLabel = ctx.levelLabel || (S.lang === 'en' ? ({beginner:'Beginner',middle:'Intermediate',advanced:'Advanced'}[level] || level) : ({beginner:'Начальный',middle:'Средний',advanced:'Продвинутый'}[level] || level));
-    var placeLabel = ctx.placeLabel || (S.lang === 'en' ? ({gym:'Gym',home:'Home',minimal:'Minimal equipment'}[place] || place) : ({gym:'Зал',home:'Дом',minimal:'Минимум оборудования'}[place] || place));
+    var goalLabel = (S.lang === 'en' ? ({muscle:'Muscle',strength:'Strength',fatloss:'Fat loss',health:'Health'}[goal] || goal) : ({muscle:'Мышцы',strength:'Сила',fatloss:'Снижение жира',health:'Здоровье'}[goal] || goal));
+    var levelLabel = (S.lang === 'en' ? ({beginner:'Beginner',middle:'Intermediate',advanced:'Advanced'}[level] || level) : ({beginner:'Начальный',middle:'Средний',advanced:'Продвинутый'}[level] || level));
+    var placeLabel = (S.lang === 'en' ? ({gym:'Gym',home:'Home',minimal:'Minimal equipment'}[place] || place) : ({gym:'Зал',home:'Дом',minimal:'Минимум оборудования'}[place] || place));
     var created = S.plan.createdAt ? new Date(S.plan.createdAt) : null;
     var createdLabel = created && !isNaN(created.getTime()) ? new Intl.DateTimeFormat(S.lang === 'en' ? 'en-GB' : 'ru-RU',{day:'numeric',month:'short'}).format(created) : '';
     var block = v7MesocycleStatus();
@@ -3584,7 +3540,10 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       var name = DAY_NAMES[day.key] ? (DAY_NAMES[day.key][S.lang] || DAY_NAMES[day.key].ru) : (S.lang === 'en' ? 'Session' : 'Тренировка');
       var done = completed.indexOf(dayIndex) !== -1;
       var current = dayIndex === nextDay;
-      var status = done ? (S.lang === 'en' ? 'Completed' : 'Выполнено') : current ? (S.lang === 'en' ? 'Next' : 'Следующая') : (S.lang === 'en' ? 'Planned' : 'Запланировано');
+      var date = v7ScheduledDate(dayIndex, weekEnd);
+      var status = done ? (S.lang === 'en' ? 'Completed' : 'Выполнено') : date && date < today
+        ? (S.lang === 'en' ? 'Overdue' : 'Пропущена')
+        : current ? (S.lang === 'en' ? 'Next' : 'Следующая') : (S.lang === 'en' ? 'Planned' : 'Запланировано');
       var rest = day.items[0] ? day.items[0].rest : 90;
       return '<section class="plan-day v10-plan-day" data-plan-day="'+dayIndex+'" data-state="'+(done?'done':current?'current':'planned')+'">' +
         '<div class="plan-day-head"><div><span class="v10-plan-status">'+esc(status)+'</span><b>'+esc(t('planDay',{n:dayIndex+1}))+' · '+esc(name)+'</b></div><span>'+esc(t('planRest'))+' '+rest+' '+esc(t('planSec'))+'</span></div>' +
@@ -3599,7 +3558,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
               '<button class="btn btn-quiet btn-sm btn-danger" type="button" data-plan-del="1">'+esc(t('planDrop'))+'</button>' +
             '</div></div>';
         }).join('') + '</div>' +
-        '<div class="plan-day-actions"><button class="btn '+(current?'btn-primary':'btn-solid')+' btn-sm" type="button" data-plan-day-add="'+dayIndex+'">'+esc(done?(S.lang==='en'?'Repeat session':'Повторить тренировку'):(current?(S.lang==='en'?'Start next session':'Начать следующую') : t('planAddDay')))+'</button></div>' +
+        '<div class="plan-day-actions"><label>'+(S.lang==='en'?'Scheduled date':'Дата тренировки')+' <input type="date" class="input" data-plan-date="'+dayIndex+'" min="'+S.plan.weekKey+'" max="'+weekEnd+'" value="'+date+'"'+(done?' disabled':'')+'></label><button class="btn '+(current?'btn-primary':'btn-solid')+' btn-sm" type="button" data-plan-day-add="'+dayIndex+'">'+esc(done?(S.lang==='en'?'Repeat session':'Повторить тренировку'):(current?(S.lang==='en'?'Start next session':'Начать следующую') : t('planAddDay')))+'</button></div>' +
       '</section>';
     }).join('');
 
@@ -3610,7 +3569,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var completedText = completed.length + ' / ' + week.length;
     var allDone = completed.length >= week.length;
 
-    out.innerHTML = '<div class="v10-plan-hero">' +
+    out.innerHTML = '<div class="v10-plan-hero" data-goal="'+esc(goal)+'">' +
         '<div><p class="eyebrow v8-eyebrow-tight">'+esc(goalLabel+' · '+levelLabel+' · '+placeLabel)+'</p>' +
         '<h3 class="v8-output-title">'+esc(allDone?(S.lang==='en'?'Week complete':'Неделя выполнена'):(S.lang==='en'?'Active programme':'Активная программа'))+'</h3>' +
         '<p class="small v8-mt-2">'+esc(t('planWeekly',{days:days,time:time,ex:week[0]&&week[0].items?week[0].items.length:0}))+(createdLabel?' · '+esc(createdLabel):'')+'</p></div>' +
@@ -4386,6 +4345,18 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       btn.setAttribute('aria-pressed', String(S.planLimits.indexOf(btn.dataset.limit) !== -1));
     });
     $('plan-out').addEventListener('click', planRowAction);
+    $('plan-out').addEventListener('change', function (event) {
+      var input=event.target;
+      if(!input.matches('[data-plan-date]')||!S.plan||!input.reportValidity())return;
+      var index=Number(input.dataset.planDate);
+      var dates=Array.isArray(S.plan.ctx.sessionDates)?S.plan.ctx.sessionDates.slice(0,S.plan.days.length):[];
+      dates[index]=input.value;
+      S.plan.ctx.sessionDates=dates;
+      var restoreFocus=document.activeElement===input;
+      savePlanV7();
+      renderStoredPlanV10();
+      if(restoreFocus)qs('[data-plan-date="'+index+'"]').focus({preventScroll:true});
+    });
 
     /* --- дневник прогресса --- */
     $('prog-form').addEventListener('submit', function (e) { e.preventDefault(); saveDiaryEntry(); });
@@ -5450,7 +5421,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var q=norm(query),s=norm(label);if(!q||!s)return-1;if(s===q)return 120;if(s.indexOf(q)===0)return 90;if(s.split(' ').indexOf(q)!==-1)return 76;if(s.indexOf(' '+q)!==-1)return 64;if(s.indexOf(q)!==-1)return 48;return-1;
   }
   function allTokenRank(query,haystack){var q=norm(query),s=norm(haystack);if(!q||!s)return-1;var tokens=q.split(' ').filter(Boolean);if(!tokens.length||!tokens.every(function(token){return s.indexOf(token)!==-1;}))return-1;var whole=matchRank(q,s);return whole>=0?whole:58+Math.min(18,tokens.length*4);}
-  function exerciseDiscoveryRank(ex,query){var q=norm(query);var name=Math.max(matchRank(q,ex.nameRu),matchRank(q,ex.nameEn));var muscle=Math.max(matchRank(q,ex.target),matchRank(q,RU_MU[ex.target]),matchRank(q,EN_MU[ex.target]));var zone=Math.max(matchRank(q,ex.zone),matchRank(q,RU_ZONE[ex.zone]),matchRank(q,EN_ZONE[ex.zone]));var equip=Math.max(matchRank(q,ex.equip),matchRank(q,RU_EQ[ex.equip]),matchRank(q,EN_EQ[ex.equip]));var tokens=allTokenRank(q,ex.search);return Math.max(name>=0?name+80:-1,muscle>=0?muscle+55:-1,zone>=0?zone+40:-1,equip>=0?equip+32:-1,tokens);}
+  function exerciseDiscoveryRank(ex,query){var q=norm(query);var name=Math.max(matchRank(q,ex.nameRu),matchRank(q,ex.nameEn));var muscle=Math.max(matchRank(q,ex.target),matchRank(q,RU_MU[ex.target]),matchRank(q,EN_MU[ex.target]));var zone=Math.max(matchRank(q,ex.zone),matchRank(q,RU_ZONE[ex.zone]),matchRank(q,EN_ZONE[ex.zone]));var equip=Math.max(matchRank(q,ex.equip),matchRank(q,RU_EQ[ex.equip]),matchRank(q,EN_EQ[ex.equip]));var tokens=allTokenRank(q,exerciseSearchText(ex));return Math.max(name>=0?name+80:-1,muscle>=0?muscle+55:-1,zone>=0?zone+40:-1,equip>=0?equip+32:-1,tokens);}
 
   function discoveryRows(query) {
     var q = norm(query);
@@ -5645,7 +5616,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   }
 
   function progressIntelligenceHtml() {
-    return progressIntelligenceHtmlView({ S, dashSignal, diaryAvg, diaryDelta, diaryVerdict, esc, premiumIcon, signal, t, totalCompletedHistorySets });
+    return progressIntelligenceHtmlView({ S, dashSignal, diaryAvg, diaryDelta, diaryVerdict, esc, premiumIcon, signal, t, today:todayISO(), totalCompletedHistorySets });
   }
 
   function workoutSessionHead(){
@@ -5737,7 +5708,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
      Correctness -> data integrity -> usability -> accessibility -> performance.
      This layer deliberately preserves the proven V4 business logic and contracts.
      ======================================================================== */
-  var APP_VERSION = '2026.11-r79.3-barbell';
+  var APP_VERSION = '2026.11-r79.4-programme';
   var BACKUP_SCHEMA = 12;
   K.restTimer = 'mmg.restTimer.v2';
   K.lastBackup = 'mmg.lastBackup.v1';
@@ -6194,7 +6165,22 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   function v7CurrentWeekKey(){var d=new Date(),day=(d.getDay()+6)%7;d.setHours(12,0,0,0);d.setDate(d.getDate()-day);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function v7MesocycleStatus(){if(!S.plan||!mesocycleStatusFn)return null;var ctx=S.plan.ctx||{};return mesocycleStatusFn({startWeek:ctx.blockStartWeek||S.plan.weekKey,durationWeeks:Number(ctx.blockWeeks)||4,today:todayISO()});}
   function v7EnsurePlanWeek(){if(!S.plan)return;var wk=v7CurrentWeekKey();if(S.plan.weekKey&&S.plan.weekKey!==wk){S.plan.weekKey=wk;S.plan.completedDays=[];savePlanV7();}else if(!S.plan.weekKey)S.plan.weekKey=wk;}
-  function v7NextPlanDay(){if(!S.plan||!Array.isArray(S.plan.days)||!S.plan.days.length)return -1;v7EnsurePlanWeek();var done=Array.isArray(S.plan.completedDays)?S.plan.completedDays:[];for(var i=0;i<S.plan.days.length;i++)if(done.indexOf(i)===-1)return i;return -1;}
+  function v7PlanWeekEnd(){return new Date(Date.parse(S.plan.weekKey)+518400000).toISOString().slice(0,10);}
+  function v7ScheduledDate(index,end){
+    var date=S.plan.ctx.sessionDates?.[index];
+    return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date>=S.plan.weekKey&&date<=end&&Number.isFinite(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date?date:'';
+  }
+  function v7NextPlanDay(){
+    if(!S.plan?.days.length)return -1;
+    v7EnsurePlanWeek();
+    var weekEnd=v7PlanWeekEnd(),next=-1,best='';
+    S.plan.days.forEach(function(_,index){
+      if(S.plan.completedDays.includes(index))return;
+      var date=v7ScheduledDate(index,weekEnd);
+      if(next===-1||date&&(!best||date<best)){next=index;best=date;}
+    });
+    return next;
+  }
   function v7NextAction(){
     var total=S.workout.reduce(function(a,w){return a+(Number(w.sets)||0);},0),done=S.workout.reduce(function(a,w){return a+completedSetCount(w);},0);
     var active=S.runSession&&Date.now()-Number(S.runSession.startedAt||0)<8*3600000&&done<total;
@@ -6337,7 +6323,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
   function applyV7Route(focus){var route=v7RouteFromHash();document.body.dataset.v7Route=route;document.documentElement.dataset.routeReady=route;var ids=['labs','home','system','start','method','muscles','library','workout','nutrition','program','progress','knowledge','about','how','faq','contact','more','settings'];ids.forEach(function(id){var el=$(id);if(el)el.hidden=true;});var hero=qs('.hero');if(hero)hero.hidden=true;var returning=v7Returning();if(route==='home'){$('home').hidden=false;renderV7Home();}else{(V7_ROUTES[route]||[]).forEach(function(id){var el=$(id);if(el)el.hidden=false;});}if(ecoRoute!==route||ecoLang!==S.lang){ecoRoute=route;ecoLang=S.lang;renderEco(false);if(route==='labs')renderLabs();if(route==='nutrition')renderFoods();}if(route==='program'){if(!v7ProgramStartTracked){track('program_start',{});v7ProgramStartTracked=true;}var pf=$('plan-form');if(pf&&!pf.dataset.v7Prefilled){prefillPlan();pf.dataset.v7Prefilled='true';renderProgramWizard();}}var footer=qs('.footer');if(footer)footer.hidden=!(['more','settings','about','method','knowledge','how','faq','contact'].indexOf(route)!==-1);syncPrimaryNav(route);var nav=$('mobile-app-nav');if(nav)qsa('[data-mobile-dest]',nav).forEach(function(a){var on=a.dataset.mobileDest===route;a.classList.toggle('is-active',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});syncV7Floating();renderV8Shell(route,!!focus);if(focus)v7FocusRoute(route);}
   function navigateV7(route,focus){route=routeIsKnown&&routeIsKnown(route)?route:'home';if(location.hash!=='#'+route)location.hash=route;else{applyV7Route(focus!==false);}}
   function syncV7Floating(){var route=v7RouteFromHash(),bar=$('mfb');if(bar){var show=MOBILE_MQ.matches&&route==='library';bar.setAttribute('data-open',String(show));}var sticky=$('mobile-rest-timer');if(sticky)sticky.classList.toggle('is-raised',!!(bar&&bar.getAttribute('data-open')==='true'));}
-  function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
+  function startPlanDayV7(dayIndex,startRun){if(!S.plan||!S.plan.days)return;v7EnsurePlanWeek();var day=S.plan.days[dayIndex];if(!day)return;if(S.workout.length&&!window.confirm(S.lang==="en"?"Replace the current workout?":"Заменить текущую тренировку?"))return;runState.startedAt=0;saveRunSession();stopTimer(true);S.workout=day.items.map(function(it){return normalizeWorkoutRecord({id:it.ex.id,sets:it.sets,reps:it.reps,weight:'',done:false,setLog:[]});});S.meta.name=(S.lang==='en'?'Day ':'День ')+(dayIndex+1)+' · '+(DAY_NAMES[day.key]?(DAY_NAMES[day.key][S.lang]||DAY_NAMES[day.key].ru):day.key);S.meta.date=todayISO();S.meta.note='';S.meta.planDay=dayIndex;saveWorkout();saveMeta();renderWorkout();renderResults();track('program_day_start',{day:dayIndex+1});navigateV7('workout',true);showToast(t('planDayAdded',{n:dayIndex+1}));if(startRun)setTimeout(openRun,80);}
   function progressionIncrementForExercise(ex){var source=ex&&ex.compound==null?Object.assign({},ex,{compound:exKind(ex)==='compound'}):ex;return equipmentLoadIncrement(source,S.settings&&S.settings.loadIncrements);}
   function progressionAdviceV7(id,item){
     if(!progressionEngine||!item)return null;
@@ -6474,6 +6460,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
 
 
   async function init() {
+    var contentRequest = loadContent();
     window.addEventListener('mmg:error',function(event){lastLocalError=String(event&&event.detail&&event.detail.key||'unknown');renderV7Diagnostics();});
     var modules = {};
     try {
@@ -6569,8 +6556,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
     var hasPersistedExerciseState = !!((store.json(K.fav,[])||[]).length || (store.json(K.workout,[])||[]).length || store.json(K.plan,null) || Object.keys(databaseExercisePreferences).length || databaseCustomExercises.length);
     var needsData = dataRouteNeedsLibrary(initialRoute) || hasPersistedExerciseState;
     if (needsData) window.dispatchEvent(new CustomEvent('mmg:stage', { detail: { key: 'data' } }));
-    var contentLoaded = await loadContent();
-    var dataLoaded = needsData ? await ensureData() : true;
+    var [contentLoaded,dataLoaded] = await Promise.all([contentRequest, needsData ? ensureData() : true]);
     if (!dataLoaded && needsData) {
       var grid = $('grid');
       if (grid) grid.innerHTML = '<div class="empty v8-grid-span"><b>Библиотека не загрузилась</b>' +

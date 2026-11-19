@@ -11,6 +11,8 @@ test('laboratory results preserve original units and classify only supplied inte
   assert.equal(labPosition(result), 'within');
   assert.equal(labPosition({ ...result, low: null }), 'unknown');
   assert.equal(labPosition({ ...result, value: 801 }), 'high');
+  assert.equal(labPosition({ ...result, value: 801, low: null }), 'high');
+  assert.equal(labPosition({ ...result, value: 249, high: null }), 'low');
   assert.equal(labCanonicalValue({ ...row, marker: 'prolactin', unit: 'ng/mL' }), null);
 });
 test('malformed laboratory backups fail atomically', () => {

@@ -27,6 +27,30 @@ test('closing and reloading Run Mode preserves the entered draft and active set'
   await expect(page.locator('.run-set-chip[data-state="current"]')).toHaveText('1');
 });
 
+test('replacing a workout with a programme day requires confirmation and starts a fresh run', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('mmg.plan.v1', JSON.stringify({
+      v: 2, ctx: { goal: 'strength' },
+      days: [{ key: 'fullA', items: [{ id: '0001', sets: 2, reps: '8', rest: 90 }] }]
+    }));
+  });
+  await page.clock.install();
+  await seed(page);
+  await page.clock.fastForward(30_000);
+  await page.locator('#run-close').click();
+  await page.evaluate(() => { location.hash = 'program'; });
+  const start = page.locator('[data-plan-day-add="0"]').first();
+  page.once('dialog', dialog => dialog.dismiss());
+  await start.click();
+  await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'program');
+  page.once('dialog', dialog => dialog.accept());
+  await start.click();
+  await expect(page.locator('html')).toHaveAttribute('data-route-ready', 'workout');
+  await page.locator('[data-v8-start-run]:visible, #w-run:visible').first().click();
+  await expect(page.locator('.run-set-chip[data-state="current"]')).toHaveText('1');
+  await expect(page.locator('[data-run-elapsed-full]').first()).toHaveText(/^0:0[0-9]$/);
+});
+
 test('rest adjustments keep their deadline, and skipped and expired rests reset', async ({ page, isMobile }) => {
   await page.clock.install({ time: new Date('2026-11-18T10:00:00Z') });
   await page.goto('/index.html#workout');

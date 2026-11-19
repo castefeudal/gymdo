@@ -1,0 +1,31 @@
+name: Verify published GYMDO
+on:
+  push:
+    branches: [verify-live-programme]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user pwuser
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 611a09884ebd00bb4c6df385ebfa02a341ea32e0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: |
+          git config --global --add safe.directory "$PWD"
+          node scripts/check-live.mjs 611a09884ebd00bb4c6df385ebfa02a341ea32e0
+      - name: Upload production evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: programme-live-proof
+          path: artifacts/live-r75-*
+          if-no-files-found: ignore

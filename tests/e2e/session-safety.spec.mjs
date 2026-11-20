@@ -11,6 +11,19 @@ async function seed(page) {
   await page.locator('[data-v8-start-run]:visible, #w-run:visible').first().click();
 }
 
+test('Today shows completed sets from the saved workout', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('mmg.workout.v2', JSON.stringify([
+      { id: '0025', sets: 2, reps: '10', setLog: [{ completed: true }, { completed: false }] },
+    ]));
+  });
+  await page.goto('/index.html#home');
+  const progress = page.getByRole('progressbar', { name: 'Ход тренировки' });
+  await expect(progress).toHaveAttribute('value', '1');
+  await expect(progress).toHaveAttribute('max', '2');
+  await expect(page.locator('.next-roster .roster-done')).toHaveText('1/2');
+});
+
 test('closing and reloading Run Mode preserves the entered draft and active set', async ({ page }) => {
   await seed(page);
   await page.locator('[data-run-field="weight"]').fill('62.5');

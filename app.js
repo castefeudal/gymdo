@@ -6261,7 +6261,7 @@ import { normalizeText, formatDateLabel, transliterateRu, compareText } from './
       '</div>'+timeline;
   }
   function renderV7Home() {
-    return renderV7HomeView({ $, S, esc, t, v7c, v7DateLabel, v7NextAction, v7PlanSummary, v7TrendSummary, totalCompletedHistorySets, premiumIcon, renderV10HomePulse, BY_ID, exStill, exName, countPhrase: countPhraseI18n });
+    return renderV7HomeView({ $, S, esc, t, v7c, v7DateLabel, v7NextAction, v7PlanSummary, v7TrendSummary, completedSetCount, totalCompletedHistorySets, premiumIcon, renderV10HomePulse, BY_ID, exStill, exName, countPhrase: countPhraseI18n });
   }
 
   function renderV7More(){

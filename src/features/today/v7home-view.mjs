@@ -2,7 +2,7 @@
 export function renderV7HomeView(context) {
   const {
     $, S, esc, t, v7c, v7DateLabel, v7NextAction, v7PlanSummary, v7TrendSummary,
-    totalCompletedHistorySets, premiumIcon, renderV10HomePulse, BY_ID, exStill, exName, countPhrase,
+    completedSetCount, totalCompletedHistorySets, premiumIcon, renderV10HomePulse, BY_ID, exStill, exName, countPhrase,
   } = context;
   const host = $('home');
   if (!host) return;
@@ -21,27 +21,24 @@ export function renderV7HomeView(context) {
   const workout = Array.isArray(S.workout) ? S.workout : [];
   const plannedSets = workout.reduce((sum, item) => sum + (Number(item.sets) || 0), 0);
   if (sub) {
-    sub.textContent = workout.length
-      ? (en
-        ? `Prepared session: ${phrase(workout.length, 'exercise')} · ${phrase(plannedSets, 'set')}.`
-        : `Собрано: ${phrase(workout.length, 'exercise')} · ${phrase(plannedSets, 'set')}.`)
-      : v7c('homeSub');
+    sub.hidden = workout.length > 0;
+    sub.textContent = v7c('homeSub');
   }
 
   const next = v7NextAction() || {};
-  const title = String(next.title || '');
+  const title = next.type === 'run' ? (en ? 'Workout ready' : 'Тренировка готова') : String(next.title || '');
   const why = String(next.why || '');
   const evidence = (next.evidence || [])
     .filter(item => !/^\s*\d/.test(String(item)))
     .slice(0, 3)
     .map(item => `<span class="v7-evidence">${esc(item)}</span>`).join('');
 
-  const minutes = plannedSets ? Math.max(15, Math.round(plannedSets * 3.6)) : 0;
+  const completed = Math.min(plannedSets, workout.reduce((sum, item) => sum + completedSetCount(item), 0));
   const facts = workout.length
     ? `<div class="next-facts">
         <div><b class="num">${workout.length}</b><span>${esc(phrase(workout.length, 'exercise').replace(/^\d+\s/, ''))}</span></div>
-        <div><b class="num">${plannedSets}</b><span>${esc(phrase(plannedSets, 'set').replace(/^\d+\s/, ''))}</span></div>
-        <div><b class="num">≈${minutes}</b><span>${esc(en ? 'min' : 'мин')}</span></div>
+        <div><b class="num">${completed} / ${plannedSets}</b><span>${en ? 'Sets completed' : 'Подходов выполнено'}</span>
+        <progress value="${completed}" max="${plannedSets || 1}" aria-label="${en ? 'Workout progress' : 'Ход тренировки'}"></progress></div>
       </div>`
     : '';
 
@@ -56,7 +53,7 @@ export function renderV7HomeView(context) {
     run: en ? 'Start workout' : 'Начать тренировку',
   };
   const ctaLabel = shortActions[next.type] || title.replace(/^Начать |^Start /, '');
-  const primary = `<button class="btn btn-primary btn-lg" type="button" data-v7-action="${esc(next.type || '')}"${next.day != null ? ` data-v7-day="${esc(next.day)}"` : ''}>${esc(en ? ctaLabel : ctaLabel)}<span aria-hidden="true">→</span></button>`;
+  const primary = `<button class="btn btn-primary btn-lg" type="button" data-v7-action="${esc(next.type || '')}"${next.day != null ? ` data-v7-day="${esc(next.day)}"` : ''}>${esc(ctaLabel)}<span aria-hidden="true">→</span></button>`;
   const secondary = next.type === 'planDay'
     ? `<button class="btn btn-quiet" type="button" data-v7-route="program">${esc(v7c('program'))}</button>`
     : `<button class="btn btn-quiet" type="button" data-v7-route="library">${esc(en ? 'Exercise library' : 'Библиотека упражнений')}</button>`;
@@ -65,6 +62,7 @@ export function renderV7HomeView(context) {
     const ex = BY_ID ? BY_ID[item.id] : null;
     const name = ex && exName ? exName(ex) : (item.name || '');
     const still = ex && exStill ? exStill(ex) : '';
+    const logged = completedSetCount(item);
     const dose = [
       `${Number(item.sets) || 0} × ${item.reps || '—'}`,
       item.weight ? `${item.weight} ${en ? 'kg' : 'кг'}` : '',
@@ -72,7 +70,7 @@ export function renderV7HomeView(context) {
     return `<li>
       ${still ? `<img src="${esc(still)}" alt="" width="48" height="48" loading="lazy" decoding="async">` : '<span class="roster-ph" aria-hidden="true"></span>'}
       <span class="roster-copy"><b>${esc(name)}</b><small>${esc(dose)}</small></span>
-      ${item.done ? '<span class="roster-done" aria-hidden="true">✓</span>' : ''}
+      ${logged ? `<span class="roster-done" title="${en ? 'Sets completed' : 'Подходов выполнено'}">${logged}/${item.sets}</span>` : ''}
     </li>`;
   }).join('');
 
@@ -82,7 +80,7 @@ export function renderV7HomeView(context) {
         <ol>${roster}</ol>
         <div class="next-roster-actions">
           <button class="next-roster-link" type="button" data-v7-route="library">${esc(en ? '+ Add exercise' : '+ Добавить упражнение')}</button>
-          <button class="next-roster-link" type="button" data-v7-route="workout">${esc(en ? 'Edit session' : 'Редактировать тренировку')} →</button>
+          <button class="next-roster-link" type="button" data-v7-route="workout">${esc(en ? 'Edit session' : 'Редактировать тренировку')}&nbsp;→</button>
         </div>
       </div>`
     : `<div class="next-roster next-roster-empty">
@@ -108,24 +106,24 @@ export function renderV7HomeView(context) {
   const signal = (host, label, figure, note, route, action) => {
     if (!host) return;
     host.classList.toggle('is-empty', figure === '—' || figure === '·');
-    host.innerHTML = `<span class="ctx-label">${esc(label)}</span>
+    host.innerHTML = `<span class="ctx-label"><span aria-hidden="true">${premiumIcon(route)}</span>${esc(label)}</span>
       <strong class="ctx-figure num">${esc(figure)}</strong>
       <small class="ctx-note">${esc(note)}</small>
       ${action ? `<button class="ctx-link" type="button" data-v7-route="${esc(route)}">${esc(action)}<span aria-hidden="true">→</span></button>` : ''}`;
   };
   signal($id('v7-home-plan'), v7c('plan'), S.plan ? (plan.v || '·') : '—',
     S.plan ? (plan.s || '') : (en ? 'No active programme' : 'Программа не собрана'),
-    'program', S.plan ? '' : (en ? 'Build programme' : 'Собрать программу'));
+    'program', S.plan ? v7c('program') : (en ? 'Build programme' : 'Собрать программу'));
   signal($id('v7-home-last'), v7c('last'), last ? String((last.items || []).length) : '—',
     last ? `${last.date} · ${phrase(totalCompletedHistorySets(last), 'set')}` : (en ? 'No completed sessions' : 'Нет завершённых тренировок'),
-    'workout', last ? '' : (en ? 'Open training' : 'К тренировке'));
+    'workout', en ? 'Open training' : 'К тренировке');
   const trendFigure = String(trend.v || '—').replace('-', '−').replace(/(\d)\.(\d)/, '$1,$2');
   signal($id('v7-home-progress'), v7c('trend'), trendFigure,
     trend.s || (en ? 'Not enough data yet' : 'Пока недостаточно данных'),
-    'progress', (S.diary || []).length ? '' : (en ? 'Log a check-in' : 'Записать данные'));
+    'progress', (S.diary || []).length ? v7c('progress') : (en ? 'Log a check-in' : 'Записать данные'));
   signal($id('v7-home-nutrition'), v7c('kcal'), S.kbjuLast ? String(S.kbjuLast.target) : '—',
     S.kbjuLast ? (en ? 'kcal per day' : 'ккал в день') : (en ? 'Not calculated' : 'Не рассчитано'),
-    'nutrition', S.kbjuLast ? '' : (en ? 'Open nutrition' : 'Открыть питание'));
+    'nutrition', en ? 'Open nutrition' : 'Открыть питание');
 
   const commands = [
     ['library', 'search', v7c('quickLibrary'), v7c('quickLibraryS')],

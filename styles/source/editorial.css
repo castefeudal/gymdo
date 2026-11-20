@@ -8,7 +8,9 @@ body::before,body::after { display:none; }
 /* @sequence 21003 */
 .section { --edition-art:url(assets/visual/plate-home.svg); --edition-index:"MM / SYSTEM"; }
 /* @sequence 21004 */
-#home { --edition-art:url(assets/visual/plate-home.svg); --edition-index:"01 / DAILY SYSTEM"; }
+#home { --edition-index:none; }
+/* @sequence 21110 */
+#home .v7-page-head{min-height:0;padding-block:16px 20px}
 /* @sequence 21005 */
 #workout { --edition-art:url(assets/visual/plate-workout.svg); --edition-index:"02 / FORCE & MOTION"; }
 /* @sequence 21006 */
